@@ -1230,7 +1230,10 @@ function AdminPage() {
       return;
     }
     api.getAdminDashboard(session.accessToken)
-      .then(setData)
+      .then((result) => {
+        setData(result);
+        setExpandedTestId((current) => current ?? result.tests[0]?.id ?? null);
+      })
       .catch((err) => setError(getErrorMessage(err)))
       .finally(() => setLoading(false));
   }, [session]);
@@ -1463,6 +1466,7 @@ function AdminPage() {
     try {
       const resp = await api.createTest(session.accessToken, { title: newTestTitle.trim(), description: newTestDesc.trim() || undefined });
       setData({ ...data, tests: [...data.tests, resp] });
+      setExpandedTestId(resp.id);
       setNewTestTitle(""); setNewTestDesc("");
     } catch (err) { alert(getErrorMessage(err)); }
     finally { setCreatingTest(false); }
@@ -1494,6 +1498,8 @@ function AdminPage() {
     try {
       const resp = await api.createTestCategory(session.accessToken, { testId, name: newCatName.trim(), description: newCatDesc.trim() || undefined });
       setData({ ...data, tests: data.tests.map(t => t.id === testId ? { ...t, categories: [...t.categories, resp] } : t) });
+      setExpandedTestId(testId);
+      setExpandedCategoryId(resp.id);
       setNewCatTestId(null); setNewCatName(""); setNewCatDesc("");
     } catch (err) { alert(getErrorMessage(err)); }
     finally { setCreatingCat(false); }
@@ -1524,6 +1530,8 @@ function AdminPage() {
     try {
       const resp = await api.createCategoryZone(session.accessToken, { categoryId: catId, zone: newZoneType, minScore: Number(newZoneMin), maxScore: Number(newZoneMax), priority: Number(newZonePriority) });
       setData({ ...data, tests: data.tests.map(t => t.id === testId ? { ...t, categories: t.categories.map(c => c.id === catId ? { ...c, zones: [...c.zones, resp] } : c) } : t) });
+      setExpandedTestId(testId);
+      setExpandedCategoryId(catId);
       setNewZoneCatId(null); setNewZoneType("GREEN"); setNewZoneMin(""); setNewZoneMax(""); setNewZonePriority("0");
     } catch (err) { alert(getErrorMessage(err)); }
   }
@@ -1544,6 +1552,9 @@ function AdminPage() {
     try {
       const resp = await api.createTestQuestion(session.accessToken, { testId, categoryId: catId, text: newQText.trim(), orderNumber: Number(newQOrder) });
       setData({ ...data, tests: data.tests.map(t => t.id === testId ? { ...t, categories: t.categories.map(c => c.id === catId ? { ...c, questions: [...c.questions, resp] } : c) } : t) });
+      setExpandedTestId(testId);
+      setExpandedCategoryId(catId);
+      setExpandedQuestionId(resp.id);
       setNewQCatId(null); setNewQText(""); setNewQOrder("1");
     } catch (err) { alert(getErrorMessage(err)); }
     finally { setCreatingQ(false); }
@@ -1574,6 +1585,9 @@ function AdminPage() {
     try {
       const resp = await api.createTestAnswer(session.accessToken, { questionId: qId, text: newAText.trim(), score: Number(newAScore) });
       setData({ ...data, tests: data.tests.map(t => t.id === testId ? { ...t, categories: t.categories.map(c => c.id === catId ? { ...c, questions: c.questions.map(q => q.id === qId ? { ...q, answers: [...q.answers, resp] } : q) } : c) } : t) });
+      setExpandedTestId(testId);
+      setExpandedCategoryId(catId);
+      setExpandedQuestionId(qId);
       setNewAQId(null); setNewAText(""); setNewAScore("0");
     } catch (err) { alert(getErrorMessage(err)); }
   }
@@ -1613,7 +1627,7 @@ function AdminPage() {
               <span>Global Administrator</span>
             </div>
           </div>
-          <button className="secondary-button outline" onClick={handleLogout}>Log out</button>
+          <button className="secondary-button outline" onClick={handleLogout} type="button">Log out</button>
         </div>
       </section>
 
@@ -1691,14 +1705,14 @@ function AdminPage() {
                        {course.ageGroup && <p className="eyebrow" style={{ marginTop: "4px" }}>Возраст: {course.ageGroup}</p>}
                        {course.description && <p style={{ marginTop: "8px", fontSize: "0.9rem", color: "var(--text-secondary)" }}>{course.description}</p>}
                        <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-                         <button className="secondary-button outline" onClick={() => startEditingCourse(course)}>Edit</button>
-                         <button className="secondary-button outline" onClick={() => handleDeleteCourse(course.id)} style={{ color: "red", borderColor: "red" }}>Delete</button>
+                            <button className="secondary-button outline" onClick={() => startEditingCourse(course)} type="button">Edit</button>
+                         <button className="secondary-button outline" onClick={() => handleDeleteCourse(course.id)} type="button" style={{ color: "red", borderColor: "red" }}>Delete</button>
                        </div>
                        
                        <section style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px solid var(--border-color)" }}>
                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
                            <h4 style={{ margin: 0 }}>Lessons</h4>
-                           <button className="secondary-button" onClick={() => setNewLessonCourseId(course.id)}>+ Add</button>
+                           <button className="secondary-button" onClick={() => setNewLessonCourseId(course.id)} type="button">+ Add</button>
                          </div>
                          
                          {newLessonCourseId === course.id && (
@@ -1736,8 +1750,8 @@ function AdminPage() {
                                      </div>
                                    </div>
                                    <div style={{ display: "flex", gap: "4px" }}>
-                                     <button className="secondary-button" style={{ padding: "4px 8px", fontSize: "0.8rem" }} onClick={() => startEditingLesson(lesson)}>Edit</button>
-                                     <button className="secondary-button" style={{ padding: "4px 8px", fontSize: "0.8rem", color: "red" }} onClick={() => handleDeleteLesson(course.id, lesson.id)}>Del</button>
+                                     <button className="secondary-button" style={{ padding: "4px 8px", fontSize: "0.8rem" }} onClick={() => startEditingLesson(lesson)} type="button">Edit</button>
+                                     <button className="secondary-button" style={{ padding: "4px 8px", fontSize: "0.8rem", color: "red" }} onClick={() => handleDeleteLesson(course.id, lesson.id)} type="button">Del</button>
                                    </div>
                                  </div>
                                )}
@@ -1789,8 +1803,8 @@ function AdminPage() {
                           {test.description && <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginTop: "4px" }}>{test.description}</p>}
                         </div>
                         <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-                          <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "0.8rem" }} onClick={() => { setEditingTestId(test.id); setEditTestTitle(test.title); setEditTestDesc(test.description || ""); }}>Edit</button>
-                          <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "0.8rem", color: "red" }} onClick={() => handleDeleteTest(test.id)}>Del</button>
+                          <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "0.8rem" }} onClick={() => { setEditingTestId(test.id); setEditTestTitle(test.title); setEditTestDesc(test.description || ""); }} type="button">Edit</button>
+                          <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "0.8rem", color: "red" }} onClick={() => handleDeleteTest(test.id)} type="button">Del</button>
                         </div>
                       </div>
 
@@ -1798,7 +1812,7 @@ function AdminPage() {
                         <div style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px solid var(--border-color)" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                             <strong>Categories / Scales</strong>
-                            <button className="secondary-button" style={{ padding: "3px 8px", fontSize: "0.8rem" }} onClick={() => setNewCatTestId(newCatTestId === test.id ? null : test.id)}>+ Category</button>
+                            <button className="secondary-button" style={{ padding: "3px 8px", fontSize: "0.8rem" }} onClick={() => setNewCatTestId(newCatTestId === test.id ? null : test.id)} type="button">+ Category</button>
                           </div>
                           {newCatTestId === test.id && (
                             <form onSubmit={e => handleCreateCategory(e, test.id)} className="stack" style={{ gap: "6px", marginBottom: "12px", padding: "10px", background: "var(--surface-bg)", borderRadius: "8px" }}>
@@ -1829,7 +1843,8 @@ function AdminPage() {
                                   </div>
                                   <div style={{ display: "flex", gap: "4px" }}>
                                     <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem" }} onClick={() => { setEditingCatId(cat.id); setEditCatName(cat.name); setEditCatDesc(cat.description || ""); }}>Edit</button>
-                                    <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem", color: "red" }} onClick={() => handleDeleteCategory(test.id, cat.id)}>Del</button>
+                                    <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem" }} onClick={() => { setEditingCatId(cat.id); setEditCatName(cat.name); setEditCatDesc(cat.description || ""); }} type="button">Edit</button>
+                                    <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem", color: "red" }} onClick={() => handleDeleteCategory(test.id, cat.id)} type="button">Del</button>
                                   </div>
                                 </div>
                               )}
@@ -1838,7 +1853,7 @@ function AdminPage() {
                                   <div style={{ marginBottom: "10px" }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                                       <small><strong>Risk Zones</strong></small>
-                                      <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem" }} onClick={() => setNewZoneCatId(newZoneCatId === cat.id ? null : cat.id)}>+ Zone</button>
+                                      <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem" }} onClick={() => setNewZoneCatId(newZoneCatId === cat.id ? null : cat.id)} type="button">+ Zone</button>
                                     </div>
                                     {newZoneCatId === cat.id && (
                                       <form onSubmit={e => handleCreateZone(e, test.id, cat.id)} className="stack" style={{ gap: "4px", marginBottom: "8px", padding: "8px", background: "var(--surface-bg)", borderRadius: "6px" }}>
@@ -1863,7 +1878,7 @@ function AdminPage() {
                                       {cat.zones.map(z => (
                                         <div key={z.id} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "3px 8px", borderRadius: "6px", fontSize: "0.8rem", background: z.zone === "GREEN" ? "#16a34a22" : z.zone === "YELLOW" ? "#ca8a0422" : z.zone === "RED" ? "#dc262622" : "#1a1a1a", border: "1px solid " + (z.zone === "GREEN" ? "#16a34a" : z.zone === "YELLOW" ? "#ca8a04" : z.zone === "RED" ? "#dc2626" : "#555") }}>
                                           <span>{z.zone} {z.minScore}-{z.maxScore}</span>
-                                          <button onClick={() => handleDeleteZone(test.id, cat.id, z.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "red", fontSize: "0.75rem" }}>x</button>
+                                          <button onClick={() => handleDeleteZone(test.id, cat.id, z.id)} type="button" style={{ background: "none", border: "none", cursor: "pointer", color: "red", fontSize: "0.75rem" }}>x</button>
                                         </div>
                                       ))}
                                       {cat.zones.length === 0 && <small style={{ color: "var(--text-secondary)" }}>No zones yet</small>}
@@ -1872,7 +1887,7 @@ function AdminPage() {
                                   <div>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                                       <small><strong>Questions ({cat.questions.length})</strong></small>
-                                      <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem" }} onClick={() => { setNewQCatId(cat.id); setNewQTestId(test.id); }}>+ Question</button>
+                                      <button className="secondary-button" style={{ padding: "2px 7px", fontSize: "0.75rem" }} onClick={() => { setNewQCatId(cat.id); setNewQTestId(test.id); }} type="button">+ Question</button>
                                     </div>
                                     {newQCatId === cat.id && (
                                       <form onSubmit={e => handleCreateQuestion(e, test.id, cat.id)} className="stack" style={{ gap: "4px", marginBottom: "8px", padding: "8px", background: "var(--surface-bg)", borderRadius: "6px" }}>
@@ -1903,14 +1918,15 @@ function AdminPage() {
                                                 </div>
                                                 <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
                                                   <button className="secondary-button" style={{ padding: "2px 6px", fontSize: "0.75rem" }} onClick={() => { setEditingQId(q.id); setEditQText(q.text); }}>Edit</button>
-                                                  <button className="secondary-button" style={{ padding: "2px 6px", fontSize: "0.75rem", color: "red" }} onClick={() => handleDeleteQuestion(test.id, cat.id, q.id)}>Del</button>
+                                                  <button className="secondary-button" style={{ padding: "2px 6px", fontSize: "0.75rem" }} onClick={() => { setEditingQId(q.id); setEditQText(q.text); }} type="button">Edit</button>
+                                                  <button className="secondary-button" style={{ padding: "2px 6px", fontSize: "0.75rem", color: "red" }} onClick={() => handleDeleteQuestion(test.id, cat.id, q.id)} type="button">Del</button>
                                                 </div>
                                               </div>
                                               {expandedQuestionId === q.id && (
                                                 <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
                                                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                                                     <small><strong>Answer Options</strong></small>
-                                                    <button className="secondary-button" style={{ padding: "2px 6px", fontSize: "0.75rem" }} onClick={() => setNewAQId(newAQId === q.id ? null : q.id)}>+ Answer</button>
+                                                    <button className="secondary-button" style={{ padding: "2px 6px", fontSize: "0.75rem" }} onClick={() => setNewAQId(newAQId === q.id ? null : q.id)} type="button">+ Answer</button>
                                                   </div>
                                                   {newAQId === q.id && (
                                                     <form onSubmit={e => handleCreateAnswer(e, test.id, cat.id, q.id)} style={{ display: "flex", gap: "6px", marginBottom: "6px", flexWrap: "wrap" }}>
@@ -1934,8 +1950,8 @@ function AdminPage() {
                                                           <span>{a.text}</span>
                                                           <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                                                             <span style={{ fontWeight: 600, minWidth: "30px", textAlign: "right" }}>{a.score}pts</span>
-                                                            <button className="secondary-button" style={{ padding: "1px 5px", fontSize: "0.7rem" }} onClick={() => { setEditingAId(a.id); setEditAText(a.text); setEditAScore(String(a.score)); }}>Edit</button>
-                                                            <button className="secondary-button" style={{ padding: "1px 5px", fontSize: "0.7rem", color: "red" }} onClick={() => handleDeleteAnswer(test.id, cat.id, q.id, a.id)}>Del</button>
+                                                            <button className="secondary-button" style={{ padding: "1px 5px", fontSize: "0.7rem" }} onClick={() => { setEditingAId(a.id); setEditAText(a.text); setEditAScore(String(a.score)); }} type="button">Edit</button>
+                                                            <button className="secondary-button" style={{ padding: "1px 5px", fontSize: "0.7rem", color: "red" }} onClick={() => handleDeleteAnswer(test.id, cat.id, q.id, a.id)} type="button">Del</button>
                                                           </div>
                                                         </>
                                                       )}
