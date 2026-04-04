@@ -209,9 +209,21 @@ export type AdminTestDto = {
   categories: AdminTestCategoryDto[];
 };
 
+export type AdminScenarioOptionDto = {
+  id: number;
+  optionText: string;
+  resultText: string | null;
+  resultImagePath: string | null;
+  score: number;
+};
+
 export type AdminScenarioDto = {
   id: number;
+  lessonId: number;
   title: string;
+  description: string | null;
+  baseImagePath: string | null;
+  options: AdminScenarioOptionDto[];
 };
 
 export type AdminDashboardDto = {
@@ -262,4 +274,3 @@ export type UpdateTestQuestionRequest = { text?: string; orderNumber?: number };
 
 export type CreateTestAnswerRequest = { questionId: number; text: string; score: number };
 export type UpdateTestAnswerRequest = { text?: string; score?: number };
-
