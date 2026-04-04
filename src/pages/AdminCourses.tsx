@@ -15,6 +15,7 @@ export function AdminCourses() {
   });
 
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<AdminCourseDto | null>(null);
   const [title, setTitle] = useState("");
@@ -31,9 +32,32 @@ export function AdminCourses() {
   const [lessonOrder, setLessonOrder] = useState("1");
   const [lessonBusy, setLessonBusy] = useState(false);
 
+  // Scenario Modal State
+  const [isScenModalOpen, setIsScenModalOpen] = useState(false);
+  const [scenTitle, setScenTitle] = useState("");
+  const [scenDesc, setScenDesc] = useState("");
+  const [scenImageType, setScenImageType] = useState<"url" | "file">("url");
+  const [scenImageUrl, setScenImageUrl] = useState("");
+  const [scenImageFile, setScenImageFile] = useState<File | null>(null);
+  const [scenBusy, setScenBusy] = useState(false);
+
+  // Scenario Option Modal State
+  const [isOptModalOpen, setIsOptModalOpen] = useState(false);
+  const [editingOptId, setEditingOptId] = useState<number | null>(null);
+  const [optText, setOptText] = useState("");
+  const [optResultText, setOptResultText] = useState("");
+  const [optImageType, setOptImageType] = useState<"url" | "file">("url");
+  const [optImageUrl, setOptImageUrl] = useState("");
+  const [optImageFile, setOptImageFile] = useState<File | null>(null);
+  const [optScore, setOptScore] = useState("");
+  const [optBusy, setOptBusy] = useState(false);
+
   if (isLoading) return <div style={{ color: "#6b7280" }}>Loading courses...</div>;
   const courses = data?.courses || [];
   const selectedCourse = courses.find(c => c.id === selectedCourseId);
+  const selectedLesson = selectedCourse?.lessons.find(l => l.id === selectedLessonId);
+  // Находим сценарий для выбранного урока (используем any пока типы не обновлены в types.ts)
+  const lessonScenario: any = data?.scenarios?.find((s: any) => s.lessonId === selectedLessonId);
 
   function openCreateModal() {
     setEditingCourse(null);
@@ -124,6 +148,193 @@ export function AdminCourses() {
     finally { refetch(); }
   }
 
+  // --- SCENARIO HANDLERS ---
+  async function handleScenarioSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!session || !selectedLessonId) return;
+    setScenBusy(true);
+    try {
+      let finalImagePath = scenImageUrl;
+      if (scenImageType === "file" && scenImageFile) {
+        // TODO: Здесь будет вызов api.uploadMedia(scenImageFile)
+        alert("Загрузка файлов требует обновления Backend API. Пока используем заглушку.");
+        finalImagePath = "/media/uploaded_placeholder.jpg";
+      }
+      
+      const payload = { lessonId: selectedLessonId, title: scenTitle.trim(), description: scenDesc.trim() || undefined, baseImagePath: finalImagePath || undefined };
+      
+      if (lessonScenario) {
+        await (api as any).updateScenario(session.accessToken, lessonScenario.id, payload);
+      } else {
+        await (api as any).createScenario(session.accessToken, payload);
+      }
+      setIsScenModalOpen(false); refetch();
+    } catch (err) { alert(getErrorMessage(err)); } finally { setScenBusy(false); }
+  }
+
+  async function handleDeleteScenario() {
+    if (!session || !lessonScenario || !confirm("Удалить сценарий и все его варианты ответа?")) return;
+    try { await (api as any).deleteScenario(session.accessToken, lessonScenario.id); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+  }
+
+  async function handleOptionSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!session || !lessonScenario) return;
+    setOptBusy(true);
+    try {
+      let finalImagePath = optImageUrl;
+      if (optImageType === "file" && optImageFile) {
+        // TODO: Вызов api.uploadMedia(optImageFile)
+        alert("Загрузка файлов требует обновления Backend API. Пока используем заглушку.");
+        finalImagePath = "/media/uploaded_result_placeholder.jpg";
+      }
+
+      const payload = { scenarioId: lessonScenario.id, optionText: optText.trim(), resultText: optResultText.trim(), resultImagePath: finalImagePath || undefined, score: Number(optScore) };
+
+      if (editingOptId) {
+        await (api as any).updateScenarioOption(session.accessToken, editingOptId, payload);
+      } else {
+        await (api as any).createScenarioOption(session.accessToken, payload);
+      }
+      setIsOptModalOpen(false); refetch();
+    } catch (err) { alert(getErrorMessage(err)); } finally { setOptBusy(false); }
+  }
+
+  async function handleDeleteOption(optId: number) {
+    if (!session || !confirm("Удалить вариант ответа?")) return;
+    try { await (api as any).deleteScenarioOption(session.accessToken, optId); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+  }
+
+  // УРОВЕНЬ 3: Сценарий выбранного урока
+  if (selectedCourse && selectedLesson) {
+    return (
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+          <button onClick={() => setSelectedLessonId(null)} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500 }}>
+            ← Back to Lessons
+          </button>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Scenario: {selectedLesson.title}</h1>
+        </div>
+
+        {!lessonScenario ? (
+          <div style={{ background: "#fff", padding: "40px", borderRadius: "12px", border: "1px dashed #d1d5db", textAlign: "center" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🎭</div>
+            <h3 style={{ color: "#111827", marginBottom: "8px" }}>У этого урока еще нет интерактивного сценария</h3>
+            <p style={{ color: "#6b7280", marginBottom: "24px", maxWidth: "500px", margin: "0 auto 24px auto" }}>Добавьте сценарий, чтобы ученики могли прочитать ситуацию, увидеть фото и принять решение, влияющее на результат.</p>
+            <button onClick={() => { setScenTitle(""); setScenDesc(""); setScenImageUrl(""); setIsScenModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "10px 20px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>
+              + Создать сценарий
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gap: "24px" }}>
+            {/* SCENARIO HEADER */}
+            <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", display: "flex", gap: "24px" }}>
+              {lessonScenario.baseImagePath ? (
+                 <img src={lessonScenario.baseImagePath} alt="Scenario" style={{ width: "200px", height: "150px", objectFit: "cover", borderRadius: "8px", border: "1px solid #e5e7eb" }} />
+              ) : (
+                 <div style={{ width: "200px", height: "150px", background: "#f3f4f6", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", border: "1px dashed #d1d5db" }}>Нет фото</div>
+              )}
+              <div style={{ flex: 1 }}>
+                <h2 style={{ margin: "0 0 8px 0", fontSize: "1.4rem", color: "#111827" }}>{lessonScenario.title}</h2>
+                <p style={{ color: "#4b5563", marginBottom: "16px", lineHeight: "1.5" }}>{lessonScenario.description}</p>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button onClick={() => { setScenTitle(lessonScenario.title); setScenDesc(lessonScenario.description || ""); setScenImageUrl(lessonScenario.baseImagePath || ""); setIsScenModalOpen(true); }} style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Изменить сценарий</button>
+                  <button onClick={handleDeleteScenario} style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #fecaca", background: "#fef2f2", color: "#dc2626", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Удалить</button>
+                </div>
+              </div>
+            </div>
+
+            {/* SCENARIO OPTIONS */}
+            <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.2rem", color: "#111827" }}>Варианты ответов (Действия ученика)</h3>
+                <button onClick={() => { setEditingOptId(null); setOptText(""); setOptResultText(""); setOptImageUrl(""); setOptScore(""); setIsOptModalOpen(true); }} style={{ backgroundColor: "#111827", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>+ Добавить вариант</button>
+              </div>
+
+              <div style={{ display: "grid", gap: "16px" }}>
+                {(!lessonScenario.options || lessonScenario.options.length === 0) && <p style={{ color: "#6b7280" }}>Пока нет вариантов ответа. Добавьте первый!</p>}
+                {lessonScenario.options?.map((opt: any) => (
+                  <div key={opt.id} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden", display: "flex" }}>
+                    <div style={{ padding: "16px", background: "#f9fafb", width: "35%", borderRight: "1px solid #e5e7eb" }}>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Если ученик выберет:</span>
+                      <h4 style={{ margin: "8px 0", color: "#1d4ed8", fontSize: "1.05rem" }}>"{opt.optionText}"</h4>
+                      <span style={{ display: "inline-block", background: "#d1fae5", color: "#065f46", padding: "2px 8px", borderRadius: "99px", fontSize: "0.75rem", fontWeight: 600 }}>Баллы учителю: {opt.score}</span>
+                    </div>
+                    <div style={{ padding: "16px", flex: 1, display: "flex", gap: "16px", background: "#fff" }}>
+                      {opt.resultImagePath && <img src={opt.resultImagePath} alt="Result" style={{ width: "100px", height: "75px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e5e7eb" }} />}
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Он увидит результат:</span>
+                        <p style={{ margin: "8px 0 0 0", color: "#374151" }}>{opt.resultText}</p>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <button onClick={() => { setEditingOptId(opt.id); setOptText(opt.optionText); setOptResultText(opt.resultText); setOptScore(String(opt.score)); setOptImageUrl(opt.resultImagePath || ""); setIsOptModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, textAlign: "right" }}>Edit</button>
+                        <button onClick={() => handleDeleteOption(opt.id)} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, textAlign: "right" }}>Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SCENARIO MODAL */}
+        <Modal isOpen={isScenModalOpen} onClose={() => setIsScenModalOpen(false)} title={lessonScenario ? "Редактировать сценарий" : "Новый сценарий"}>
+          <form onSubmit={handleScenarioSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Название ситуации</span><input type="text" value={scenTitle} onChange={e => setScenTitle(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="Напр: Ситуация на перемене" /></label>
+            <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Текст (описание)</span><textarea value={scenDesc} onChange={e => setScenDesc(e.target.value)} required rows={4} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="Опишите ситуацию для ученика..." /></label>
+            
+            <div style={{ border: "1px solid #e5e7eb", padding: "12px", borderRadius: "6px", background: "#f9fafb" }}>
+              <span style={{ display: "block", marginBottom: "12px", fontSize: "0.85rem", fontWeight: 500 }}>Картинка ситуации</span>
+              <div style={{ display: "flex", gap: "16px", marginBottom: "12px" }}>
+                <label style={{ fontSize: "0.85rem" }}><input type="radio" checked={scenImageType === "url"} onChange={() => setScenImageType("url")} /> Указать URL ссылку</label>
+                <label style={{ fontSize: "0.85rem" }}><input type="radio" checked={scenImageType === "file"} onChange={() => setScenImageType("file")} /> Загрузить файл</label>
+              </div>
+              {scenImageType === "url" ? (
+                <input type="url" value={scenImageUrl} onChange={e => setScenImageUrl(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="https://..." />
+              ) : (
+                <input type="file" accept="image/*" onChange={e => setScenImageFile(e.target.files?.[0] || null)} style={{ width: "100%", fontSize: "0.85rem" }} />
+              )}
+            </div>
+            
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
+              <button type="button" onClick={() => setIsScenModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer" }}>Отмена</button>
+              <button type="submit" disabled={scenBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", cursor: "pointer" }}>Сохранить</button>
+            </div>
+          </form>
+        </Modal>
+
+        {/* OPTION MODAL */}
+        <Modal isOpen={isOptModalOpen} onClose={() => setIsOptModalOpen(false)} title={editingOptId ? "Редактировать вариант" : "Новый вариант ответа"}>
+          <form onSubmit={handleOptionSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Что может выбрать ученик?</span><input type="text" value={optText} onChange={e => setOptText(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="Напр: Убежать" /></label>
+            <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Текст последствия (результат)</span><textarea value={optResultText} onChange={e => setOptResultText(e.target.value)} required rows={3} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="Что произойдет после этого выбора..." /></label>
+            
+            <div style={{ border: "1px solid #e5e7eb", padding: "12px", borderRadius: "6px", background: "#f9fafb" }}>
+              <span style={{ display: "block", marginBottom: "12px", fontSize: "0.85rem", fontWeight: 500 }}>Картинка последствия (опционально)</span>
+              <div style={{ display: "flex", gap: "16px", marginBottom: "12px" }}>
+                <label style={{ fontSize: "0.85rem" }}><input type="radio" checked={optImageType === "url"} onChange={() => setOptImageType("url")} /> Указать URL</label>
+                <label style={{ fontSize: "0.85rem" }}><input type="radio" checked={optImageType === "file"} onChange={() => setOptImageType("file")} /> Загрузить файл</label>
+              </div>
+              {optImageType === "url" ? (
+                <input type="url" value={optImageUrl} onChange={e => setOptImageUrl(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="https://..." />
+              ) : (
+                <input type="file" accept="image/*" onChange={e => setOptImageFile(e.target.files?.[0] || null)} style={{ width: "100%", fontSize: "0.85rem" }} />
+              )}
+            </div>
+
+            <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Баллы (Видит только учитель)</span><input type="number" value={optScore} onChange={e => setOptScore(e.target.value)} required style={{ width: "100px", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="Напр: 10" /></label>
+            
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
+              <button type="button" onClick={() => setIsOptModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer" }}>Отмена</button>
+              <button type="submit" disabled={optBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", cursor: "pointer" }}>Сохранить</button>
+            </div>
+          </form>
+        </Modal>
+      </div>
+    );
+  }
+
   // Уровень 2: Уроки выбранного курса
   if (selectedCourse) {
     return (
@@ -164,8 +375,9 @@ export function AdminCourses() {
                       </div>
                     </td>
                     <td style={{ padding: "16px 24px", textAlign: "right" }}>
-                      <button onClick={() => openEditLessonModal(lesson)} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Edit</button>
-                      <button onClick={() => handleDeleteLesson(lesson.id)} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Delete</button>
+                      <button onClick={(e) => { e.stopPropagation(); setSelectedLessonId(lesson.id); }} style={{ color: "#8b5cf6", background: "none", border: "none", cursor: "pointer", fontWeight: 600, marginRight: "16px", padding: "6px 12px", borderRadius: "6px", backgroundColor: "#f5f3ff" }}>🎭 Сценарий</button>
+                      <button onClick={(e) => { e.stopPropagation(); openEditLessonModal(lesson); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Edit</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDeleteLesson(lesson.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Delete</button>
                     </td>
                   </tr>
                 ))}

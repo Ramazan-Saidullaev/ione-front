@@ -54,7 +54,7 @@ export function AdminTests() {
   const [editQOrder, setEditQOrder] = useState("1");
   const [newAQId, setNewAQId] = useState<number | null>(null);
   const [newAText, setNewAText] = useState("");
-  const [newAScore, setNewAScore] = useState("0");
+  const [newAScore, setNewAScore] = useState("");
   const [editingAId, setEditingAId] = useState<number | null>(null);
   const [editAText, setEditAText] = useState("");
   const [editAScore, setEditAScore] = useState("0");
@@ -154,7 +154,7 @@ export function AdminTests() {
   async function handleCreateAnswer(e: React.FormEvent, qId: number) {
     e.preventDefault();
     if (!session) return;
-    try { await api.createTestAnswer(session.accessToken, { questionId: qId, text: newAText.trim(), score: Number(newAScore) }); setNewAText(""); setNewAScore(String(Number(newAScore) + 1)); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+    try { await api.createTestAnswer(session.accessToken, { questionId: qId, text: newAText.trim(), score: Number(newAScore) }); setNewAText(""); setNewAScore(""); refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
   async function handleUpdateAnswer(e: React.FormEvent) {
     e.preventDefault();
@@ -297,8 +297,7 @@ export function AdminTests() {
                             setNewAQId(null);
                           } else {
                             setNewAQId(q.id);
-                            const maxScore = q.answers.reduce((max, a) => Math.max(max, a.score || 0), -1);
-                            setNewAScore(String(maxScore + 1));
+                            setNewAScore("");
                           }
                         }} style={{ padding: "4px 8px", fontSize: "0.75rem", border: "1px solid #d1d5db", borderRadius: "4px", background: "#fff", cursor: "pointer" }}>+ Add Answer</button>
                       </div>
