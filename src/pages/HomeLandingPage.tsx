@@ -1,4 +1,4 @@
-import { GlobalHeader } from "./GlobalHeader";
+import { GlobalHeader } from "../components/GlobalHeader";
 
 export function HomeLandingPage() {
   return (

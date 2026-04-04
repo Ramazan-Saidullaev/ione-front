@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function ChevronDown() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -19,7 +21,7 @@ export function GlobalHeader() {
   return (
     <header className="global-header">
       <div className="global-header-left">
-        <a href="/" className="global-brand">
+        <Link to="/" className="global-brand">
           <div className="brand-logo-card">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
@@ -30,7 +32,7 @@ export function GlobalHeader() {
             <strong>SAFE</strong>
             <span>SCHOOL</span>
           </div>
-        </a>
+        </Link>
         <nav className="global-nav">
           <a href="/#about" className="nav-dropdown-btn">О платформе</a>
           <a href="/#features" className="nav-dropdown-btn">Функционал</a>
@@ -39,9 +41,9 @@ export function GlobalHeader() {
         </nav>
       </div>
       <div className="global-header-right">
-        <a href="/auth" className="icon-action-btn" title="Войти">
+        <Link to="/auth" className="icon-action-btn" title="Войти">
           <UserIcon />
-        </a>
+        </Link>
 
         <button className="lang-selector-btn">
           <div className="ru-flag"></div>
