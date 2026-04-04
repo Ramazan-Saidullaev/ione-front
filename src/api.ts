@@ -37,7 +37,13 @@ import type {
   CreateTestQuestionRequest,
   UpdateTestQuestionRequest,
   CreateTestAnswerRequest,
-  UpdateTestAnswerRequest
+  UpdateTestAnswerRequest,
+  AdminScenarioDto,
+  AdminScenarioOptionDto,
+  CreateScenarioRequest,
+  UpdateScenarioRequest,
+  CreateScenarioOptionRequest,
+  UpdateScenarioOptionRequest
 } from "./types";
 
 const API_BASE_URL =
@@ -280,6 +286,46 @@ export const api = {
   },
   deleteTestAnswer(token: string, id: number) {
     return request<{ success?: boolean }>(`/api/admin/test-answers/delete/${id}`, { method: "POST", token });
+  },
+
+  createScenario(token: string, data: CreateScenarioRequest) {
+    return request<AdminScenarioDto>("/api/admin/scenarios/add", { method: "POST", token, body: data });
+  },
+
+  updateScenario(token: string, id: number, data: UpdateScenarioRequest) {
+    return request<AdminScenarioDto>(`/api/admin/scenarios/update/${id}`, { method: "POST", token, body: data });
+  },
+
+  deleteScenario(token: string, id: number) {
+    return request<{ success?: boolean }>(`/api/admin/scenarios/delete/${id}`, { method: "POST", token });
+  },
+
+  createScenarioOption(token: string, data: CreateScenarioOptionRequest) {
+    return request<AdminScenarioOptionDto>("/api/admin/scenario-options/add", { method: "POST", token, body: data });
+  },
+
+  updateScenarioOption(token: string, id: number, data: UpdateScenarioOptionRequest) {
+    return request<AdminScenarioOptionDto>(`/api/admin/scenario-options/update/${id}`, { method: "POST", token, body: data });
+  },
+
+  deleteScenarioOption(token: string, id: number) {
+    return request<{ success?: boolean }>(`/api/admin/scenario-options/delete/${id}`, { method: "POST", token });
+  },
+
+  uploadMedia(token: string, file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return fetch(`${API_BASE_URL}/api/admin/media/upload`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
+    }).then(res => {
+      if (!res.ok) throw new Error("Failed to upload media");
+      return res.json() as Promise<{ url: string }>;
+    });
   }
 };
 

@@ -274,3 +274,8 @@ export type UpdateTestQuestionRequest = { text?: string; orderNumber?: number };
 
 export type CreateTestAnswerRequest = { questionId: number; text: string; score: number };
 export type UpdateTestAnswerRequest = { text?: string; score?: number };
+
+export type CreateScenarioRequest = { lessonId: number; title: string; description?: string; baseImagePath?: string };
+export type UpdateScenarioRequest = { title?: string; description?: string; baseImagePath?: string };
+export type CreateScenarioOptionRequest = { scenarioId: number; optionText: string; resultText?: string; resultImagePath?: string; score: number };
+export type UpdateScenarioOptionRequest = { optionText?: string; resultText?: string; resultImagePath?: string; score?: number };

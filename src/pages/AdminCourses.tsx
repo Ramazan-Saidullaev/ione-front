@@ -156,17 +156,16 @@ export function AdminCourses() {
     try {
       let finalImagePath = scenImageUrl;
       if (scenImageType === "file" && scenImageFile) {
-        // TODO: Здесь будет вызов api.uploadMedia(scenImageFile)
-        alert("Загрузка файлов требует обновления Backend API. Пока используем заглушку.");
-        finalImagePath = "/media/uploaded_placeholder.jpg";
+        const uploadRes = await api.uploadMedia(session.accessToken, scenImageFile);
+        finalImagePath = uploadRes.url;
       }
       
       const payload = { lessonId: selectedLessonId, title: scenTitle.trim(), description: scenDesc.trim() || undefined, baseImagePath: finalImagePath || undefined };
       
       if (lessonScenario) {
-        await (api as any).updateScenario(session.accessToken, lessonScenario.id, payload);
+        await api.updateScenario(session.accessToken, lessonScenario.id, payload);
       } else {
-        await (api as any).createScenario(session.accessToken, payload);
+        await api.createScenario(session.accessToken, payload);
       }
       setIsScenModalOpen(false); refetch();
     } catch (err) { alert(getErrorMessage(err)); } finally { setScenBusy(false); }
@@ -174,7 +173,7 @@ export function AdminCourses() {
 
   async function handleDeleteScenario() {
     if (!session || !lessonScenario || !confirm("Удалить сценарий и все его варианты ответа?")) return;
-    try { await (api as any).deleteScenario(session.accessToken, lessonScenario.id); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+    try { await api.deleteScenario(session.accessToken, lessonScenario.id); refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
 
   async function handleOptionSubmit(e: React.FormEvent) {
@@ -184,17 +183,16 @@ export function AdminCourses() {
     try {
       let finalImagePath = optImageUrl;
       if (optImageType === "file" && optImageFile) {
-        // TODO: Вызов api.uploadMedia(optImageFile)
-        alert("Загрузка файлов требует обновления Backend API. Пока используем заглушку.");
-        finalImagePath = "/media/uploaded_result_placeholder.jpg";
+        const uploadRes = await api.uploadMedia(session.accessToken, optImageFile);
+        finalImagePath = uploadRes.url;
       }
 
       const payload = { scenarioId: lessonScenario.id, optionText: optText.trim(), resultText: optResultText.trim(), resultImagePath: finalImagePath || undefined, score: Number(optScore) };
 
       if (editingOptId) {
-        await (api as any).updateScenarioOption(session.accessToken, editingOptId, payload);
+        await api.updateScenarioOption(session.accessToken, editingOptId, payload);
       } else {
-        await (api as any).createScenarioOption(session.accessToken, payload);
+        await api.createScenarioOption(session.accessToken, payload);
       }
       setIsOptModalOpen(false); refetch();
     } catch (err) { alert(getErrorMessage(err)); } finally { setOptBusy(false); }
@@ -202,7 +200,7 @@ export function AdminCourses() {
 
   async function handleDeleteOption(optId: number) {
     if (!session || !confirm("Удалить вариант ответа?")) return;
-    try { await (api as any).deleteScenarioOption(session.accessToken, optId); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+    try { await api.deleteScenarioOption(session.accessToken, optId); refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
 
   // УРОВЕНЬ 3: Сценарий выбранного урока
