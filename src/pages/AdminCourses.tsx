@@ -59,6 +59,14 @@ export function AdminCourses() {
   // Находим сценарий для выбранного урока (используем any пока типы не обновлены в types.ts)
   const lessonScenario: any = data?.scenarios?.find((s: any) => s.lessonId === selectedLessonId);
 
+  // Функция для правильного отображения картинок (локальных и по ссылке)
+  function getMediaUrl(path: string | undefined | null) {
+    if (!path) return "";
+    if (path.startsWith("http")) return path;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+    return baseUrl + (path.startsWith("/") ? path : `/${path}`);
+  }
+
   function openCreateModal() {
     setEditingCourse(null);
     setTitle(""); setDesc(""); setAge("");
@@ -228,7 +236,7 @@ export function AdminCourses() {
             {/* SCENARIO HEADER */}
             <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", display: "flex", gap: "24px" }}>
               {lessonScenario.baseImagePath ? (
-                 <img src={lessonScenario.baseImagePath} alt="Scenario" style={{ width: "200px", height: "150px", objectFit: "cover", borderRadius: "8px", border: "1px solid #e5e7eb" }} />
+                 <img src={getMediaUrl(lessonScenario.baseImagePath)} alt="Scenario" style={{ width: "200px", height: "150px", objectFit: "cover", borderRadius: "8px", border: "1px solid #e5e7eb" }} />
               ) : (
                  <div style={{ width: "200px", height: "150px", background: "#f3f4f6", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", border: "1px dashed #d1d5db" }}>Нет фото</div>
               )}
@@ -259,7 +267,7 @@ export function AdminCourses() {
                       <span style={{ display: "inline-block", background: "#d1fae5", color: "#065f46", padding: "2px 8px", borderRadius: "99px", fontSize: "0.75rem", fontWeight: 600 }}>Баллы учителю: {opt.score}</span>
                     </div>
                     <div style={{ padding: "16px", flex: 1, display: "flex", gap: "16px", background: "#fff" }}>
-                      {opt.resultImagePath && <img src={opt.resultImagePath} alt="Result" style={{ width: "100px", height: "75px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e5e7eb" }} />}
+                      {opt.resultImagePath && <img src={getMediaUrl(opt.resultImagePath)} alt="Result" style={{ width: "100px", height: "75px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e5e7eb" }} />}
                       <div style={{ flex: 1 }}>
                         <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Он увидит результат:</span>
                         <p style={{ margin: "8px 0 0 0", color: "#374151" }}>{opt.resultText}</p>
