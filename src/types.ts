@@ -233,6 +233,11 @@ export type AdminDashboardDto = {
   scenarios: AdminScenarioDto[];
 };
 
+export type CreateSchoolRequest = { name: string; address?: string };
+export type UpdateSchoolRequest = { name?: string; address?: string };
+export type UpdateTeacherRequest = { fullName?: string };
+export type UpdateStudentRequest = { fullName?: string; className?: string };
+
 export type CreateCourseRequest = {
   title: string;
   description?: string;

@@ -38,6 +38,10 @@ import type {
   UpdateTestQuestionRequest,
   CreateTestAnswerRequest,
   UpdateTestAnswerRequest,
+  CreateSchoolRequest,
+  UpdateSchoolRequest,
+  UpdateTeacherRequest,
+  UpdateStudentRequest,
   AdminScenarioDto,
   AdminScenarioOptionDto,
   CreateScenarioRequest,
@@ -286,6 +290,30 @@ export const api = {
   },
   deleteTestAnswer(token: string, id: number) {
     return request<{ success?: boolean }>(`/api/admin/test-answers/delete/${id}`, { method: "POST", token });
+  },
+
+  createSchool(token: string, data: CreateSchoolRequest) {
+    return request<AdminSchoolDto>("/api/admin/schools/add", { method: "POST", token, body: data });
+  },
+  updateSchool(token: string, id: number, data: UpdateSchoolRequest) {
+    return request<AdminSchoolDto>(`/api/admin/schools/update/${id}`, { method: "POST", token, body: data });
+  },
+  deleteSchool(token: string, id: number) {
+    return request<{ success?: boolean }>(`/api/admin/schools/delete/${id}`, { method: "POST", token });
+  },
+
+  updateTeacher(token: string, id: number, data: UpdateTeacherRequest) {
+    return request<AdminTeacherDto>(`/api/admin/teachers/update/${id}`, { method: "POST", token, body: data });
+  },
+  deleteTeacher(token: string, id: number) {
+    return request<{ success?: boolean }>(`/api/admin/teachers/delete/${id}`, { method: "POST", token });
+  },
+
+  updateStudent(token: string, id: number, data: UpdateStudentRequest) {
+    return request<AdminStudentDto>(`/api/admin/students/update/${id}`, { method: "POST", token, body: data });
+  },
+  deleteStudent(token: string, id: number) {
+    return request<{ success?: boolean }>(`/api/admin/students/delete/${id}`, { method: "POST", token });
   },
 
   createScenario(token: string, data: CreateScenarioRequest) {
