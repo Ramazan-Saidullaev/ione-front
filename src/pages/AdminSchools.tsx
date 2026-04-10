@@ -45,13 +45,13 @@ export function AdminSchools() {
       } else {
         await api.createSchool(session.accessToken, { name: schoolName.trim() });
       }
+      await refetch();
       setIsSchoolModalOpen(false);
-      refetch();
     } catch (err) { alert(getErrorMessage(err)); } finally { setBusy(false); }
   }
   async function handleSchoolDelete(id: number) {
-    if (!session || !confirm("Удалить школу?")) return;
-    try { await api.deleteSchool(session.accessToken, id); setSelectedSchoolId(null); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+    if (!session || !confirm("Удалить школу? Внимание: это также безвозвратно удалит всех её учителей и учеников!")) return;
+    try { await api.deleteSchool(session.accessToken, id); setSelectedSchoolId(null); await refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
 
   async function handleTeacherSubmit(e: React.FormEvent) {
@@ -65,13 +65,13 @@ export function AdminSchools() {
         if (!selectedSchoolId) return;
         await api.registerTeacher({ fullName: teacherName.trim(), email: teacherEmail.trim(), password: teacherPassword, schoolId: selectedSchoolId });
       }
+      await refetch();
       setIsTeacherModalOpen(false);
-      refetch();
     } catch (err) { alert(getErrorMessage(err)); } finally { setBusy(false); }
   }
   async function handleTeacherDelete(id: number) {
-    if (!session || !confirm("Удалить учителя и его аккаунт?")) return;
-    try { await api.deleteTeacher(session.accessToken, id); setSelectedTeacherId(null); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+    if (!session || !confirm("Удалить учителя и его аккаунт? Внимание: это также безвозвратно удалит всех его учеников!")) return;
+    try { await api.deleteTeacher(session.accessToken, id); setSelectedTeacherId(null); await refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
 
   async function handleStudentSubmit(e: React.FormEvent) {
@@ -85,13 +85,13 @@ export function AdminSchools() {
         if (!selectedSchoolId || !selectedTeacherId) return;
         await api.registerStudent({ fullName: studentName.trim(), email: studentEmail.trim(), password: studentPassword, schoolId: selectedSchoolId, teacherId: selectedTeacherId, className: studentClass.trim() || null });
       }
+      await refetch();
       setIsStudentModalOpen(false);
-      refetch();
     } catch (err) { alert(getErrorMessage(err)); } finally { setBusy(false); }
   }
   async function handleStudentDelete(id: number) {
     if (!session || !confirm("Удалить ученика и его аккаунт?")) return;
-    try { await api.deleteStudent(session.accessToken, id); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+    try { await api.deleteStudent(session.accessToken, id); await refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
 
   if (isLoading) return <div style={{ color: "#6b7280" }}>Loading schools...</div>;
@@ -165,7 +165,11 @@ export function AdminSchools() {
                     <h3 style={{ margin: "0 0 4px 0", color: "#111827", fontSize: "1.1rem" }}>{teacher.fullName}</h3>
                     <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280" }}>{teacher.students.length} students</p>
                   </div>
-                  <div style={{ color: "#9ca3af", fontSize: "1.2rem" }}>→</div>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    <button onClick={(e) => { e.stopPropagation(); setEditingTeacherId(teacher.id); setTeacherName(teacher.fullName); setIsTeacherModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Edit</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleTeacherDelete(teacher.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Delete</button>
+                    <div style={{ color: "#9ca3af", fontSize: "1.2rem", marginLeft: "8px" }}>→</div>
+                  </div>
                 </div>
               </div>
             ))}
