@@ -28,6 +28,16 @@ export type RegisterStudentRequest = {
   className: string | null;
 };
 
+export type PublicSchoolDto = {
+  id: number;
+  name: string;
+};
+
+export type PublicTeacherDto = {
+  id: number;
+  fullName: string;
+};
+
 export type MeResponse = {
   userId: number | null;
   authorities: string[];

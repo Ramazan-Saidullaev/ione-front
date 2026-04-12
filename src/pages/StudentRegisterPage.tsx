@@ -1,0 +1,197 @@
+import { useEffect, useState } from "react";
+import { api } from "../api";
+import { saveSession } from "../storage";
+import { GlobalHeader } from "../components/GlobalHeader";
+import { getErrorMessage, redirectToRole } from "../utils/helpers";
+import type { PublicSchoolDto, PublicTeacherDto } from "../types";
+
+export function StudentRegisterPage() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [className, setClassName] = useState("");
+  const [schoolId, setSchoolId] = useState<number | "">("");
+  const [teacherId, setTeacherId] = useState<number | "">("");
+  const [schools, setSchools] = useState<PublicSchoolDto[]>([]);
+  const [teachers, setTeachers] = useState<PublicTeacherDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingTeachers, setLoadingTeachers] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchSchools();
+  }, []);
+
+  async function fetchSchools() {
+    try {
+      setLoading(true);
+      const data = await api.getSchools();
+      setSchools(data);
+      setError(null);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSchoolChange(newSchoolId: number | string) {
+    setSchoolId(newSchoolId as number | "");
+    setTeacherId("");
+    setTeachers([]);
+
+    if (newSchoolId === "") {
+      return;
+    }
+
+    try {
+      setLoadingTeachers(true);
+      const data = await api.getTeachersBySchool(newSchoolId as number);
+      setTeachers(data);
+      setError(null);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoadingTeachers(false);
+    }
+  }
+
+  async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (schoolId === "") {
+      setError("Пожалуйста, выберите школу");
+      return;
+    }
+
+    if (teacherId === "") {
+      setError("Пожалуйста, выберите учителя");
+      return;
+    }
+
+    setRegistering(true);
+    setError(null);
+
+    try {
+      const result = await api.registerStudent({
+        fullName: fullName.trim(),
+        email: email.trim(),
+        password,
+        schoolId: typeof schoolId === "number" ? schoolId : parseInt(schoolId),
+        teacherId: typeof teacherId === "number" ? teacherId : parseInt(teacherId),
+        className: className.trim() || null
+      });
+      saveSession("student", result);
+      redirectToRole("STUDENT");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
+    } finally {
+      setRegistering(false);
+    }
+  }
+
+  return (
+    <main className="shell route-shell">
+      <GlobalHeader />
+      <section className="card auth-card auth-home-card">
+        <form className="stack" onSubmit={handleRegister}>
+          <div className="section-heading">
+            <p className="eyebrow">Registration</p>
+            <h2>Sign up as a student</h2>
+          </div>
+
+          <label className="field">
+            <span>Full Name</span>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </label>
+
+          <label className="field">
+            <span>Email</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+
+          <label className="field">
+            <span>Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+
+          <label className="field">
+            <span>School</span>
+            {loading ? (
+              <p style={{ color: "#666", margin: 0 }}>Loading schools...</p>
+            ) : (
+              <select
+                value={schoolId}
+                onChange={(e) => handleSchoolChange(e.target.value ? parseInt(e.target.value) : "")}
+                required
+              >
+                <option value="">Select a school</option>
+                {schools.map((school) => (
+                  <option key={school.id} value={school.id}>
+                    {school.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </label>
+
+          <label className="field">
+            <span>Teacher</span>
+            {schoolId === "" ? (
+              <p style={{ color: "#999", margin: 0 }}>Please select a school first</p>
+            ) : loadingTeachers ? (
+              <p style={{ color: "#666", margin: 0 }}>Loading teachers...</p>
+            ) : teachers.length === 0 ? (
+              <p style={{ color: "#999", margin: 0 }}>No teachers found for this school</p>
+            ) : (
+              <select
+                value={teacherId}
+                onChange={(e) => setTeacherId(e.target.value ? parseInt(e.target.value) : "")}
+                required
+              >
+                <option value="">Select a teacher</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.fullName}
+                  </option>
+                ))}
+              </select>
+            )}
+          </label>
+
+          <label className="field">
+            <span>Class (Optional)</span>
+            <input
+              type="text"
+              value={className}
+              onChange={(e) => setClassName(e.target.value)}
+              placeholder="e.g., 9A, 10B"
+            />
+          </label>
+
+          {error ? <div className="banner error">{error}</div> : null}
+
+          <button className="primary-button" type="submit" disabled={registering || loading}>
+            {registering ? "Creating account..." : "Register"}
+          </button>
+        </form>
+      </section>
+    </main>
+  );
+}

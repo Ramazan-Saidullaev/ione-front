@@ -47,7 +47,9 @@ import type {
   CreateScenarioRequest,
   UpdateScenarioRequest,
   CreateScenarioOptionRequest,
-  UpdateScenarioOptionRequest
+  UpdateScenarioOptionRequest,
+  PublicSchoolDto,
+  PublicTeacherDto
 } from "./types";
 
 const API_BASE_URL =
@@ -354,6 +356,15 @@ export const api = {
       if (!res.ok) throw new Error("Failed to upload media");
       return res.json() as Promise<{ url: string }>;
     });
+  },
+
+  // Public registration endpoints
+  getSchools() {
+    return request<PublicSchoolDto[]>("/api/public/schools");
+  },
+
+  getTeachersBySchool(schoolId: number) {
+    return request<PublicTeacherDto[]>(`/api/public/schools/${schoolId}/teachers`);
   }
 };
 
