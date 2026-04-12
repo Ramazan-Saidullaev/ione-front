@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 function ChevronDown() {
@@ -18,6 +19,22 @@ function UserIcon() {
 }
 
 export function GlobalHeader() {
+  const [showAuthMenu, setShowAuthMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowAuthMenu(false);
+      }
+    }
+
+    if (showAuthMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showAuthMenu]);
+
   return (
     <header className="global-header">
       <div className="global-header-left">
@@ -41,9 +58,34 @@ export function GlobalHeader() {
         </nav>
       </div>
       <div className="global-header-right">
-        <Link to="/auth" className="icon-action-btn" title="Войти">
-          <UserIcon />
-        </Link>
+        <div className="auth-menu-container" ref={menuRef}>
+          <button
+            className="icon-action-btn"
+            title="Меню"
+            onClick={() => setShowAuthMenu(!showAuthMenu)}
+          >
+            <UserIcon />
+          </button>
+          
+          {showAuthMenu && (
+            <div className="auth-dropdown-menu">
+              <Link 
+                to="/auth" 
+                className="auth-menu-item"
+                onClick={() => setShowAuthMenu(false)}
+              >
+                Войти
+              </Link>
+              <Link 
+                to="/auth/register" 
+                className="auth-menu-item"
+                onClick={() => setShowAuthMenu(false)}
+              >
+                Регистрация
+              </Link>
+            </div>
+          )}
+        </div>
 
         <button className="lang-selector-btn">
           <div className="ru-flag"></div>

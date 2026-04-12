@@ -129,7 +129,7 @@ export function AdminTests() {
   async function handleUpdateZone(e: React.FormEvent) {
     e.preventDefault();
     if (!session || !selectedCategoryId || editingZoneId === null) return;
-    try { await api.updateCategoryZone(session.accessToken, editingZoneId, { categoryId: selectedCategoryId, zone: editZoneType, minScore: Number(editZoneMin), maxScore: Number(editZoneMax), priority: Number(editZonePriority) }); setEditingZoneId(null); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+    try { await api.updateCategoryZone(session.accessToken, editingZoneId, { zone: editZoneType, minScore: Number(editZoneMin), maxScore: Number(editZoneMax), priority: Number(editZonePriority) }); setEditingZoneId(null); refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
   async function handleDeleteZone(zoneId: number) {
     if (!session || !confirm("Delete zone?")) return;

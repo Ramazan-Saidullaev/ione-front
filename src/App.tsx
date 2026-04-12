@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HomeLandingPage } from "./pages/HomeLandingPage";
 import { AuthPage } from "./pages/AuthPage";
+import { RegisterTypePage } from "./pages/RegisterTypePage";
 import { TeacherRegisterPage } from "./pages/TeacherRegisterPage";
 import { StudentRegisterPage } from "./pages/StudentRegisterPage";
 import { TeacherPage } from "./pages/TeacherPage";
@@ -14,6 +15,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeLandingPage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth/register" element={<RegisterTypePage />} />
         <Route path="/auth/register/teacher" element={<TeacherRegisterPage />} />
         <Route path="/auth/register/student" element={<StudentRegisterPage />} />
         <Route path="/teachers/*" element={<TeacherPage />} />

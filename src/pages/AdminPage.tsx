@@ -5,6 +5,7 @@ import { AdminOverview } from "./AdminOverview";
 import { AdminCourses } from "./AdminCourses";
 import { AdminSchools } from "./AdminSchools";
 import { AdminTests } from "./AdminTests";
+import type { AuthResponse } from "../types";
 
 export function AdminPage() {
   const [session] = useState<AuthResponse | null>(() => loadSession("admin"));

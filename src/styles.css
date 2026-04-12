@@ -1088,6 +1088,43 @@ select {
   color: #0f172a;
 }
 
+.auth-menu-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: -20px;
+  background: #fff;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 8px 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  z-index: 100;
+  margin-top: 8px;
+}
+
+.auth-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #334155;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.15s ease;
+}
+
+.auth-menu-item:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
 .lang-selector-btn {
   background: none;
   border: none;
