@@ -4,6 +4,8 @@ import type {
   FinishAttemptResponse,
   Lesson,
   LessonCompletionResponse,
+  StudentCourseProgress,
+  StudentLessonProgress,
   LoginRequest,
   MeResponse,
   RegisterStudentRequest,
@@ -155,6 +157,16 @@ export const api = {
 
   getLesson(lessonId: number) {
     return request<Lesson>(`/api/public/lessons/${lessonId}`);
+  },
+
+  getCourseLessonProgress(token: string, courseId: number) {
+    return request<StudentLessonProgress[]>(`/api/student/courses/${courseId}/lesson-progress`, {
+      token
+    });
+  },
+
+  getStudentCourseProgress(token: string) {
+    return request<StudentCourseProgress[]>("/api/student/course-progress", { token });
   },
 
   completeLesson(token: string, lessonId: number) {

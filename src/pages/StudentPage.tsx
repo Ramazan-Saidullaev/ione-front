@@ -9,6 +9,8 @@ import type {
   Course,
   FinishAttemptResponse,
   Lesson,
+  StudentCourseProgress,
+  StudentLessonProgress,
   TestListItem,
   TestQuestion
 } from "../types";
@@ -41,7 +43,9 @@ export function StudentPage() {
   const [coursesError, setCoursesError] = useState<string | null>(null);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+  const [courseProgress, setCourseProgress] = useState<Record<number, StudentCourseProgress>>({});
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [lessonProgress, setLessonProgress] = useState<Record<number, StudentLessonProgress>>({});
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lessonsError, setLessonsError] = useState<string | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
@@ -76,10 +80,15 @@ export function StudentPage() {
     setCoursesError(null);
     setTestsError(null);
 
-    Promise.all([api.getCourses(), api.getStudentTests(session.accessToken)])
-      .then(([loadedCourses, loadedTests]) => {
+    Promise.all([
+      api.getCourses(),
+      api.getStudentTests(session.accessToken),
+      api.getStudentCourseProgress(session.accessToken)
+    ])
+      .then(([loadedCourses, loadedTests, loadedCourseProgress]) => {
         setCourses(loadedCourses);
         setTests(loadedTests);
+        setCourseProgress(Object.fromEntries(loadedCourseProgress.map((item) => [item.courseId, item])));
         if (loadedCourses.length > 0) setSelectedCourseId((current) => current ?? loadedCourses[0].id);
         if (loadedTests.length > 0) setSelectedTestId((current) => current ?? loadedTests[0].id);
       })
@@ -92,19 +101,23 @@ export function StudentPage() {
   }, [session]);
 
   useEffect(() => {
-    if (!selectedCourseId) {
+    if (!selectedCourseId || !session) {
       setLessons([]);
+      setLessonProgress({});
       return;
     }
     setLessonsLoading(true);
     setLessonsError(null);
-    api
-      .getCourseLessons(selectedCourseId)
-      .then((result) => {
-        setLessons(result);
-        if (result.length > 0) {
+    Promise.all([
+      api.getCourseLessons(selectedCourseId),
+      api.getCourseLessonProgress(session.accessToken, selectedCourseId)
+    ])
+      .then(([loadedLessons, loadedProgress]) => {
+        setLessons(loadedLessons);
+        setLessonProgress(Object.fromEntries(loadedProgress.map((item) => [item.lessonId, item])));
+        if (loadedLessons.length > 0) {
           setSelectedLessonId((current) =>
-            current && result.some((lesson) => lesson.id === current) ? current : result[0].id
+            current && loadedLessons.some((lesson) => lesson.id === current) ? current : loadedLessons[0].id
           );
         } else {
           setSelectedLessonId(null);
@@ -114,10 +127,11 @@ export function StudentPage() {
       })
       .catch((error: unknown) => {
         setLessons([]);
+        setLessonProgress({});
         setLessonsError(getErrorMessage(error));
       })
       .finally(() => setLessonsLoading(false));
-  }, [selectedCourseId]);
+  }, [selectedCourseId, session]);
 
   useEffect(() => {
     if (!selectedLessonId) {
@@ -126,13 +140,14 @@ export function StudentPage() {
       setLessonActionMessage(null);
       return;
     }
+    setLessonCompletedLocally(lessonProgress[selectedLessonId]?.status === "COMPLETED");
     setLessonDetailsLoading(true);
     api
       .getLesson(selectedLessonId)
       .then(setLessonDetails)
       .catch(() => setLessonDetails(null))
       .finally(() => setLessonDetailsLoading(false));
-  }, [selectedLessonId]);
+  }, [selectedLessonId, lessonProgress]);
 
   useEffect(() => {
     if (!session || !selectedTestId) {
@@ -180,7 +195,32 @@ export function StudentPage() {
     setLessonActionBusy(true);
     setLessonActionMessage(null);
     try {
+      const wasAlreadyCompleted = lessonProgress[lessonDetails.id]?.status === "COMPLETED";
       const result = await api.completeLesson(session.accessToken, lessonDetails.id);
+      setLessonProgress((current) => ({
+        ...current,
+        [lessonDetails.id]: {
+          lessonId: lessonDetails.id,
+          status: "COMPLETED",
+          completedAt: result.completedAt
+        }
+      }));
+      if (selectedCourseId && !wasAlreadyCompleted) {
+        setCourseProgress((current) => {
+          const currentCourse = current[selectedCourseId];
+          if (!currentCourse) return current;
+
+          const completedLessons = Math.min(currentCourse.completedLessons + 1, currentCourse.totalLessons);
+          return {
+            ...current,
+            [selectedCourseId]: {
+              ...currentCourse,
+              completedLessons,
+              completed: currentCourse.totalLessons > 0 && completedLessons === currentCourse.totalLessons
+            }
+          };
+        });
+      }
       setLessonCompletedLocally(true);
       setShowCompletionModal(true);
       setLessonActionMessage(`Урок успешно пройден! (${formatDateTime(result.completedAt)})`);
@@ -269,7 +309,9 @@ export function StudentPage() {
   function handleLogout() {
     clearSession("student");
     setSession(null);
+    setCourseProgress({});
     setLessons([]);
+    setLessonProgress({});
     setLessonDetails(null);
     setQuestions([]);
     setAttemptId(null);
@@ -351,6 +393,16 @@ export function StudentPage() {
                 >
                   <div className="student-card-top">
                     <strong>{course.title}</strong>
+                    <span
+                      className="mini-pill"
+                      style={{
+                        display: courseProgress[course.id]?.completed ? undefined : "none",
+                        background: "#dcfce7",
+                        color: "#166534"
+                      }}
+                    >
+                      Курс пройден
+                    </span>
                     <span className="mini-pill">{course.ageGroup || "Для всех"}</span>
                   </div>
                   <p>{course.description || "Описание отсутствует."}</p>
@@ -375,6 +427,15 @@ export function StudentPage() {
                 >
                   <div className="student-card-top">
                     <strong>{lesson.orderNumber}. {lesson.title}</strong>
+                    <span
+                      className="mini-pill"
+                      style={{
+                        background: lessonProgress[lesson.id]?.status === "COMPLETED" ? "#dcfce7" : "#e5e7eb",
+                        color: lessonProgress[lesson.id]?.status === "COMPLETED" ? "#166534" : "#4b5563"
+                      }}
+                    >
+                      {lessonProgress[lesson.id]?.status === "COMPLETED" ? "Пройден" : "Не пройден"}
+                    </span>
                   </div>
                   <p>{lesson.textContent ? "Есть текстовый материал" : "Только видео"}</p>
                 </button>

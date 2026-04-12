@@ -5,6 +5,7 @@ export type AuthResponse = {
   userId: number;
   role: UserRole;
   fullName?: string;
+  studentId?: number;  // Added for students
 };
 
 export type LoginRequest = {
@@ -106,6 +107,19 @@ export type Lesson = {
   orderNumber: number;
   videoUrl: string | null;
   textContent: string | null;
+};
+
+export type StudentLessonProgress = {
+  lessonId: number;
+  status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+  completedAt: string | null;
+};
+
+export type StudentCourseProgress = {
+  courseId: number;
+  totalLessons: number;
+  completedLessons: number;
+  completed: boolean;
 };
 
 export type TestListItem = {
