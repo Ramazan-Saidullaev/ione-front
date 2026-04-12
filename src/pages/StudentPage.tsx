@@ -15,6 +15,20 @@ import { getErrorMessage, formatDateTime } from "../utils/helpers";
 import { useRoleSession, handleRoleLogin } from "../hooks/authHooks";
 import { InfoBox } from "../components/InfoBox";
 
+function parseVideoUrl(url: string) {
+  if (!url) return url;
+  // Бэкенд ошибочно приклеивает /media/ ко всем ссылкам. Исправляем это здесь:
+  const mediaHttpIndex = url.indexOf("/media/http");
+  if (mediaHttpIndex !== -1) {
+    return url.substring(mediaHttpIndex + 7);
+  }
+  const mediaWwwIndex = url.indexOf("/media/www.");
+  if (mediaWwwIndex !== -1) {
+    return "https://" + url.substring(mediaWwwIndex + 7);
+  }
+  return url;
+}
+
 export function StudentPage() {
   const [session, setSession] = useState<AuthResponse | null>(() => loadSession("student"));
   const [authLoading, setAuthLoading] = useState<boolean>(Boolean(loadSession("student")));
@@ -46,6 +60,11 @@ export function StudentPage() {
   const [finishResult, setFinishResult] = useState<FinishAttemptResponse | null>(null);
   const [testActionError, setTestActionError] = useState<string | null>(null);
   const [testActionBusy, setTestActionBusy] = useState(false);
+  
+  // Новые состояния для улучшения UI
+  const [activeTab, setActiveTab] = useState<"courses" | "tests">("courses");
+  const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
+  const [lessonCompletedLocally, setLessonCompletedLocally] = useState(false);
 
   useRoleSession("student", "STUDENT", setSession, setAuthLoading);
 
@@ -88,6 +107,7 @@ export function StudentPage() {
         } else {
           setSelectedLessonId(null);
           setLessonDetails(null);
+          setLessonCompletedLocally(false);
         }
       })
       .catch((error: unknown) => {
@@ -100,6 +120,8 @@ export function StudentPage() {
   useEffect(() => {
     if (!selectedLessonId) {
       setLessonDetails(null);
+      setLessonCompletedLocally(false);
+      setLessonActionMessage(null);
       return;
     }
     setLessonDetailsLoading(true);
@@ -125,6 +147,7 @@ export function StudentPage() {
         setAnswersByQuestion({});
         setFinishResult(null);
         setTestActionError(null);
+        setUnansweredQuestions([]);
       })
       .catch((error: unknown) => {
         setQuestions([]);
@@ -156,7 +179,8 @@ export function StudentPage() {
     setLessonActionMessage(null);
     try {
       const result = await api.completeLesson(session.accessToken, lessonDetails.id);
-      setLessonActionMessage(`Lesson marked as ${result.status} at ${formatDateTime(result.completedAt)}`);
+      setLessonCompletedLocally(true);
+      setLessonActionMessage(`Урок успешно пройден! (${formatDateTime(result.completedAt)})`);
     } catch (error: unknown) {
       setLessonActionMessage(getErrorMessage(error));
     } finally {
@@ -173,6 +197,7 @@ export function StudentPage() {
       setAttemptId(result.attemptId);
       setAnswersByQuestion({});
       setFinishResult(null);
+      setUnansweredQuestions([]);
     } catch (error: unknown) {
       setTestActionError(getErrorMessage(error));
     } finally {
@@ -187,10 +212,25 @@ export function StudentPage() {
     try {
       await api.answerStudentQuestion(session.accessToken, attemptId, questionId, optionId);
       setAnswersByQuestion((current) => ({ ...current, [questionId]: optionId }));
+      setUnansweredQuestions((prev) => prev.filter((id) => id !== questionId));
     } catch (error: unknown) {
       setTestActionError(getErrorMessage(error));
     } finally {
       setAnswerBusyQuestionId(null);
+    }
+  }
+
+  function handleTryFinish() {
+    const missed = questions.filter((q) => !answersByQuestion[q.id]).map((q) => q.id);
+    if (missed.length > 0) {
+      setUnansweredQuestions(missed);
+      alert("Вы ответили не на все вопросы! Пожалуйста, выберите ответы для вопросов, выделенных красным.");
+      const firstMissedElement = document.getElementById(`question-${missed[0]}`);
+      firstMissedElement?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (window.confirm("Вы уверены, что хотите завершить тест? После этого ответы нельзя будет изменить.")) {
+      handleFinishAttempt();
     }
   }
 
@@ -216,21 +256,22 @@ export function StudentPage() {
     setQuestions([]);
     setAttemptId(null);
     setFinishResult(null);
+    setUnansweredQuestions([]);
   }
 
-  if (authLoading) return <div className="shell loading-shell">Checking saved student session...</div>;
+  if (authLoading) return <div className="shell loading-shell">Загрузка данных ученика...</div>;
 
   if (!session) {
     return (
       <main className="shell route-shell">
         <GlobalHeader />
         <section className="hero-panel">
-          <p className="eyebrow">Student Console</p>
-          <h1>You need to sign in from the main page first.</h1>
-          <p className="lead">Use the unified login on `/auth`, then the site will redirect students here automatically.</p>
+          <p className="eyebrow">Кабинет ученика</p>
+          <h1>Вам необходимо войти в систему</h1>
+          <p className="lead">Используйте общую страницу авторизации, после чего вы будете перенаправлены сюда.</p>
           <a className="route-card compact-route-card" href="/auth">
-            <h2>Go to login</h2>
-            <p>Open the shared login and registration page.</p>
+            <h2>Войти в аккаунт</h2>
+            <p>Открыть страницу авторизации.</p>
           </a>
         </section>
       </main>
@@ -242,222 +283,259 @@ export function StudentPage() {
       <GlobalHeader />
       <section className="topbar">
         <div>
-          <p className="eyebrow">Student Console</p>
-          <h1>Student dashboard</h1>
+          <p className="eyebrow">Кабинет ученика</p>
+          <h1>Добро пожаловать, {session.fullName || "Ученик"}</h1>
         </div>
         <div className="topbar-actions">
           <div className="identity-card">
-            <span>{session.fullName ? "Student" : "Student ID"}</span>
+            <span>Роль: Ученик</span>
             <strong>{session.fullName || session.userId}</strong>
           </div>
           <button className="ghost-button" onClick={handleLogout} type="button">
-            Log out
+            Выйти
           </button>
         </div>
       </section>
 
-      <section className="student-dashboard-grid">
-        <aside className="card sidebar-card">
-          <div className="section-heading">
-            <p className="eyebrow">Courses</p>
-            <h2>Learning content</h2>
-          </div>
-          {coursesLoading ? <div className="empty-state">Loading courses...</div> : null}
-          {coursesError ? <div className="banner error">{coursesError}</div> : null}
-          <div className="stack">
-            {courses.map((course) => (
-              <button
-                key={course.id}
-                className={`student-card ${selectedCourseId === course.id ? "selected" : ""}`}
-                onClick={() => setSelectedCourseId(course.id)}
-                type="button"
-              >
-                <div className="student-card-top">
-                  <strong>{course.title}</strong>
-                  <span className="mini-pill">{course.ageGroup || "All ages"}</span>
-                </div>
-                <p>{course.description || "No description provided."}</p>
-              </button>
-            ))}
-          </div>
+      {/* Вкладки навигации */}
+      <div style={{ padding: "0 32px", marginBottom: "24px", display: "flex", gap: "24px", borderBottom: "1px solid #e5e7eb" }}>
+        <button
+          onClick={() => setActiveTab("courses")}
+          style={{ padding: "12px 16px", fontSize: "1.1rem", fontWeight: 600, background: "none", border: "none", borderBottom: activeTab === "courses" ? "3px solid #2563eb" : "3px solid transparent", color: activeTab === "courses" ? "#2563eb" : "#6b7280", cursor: "pointer", transition: "color 0.2s" }}
+        >
+          📚 Учебные курсы
+        </button>
+        <button
+          onClick={() => setActiveTab("tests")}
+          style={{ padding: "12px 16px", fontSize: "1.1rem", fontWeight: 600, background: "none", border: "none", borderBottom: activeTab === "tests" ? "3px solid #2563eb" : "3px solid transparent", color: activeTab === "tests" ? "#2563eb" : "#6b7280", cursor: "pointer", transition: "color 0.2s" }}
+        >
+          🧠 Психологические тесты
+        </button>
+      </div>
 
-          <div className="section-heading compact-heading">
-            <p className="eyebrow">Lessons</p>
-            <h2>Course lessons</h2>
-          </div>
-          {lessonsLoading ? <div className="empty-state">Loading lessons...</div> : null}
-          {lessonsError ? <div className="banner error">{lessonsError}</div> : null}
-          <div className="stack">
-            {lessons.map((lesson) => (
-              <button
-                key={lesson.id}
-                className={`student-card ${selectedLessonId === lesson.id ? "selected" : ""}`}
-                onClick={() => setSelectedLessonId(lesson.id)}
-                type="button"
-              >
-                <div className="student-card-top">
-                  <strong>{lesson.title}</strong>
-                  <span className="mini-pill">#{lesson.orderNumber}</span>
-                </div>
-                <p>{lesson.textContent ? "Lesson text available" : "Text is not set"}</p>
-              </button>
-            ))}
-          </div>
-        </aside>
-
-        <section className="card details-card">
-          <div className="section-heading">
-            <p className="eyebrow">Lesson</p>
-            <h2>Selected lesson</h2>
-          </div>
-          {lessonDetailsLoading ? <div className="empty-state">Loading lesson details...</div> : null}
-          {!lessonDetailsLoading && lessonDetails ? (
-            <div className="details-layout">
-              <div className="summary-grid">
-                <InfoBox label="Title" value={lessonDetails.title} />
-                <InfoBox label="Course ID" value={String(lessonDetails.courseId)} />
-                <InfoBox label="Order" value={String(lessonDetails.orderNumber)} />
-              </div>
-              <div className="panel-block">
-                <div className="panel-heading">
-                  <h3>Lesson content</h3>
-                </div>
-                <div className="content-card">
-                  <p>{lessonDetails.textContent || "No text content was provided for this lesson yet."}</p>
-                  {lessonDetails.videoUrl ? (
-                    <a className="inline-link" href={lessonDetails.videoUrl} target="_blank" rel="noreferrer">
-                      Open lesson video
-                    </a>
-                  ) : (
-                    <p className="muted-text">Video is not attached to this lesson.</p>
-                  )}
-                </div>
-              </div>
-              <div className="panel-block">
-                <button className="primary-button" onClick={handleCompleteLesson} disabled={lessonActionBusy}>
-                  {lessonActionBusy ? "Saving..." : "Mark lesson as completed"}
-                </button>
-                {lessonActionMessage ? <div className="banner info">{lessonActionMessage}</div> : null}
-                <div className="banner info">
-                  Scenario answering API exists, but there is no student endpoint yet for listing scenarios by lesson.
-                </div>
-              </div>
+      {activeTab === "courses" && (
+        <section className="student-dashboard-grid">
+          <aside className="card sidebar-card">
+            <div className="section-heading">
+              <p className="eyebrow">Доступные программы</p>
+              <h2>Курсы</h2>
             </div>
-          ) : null}
-          {!lessonDetailsLoading && !lessonDetails ? (
-            <div className="empty-state">
-              <strong>No lesson selected</strong>
-              <p>Choose a course and lesson on the left to view its content.</p>
-            </div>
-          ) : null}
-        </section>
-      </section>
-
-      <section className="card tests-card">
-        <div className="section-heading">
-          <p className="eyebrow">Tests</p>
-          <h2>Psychological tests</h2>
-        </div>
-        {testsError ? <div className="banner error">{testsError}</div> : null}
-        <div className="test-tabs">
-          {tests.map((test) => (
-            <button
-              key={test.id}
-              className={`test-tab ${selectedTestId === test.id ? "selected" : ""}`}
-              onClick={() => setSelectedTestId(test.id)}
-              type="button"
-            >
-              {test.title}
-            </button>
-          ))}
-        </div>
-
-        {questionsLoading ? <div className="empty-state">Loading questions...</div> : null}
-        {questionsError ? <div className="banner error">{questionsError}</div> : null}
-
-        {!questionsLoading && selectedTestId && questions.length > 0 ? (
-          <div className="details-layout">
-            <div className="panel-block">
-              <div className="panel-heading">
-                <h3>Attempt controls</h3>
-              </div>
-              <div className="test-actions">
-                <button className="primary-button" onClick={handleStartAttempt} disabled={testActionBusy}>
-                  {testActionBusy ? "Preparing..." : attemptId ? `Attempt #${attemptId}` : "Start attempt"}
-                </button>
+            {coursesLoading ? <div className="empty-state">Загрузка курсов...</div> : null}
+            {coursesError ? <div className="banner error">{coursesError}</div> : null}
+            <div className="stack">
+              {courses.length === 0 && !coursesLoading && <p className="muted-text">Нет доступных курсов</p>}
+              {courses.map((course) => (
                 <button
-                  className="ghost-button"
-                  onClick={handleFinishAttempt}
-                  disabled={!attemptId || testActionBusy}
+                  key={course.id}
+                  className={`student-card ${selectedCourseId === course.id ? "selected" : ""}`}
+                  onClick={() => setSelectedCourseId(course.id)}
                   type="button"
                 >
-                  Finish attempt
-                </button>
-              </div>
-              {testActionError ? <div className="banner error">{testActionError}</div> : null}
-            </div>
-
-            <div className="question-list">
-              {questions.map((question) => (
-                <article key={question.id} className="question-card">
                   <div className="student-card-top">
-                    <strong>
-                      {question.orderNumber}. {question.text}
-                    </strong>
-                    <span className="mini-pill">{question.categoryName}</span>
+                    <strong>{course.title}</strong>
+                    <span className="mini-pill">{course.ageGroup || "Для всех"}</span>
                   </div>
-                  <div className="option-list">
-                    {question.options.map((option) => {
-                      const isSelected = answersByQuestion[question.id] === option.id;
-                      return (
-                        <button
-                          key={option.id}
-                          className={`option-button ${isSelected ? "selected" : ""}`}
-                          disabled={!attemptId || answerBusyQuestionId === question.id || Boolean(finishResult)}
-                          onClick={() => handleAnswerQuestion(question.id, option.id)}
-                          type="button"
-                        >
-                          {option.text}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </article>
+                  <p>{course.description || "Описание отсутствует."}</p>
+                </button>
               ))}
             </div>
 
-            {finishResult ? (
-              <div className="panel-block">
-                <div className="panel-heading">
-                  <h3>Attempt result</h3>
-                </div>
-                <div className="summary-grid">
-                  <InfoBox label="Attempt ID" value={String(finishResult.attemptId)} />
-                  <InfoBox label="Max zone" value={finishResult.maxZone} tone={finishResult.maxZone} />
-                </div>
-                <div className="category-grid">
-                  {finishResult.results.map((result: CategoryResult) => (
-                    <article key={result.categoryId} className="category-card">
-                      <div className="student-card-top">
-                        <strong>{result.categoryName}</strong>
-                        <span className={`zone-pill zone-${result.zone.toLowerCase()}`}>{result.zone}</span>
+            <div className="section-heading compact-heading" style={{ marginTop: '24px' }}>
+              <p className="eyebrow">Материалы курса</p>
+              <h2>Уроки</h2>
+            </div>
+            {lessonsLoading ? <div className="empty-state">Загрузка уроков...</div> : null}
+            {lessonsError ? <div className="banner error">{lessonsError}</div> : null}
+            <div className="stack">
+              {lessons.length === 0 && selectedCourseId && !lessonsLoading && <p className="muted-text">В этом курсе пока нет уроков.</p>}
+              {lessons.map((lesson) => (
+                <button
+                  key={lesson.id}
+                  className={`student-card ${selectedLessonId === lesson.id ? "selected" : ""}`}
+                  onClick={() => setSelectedLessonId(lesson.id)}
+                  type="button"
+                >
+                  <div className="student-card-top">
+                    <strong>{lesson.orderNumber}. {lesson.title}</strong>
+                  </div>
+                  <p>{lesson.textContent ? "Есть текстовый материал" : "Только видео"}</p>
+                </button>
+              ))}
+            </div>
+          </aside>
+
+          <section className="card details-card">
+            <div className="section-heading">
+              <p className="eyebrow">Содержимое</p>
+              <h2>Просмотр урока</h2>
+            </div>
+            {lessonDetailsLoading ? <div className="empty-state">Загрузка урока...</div> : null}
+            {!lessonDetailsLoading && lessonDetails ? (
+              <div className="details-layout">
+                <div className="panel-block">
+                  <div className="content-card" style={{ fontSize: '1.05rem', lineHeight: 1.6 }}>
+                    <h3 style={{ marginTop: 0 }}>{lessonDetails.title}</h3>
+                    <p style={{ whiteSpace: 'pre-wrap' }}>{lessonDetails.textContent || "Текстовое описание к этому уроку отсутствует."}</p>
+                    {lessonDetails.videoUrl ? (
+                      <div style={{ marginTop: "24px" }}>
+                        <a className="primary-link-button" href={parseVideoUrl(lessonDetails.videoUrl)} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                          ▶ Открыть видеоурок
+                        </a>
                       </div>
-                      <p>Total score: {result.totalScore}</p>
-                    </article>
-                  ))}
+                    ) : (
+                      <p className="muted-text" style={{ marginTop: "24px" }}>Видео к этому уроку не прикреплено.</p>
+                    )}
+                  </div>
                 </div>
+                
+                {!lessonCompletedLocally ? (
+                  <div className="panel-block" style={{ marginTop: '24px' }}>
+                    <button className="primary-button" onClick={handleCompleteLesson} disabled={lessonActionBusy} style={{ width: '100%', padding: '16px', fontSize: '1.1rem' }}>
+                      {lessonActionBusy ? "Сохранение..." : "Я изучил(а) этот материал"}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: '24px', padding: '24px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px' }}>
+                    <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>✅ Урок успешно пройден</h3>
+                    <p style={{ color: '#15803d', marginBottom: '16px' }}>Вам стал доступен ситуационный сценарий для закрепления материала.</p>
+                    <button style={{ backgroundColor: '#166534', color: '#fff', padding: '12px 24px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer', width: '100%', fontSize: '1rem' }} onClick={() => alert('Раздел загрузки ситуационных сценариев в разработке. Здесь откроется диалог для выбора вариантов ответа.')}>
+                      🎭 Начать ситуационный тест (Сценарий)
+                    </button>
+                  </div>
+                )}
+                {lessonActionMessage && !lessonCompletedLocally ? <div className="banner info">{lessonActionMessage}</div> : null}
               </div>
             ) : null}
-          </div>
-        ) : null}
+            {!lessonDetailsLoading && !lessonDetails ? (
+              <div className="empty-state">
+                <strong>Урок не выбран</strong>
+                <p>Выберите курс и урок слева, чтобы начать обучение.</p>
+              </div>
+            ) : null}
+          </section>
+        </section>
+      )}
 
-        {!questionsLoading && selectedTestId && questions.length === 0 ? (
-          <div className="empty-state">
-            <strong>No questions found</strong>
-            <p>This test has no questions in the current database.</p>
-          </div>
-        ) : null}
-      </section>
+      {activeTab === "tests" && (
+        <section className="student-dashboard-grid">
+          <aside className="card sidebar-card">
+            <div className="section-heading">
+              <p className="eyebrow">Диагностика</p>
+              <h2>Тесты</h2>
+            </div>
+            {testsError ? <div className="banner error">{testsError}</div> : null}
+            <div className="stack">
+              {tests.length === 0 && <p className="muted-text">Доступных тестов пока нет.</p>}
+              {tests.map((test) => (
+                <button
+                  key={test.id}
+                  className={`student-card ${selectedTestId === test.id ? "selected" : ""}`}
+                  onClick={() => setSelectedTestId(test.id)}
+                  type="button"
+                >
+                  <div className="student-card-top">
+                    <strong>{test.title}</strong>
+                  </div>
+                  <p>{test.description || "Психологическое тестирование"}</p>
+                </button>
+              ))}
+            </div>
+          </aside>
+
+          <section className="card details-card">
+            {questionsLoading ? <div className="empty-state">Загрузка вопросов...</div> : null}
+            {questionsError ? <div className="banner error">{questionsError}</div> : null}
+
+            {!questionsLoading && selectedTestId && questions.length > 0 ? (
+              <div className="details-layout">
+                {!attemptId && !finishResult ? (
+                  <div className="empty-state" style={{ padding: '60px 20px' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📝</div>
+                    <h3 style={{ fontSize: '1.4rem', color: '#111827', marginBottom: '12px' }}>Готовы начать тест?</h3>
+                    <p style={{ color: '#4b5563', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>Вам будет предложено несколько вопросов. Пожалуйста, отвечайте на них честно. После завершения теста результаты будут отправлены вашему учителю.</p>
+                    <button className="primary-button" onClick={handleStartAttempt} disabled={testActionBusy} style={{ padding: '12px 32px', fontSize: '1.1rem' }}>
+                      {testActionBusy ? "Подготовка..." : "Начать тестирование"}
+                    </button>
+                  </div>
+                ) : null}
+
+                {attemptId && !finishResult ? (
+                  <div>
+                    <div style={{ marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h2 style={{ margin: 0, color: '#111827' }}>Прохождение теста</h2>
+                      <span style={{ background: '#e0e7ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '99px', fontWeight: 600, fontSize: '0.9rem' }}>В процессе</span>
+                    </div>
+                    
+                    <div className="question-list" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                      {questions.map((question, index) => {
+                        const isUnanswered = unansweredQuestions.includes(question.id);
+                        return (
+                          <article id={`question-${question.id}`} key={question.id} className="question-card" style={{ border: isUnanswered ? '2px solid #dc2626' : '1px solid #e5e7eb', padding: '24px', borderRadius: '12px', backgroundColor: isUnanswered ? '#fef2f2' : '#fff', transition: 'all 0.3s' }}>
+                            <div className="student-card-top" style={{ marginBottom: '16px' }}>
+                              <strong style={{ fontSize: '1.15rem', color: '#111827' }}>
+                                {index + 1}. {question.text}
+                              </strong>
+                            </div>
+                            {isUnanswered && (
+                              <div style={{ color: '#dc2626', fontSize: '0.9rem', marginBottom: '12px', fontWeight: 600 }}>
+                                ⚠️ Вы забыли выбрать ответ на этот вопрос
+              </div>
+                            )}
+                            <div className="option-list" style={{ display: 'grid', gap: '8px' }}>
+                              {question.options.map((option) => {
+                                const isSelected = answersByQuestion[question.id] === option.id;
+                                return (
+                                  <button
+                                    key={option.id}
+                                    className={`option-button ${isSelected ? "selected" : ""}`}
+                                    disabled={!attemptId || answerBusyQuestionId === question.id || Boolean(finishResult)}
+                                    onClick={() => handleAnswerQuestion(question.id, option.id)}
+                                    type="button"
+                                    style={{ padding: '12px', textAlign: 'left', fontSize: '1rem', background: isSelected ? '#eff6ff' : '#f9fafb', border: isSelected ? '1px solid #3b82f6' : '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', color: isSelected ? '#1d4ed8' : '#374151', fontWeight: isSelected ? 500 : 400 }}
+                                  >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: isSelected ? '6px solid #3b82f6' : '2px solid #d1d5db', backgroundColor: '#fff', flexShrink: 0 }}></div>
+                                      {option.text}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                    
+                    <div style={{ marginTop: '32px', borderTop: '1px solid #e5e7eb', paddingTop: '24px', display: 'flex', justifyContent: 'center' }}>
+                      <button className="primary-button" onClick={handleTryFinish} disabled={testActionBusy} style={{ padding: '16px 48px', fontSize: '1.1rem', backgroundColor: '#111827' }}>
+                        {testActionBusy ? "Отправка..." : "Завершить тест и отправить ответы"}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {finishResult ? (
+                  <div className="panel-block" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                    <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🎉</div>
+                    <h2 style={{ color: '#111827', marginBottom: '12px' }}>Тест успешно завершен!</h2>
+                    <p style={{ color: '#4b5563', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 24px' }}>Ваши ответы сохранены и отправлены вашему учителю для ознакомления. Спасибо за прохождение.</p>
+                    <button className="ghost-button" onClick={() => { setAttemptId(null); setFinishResult(null); setAnswersByQuestion({}); }} style={{ padding: '10px 24px', fontSize: '1rem' }}>
+                      Пройти тест заново
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {!questionsLoading && selectedTestId && questions.length === 0 ? (
+              <div className="empty-state">
+                <strong>Вопросы не найдены</strong>
+                <p>В этом тесте пока нет вопросов.</p>
+              </div>
+            ) : null}
+          </section>
+        </section>
+      )}
     </main>
   );
 }
