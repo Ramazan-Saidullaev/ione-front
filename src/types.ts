@@ -129,18 +129,25 @@ export type StudentScenarioOption = {
 
 export type StudentLessonScenario = {
   available: boolean;
+  completed: boolean;
+  hasScenario: boolean;
   scenarioId: number | null;
   title: string | null;
   description: string | null;
+  baseImageUrl: string | null;
   options: StudentScenarioOption[];
+  message: string | null;
+  selectedOptionText: string | null;
+  resultText: string | null;
+  resultImageUrl: string | null;
 };
 
 export type StudentScenarioAnswerResult = {
   answerId: number;
   selectedOptionId: number;
+  selectedOptionText: string | null;
   resultText: string | null;
   resultImageUrl: string | null;
-  score: number;
 };
 
 export type TestListItem = {

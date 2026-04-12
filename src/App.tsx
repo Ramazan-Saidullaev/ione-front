@@ -6,6 +6,7 @@ import { TeacherRegisterPage } from "./pages/TeacherRegisterPage";
 import { StudentRegisterPage } from "./pages/StudentRegisterPage";
 import { TeacherPage } from "./pages/TeacherPage";
 import { StudentPage } from "./pages/StudentPage";
+import { SituationTestPage } from "./pages/SituationTestPage";
 import { AdminPage } from "./pages/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/auth/register/teacher" element={<TeacherRegisterPage />} />
         <Route path="/auth/register/student" element={<StudentRegisterPage />} />
         <Route path="/teachers/*" element={<TeacherPage />} />
+        <Route path="/students/course/:courseId/lesson/:lessonId/situation-test" element={<SituationTestPage />} />
         <Route path="/students/*" element={<StudentPage />} />
         <Route path="/admin/*" element={<AdminPage />} />
         <Route path="*" element={<NotFoundPage />} />

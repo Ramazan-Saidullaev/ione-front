@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { loadSession, clearSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
@@ -12,29 +13,16 @@ import type {
   StudentCourseProgress,
   StudentLessonProgress,
   StudentLessonScenario,
-  StudentScenarioAnswerResult,
   TestListItem,
   TestQuestion
 } from "../types";
 import { getErrorMessage, formatDateTime } from "../utils/helpers";
 import { useRoleSession, handleRoleLogin } from "../hooks/authHooks";
 import { InfoBox } from "../components/InfoBox";
-
-function parseVideoUrl(url: string) {
-  if (!url) return url;
-  // Бэкенд ошибочно приклеивает /media/ ко всем ссылкам. Исправляем это здесь:
-  const mediaHttpIndex = url.indexOf("/media/http");
-  if (mediaHttpIndex !== -1) {
-    return url.substring(mediaHttpIndex + 7);
-  }
-  const mediaWwwIndex = url.indexOf("/media/www.");
-  if (mediaWwwIndex !== -1) {
-    return "https://" + url.substring(mediaWwwIndex + 7);
-  }
-  return url;
-}
+import { parseMediaUrl } from "../utils/mediaUrl";
 
 export function StudentPage() {
+  const navigate = useNavigate();
   const [session, setSession] = useState<AuthResponse | null>(() => loadSession("student"));
   const [authLoading, setAuthLoading] = useState<boolean>(Boolean(loadSession("student")));
   const [loginEmail, setLoginEmail] = useState("");
@@ -54,9 +42,6 @@ export function StudentPage() {
   const [lessonDetails, setLessonDetails] = useState<Lesson | null>(null);
   const [lessonScenario, setLessonScenario] = useState<StudentLessonScenario | null>(null);
   const [lessonScenarioLoading, setLessonScenarioLoading] = useState(false);
-  const [scenarioStarted, setScenarioStarted] = useState(false);
-  const [scenarioBusy, setScenarioBusy] = useState(false);
-  const [scenarioResult, setScenarioResult] = useState<StudentScenarioAnswerResult | null>(null);
   const [lessonDetailsLoading, setLessonDetailsLoading] = useState(false);
   const [lessonActionMessage, setLessonActionMessage] = useState<string | null>(null);
   const [lessonActionBusy, setLessonActionBusy] = useState(false);
@@ -144,8 +129,6 @@ export function StudentPage() {
     if (!selectedLessonId) {
       setLessonDetails(null);
       setLessonScenario(null);
-      setScenarioStarted(false);
-      setScenarioResult(null);
       setLessonCompletedLocally(false);
       setLessonActionMessage(null);
       return;
@@ -153,16 +136,14 @@ export function StudentPage() {
     setLessonCompletedLocally(lessonProgress[selectedLessonId]?.status === "COMPLETED");
     setLessonDetailsLoading(true);
     setLessonScenarioLoading(true);
-    setScenarioStarted(false);
-    setScenarioResult(null);
     api
       .getLesson(selectedLessonId)
       .then(setLessonDetails)
       .catch(() => setLessonDetails(null))
       .finally(() => setLessonDetailsLoading(false));
-    if (session) {
+    if (session && selectedCourseId) {
       api
-        .getLessonScenario(session.accessToken, selectedLessonId)
+        .getLessonScenario(session.accessToken, selectedCourseId, selectedLessonId)
         .then(setLessonScenario)
         .catch(() => setLessonScenario(null))
         .finally(() => setLessonScenarioLoading(false));
@@ -170,7 +151,7 @@ export function StudentPage() {
       setLessonScenario(null);
       setLessonScenarioLoading(false);
     }
-  }, [selectedLessonId, lessonProgress, session]);
+  }, [selectedLessonId, lessonProgress, session, selectedCourseId]);
 
   useEffect(() => {
     if (!session || !selectedTestId) {
@@ -199,8 +180,11 @@ export function StudentPage() {
   const selectedCourseIndex = selectedCourseId ? courses.findIndex((course) => course.id === selectedCourseId) : -1;
   const selectedCourseProgress = selectedCourseId ? courseProgress[selectedCourseId] : undefined;
   const isCurrentCourseCompleted = Boolean(selectedCourseProgress?.completed);
-  const hasNextLesson = selectedLessonId ? lessons.findIndex((lesson) => lesson.id === selectedLessonId) < lessons.length - 1 : false;
+  const currentLessonIndex = selectedLessonId ? lessons.findIndex((lesson) => lesson.id === selectedLessonId) : -1;
+  const hasNextLesson = currentLessonIndex !== -1 && currentLessonIndex < lessons.length - 1;
   const hasNextCourse = selectedCourseIndex !== -1 && selectedCourseIndex < courses.length - 1;
+  const programFullyCompleted =
+    courses.length > 0 && courses.every((course) => courseProgress[course.id]?.completed === true);
 
   function handleNextCourse() {
     if (!hasNextCourse || selectedCourseIndex === -1) {
@@ -229,19 +213,26 @@ export function StudentPage() {
           primaryActionLabel: "Перейти на следующий курс",
           onPrimaryAction: handleNextCourse
         }
-      : isCurrentCourseCompleted
+      : programFullyCompleted
         ? {
-          completionMessage: "Поздравляем, вы завершили все доступные курсы.",
-          helperText: "Вы прошли всю программу обучения.",
-          primaryActionLabel: "Завершить",
-          onPrimaryAction: () => setShowCompletionModal(false)
-          }
-        : {
-            completionMessage: "Вы успешно завершили этот урок.",
-            helperText: "Чтобы завершить курс, пройдите оставшиеся уроки из списка.",
-            primaryActionLabel: "Продолжить обучение",
+            completionMessage: "Поздравляем! Вы прошли всю образовательную программу.",
+            helperText: "Вы успешно завершили все курсы. Спасибо за обучение!",
+            primaryActionLabel: "Закрыть",
             onPrimaryAction: () => setShowCompletionModal(false)
-          };
+          }
+        : isCurrentCourseCompleted
+          ? {
+              completionMessage: "Вы завершили этот курс.",
+              helperText: "Чтобы завершить всю программу, пройдите остальные курсы в списке слева.",
+              primaryActionLabel: "Продолжить",
+              onPrimaryAction: () => setShowCompletionModal(false)
+            }
+          : {
+              completionMessage: "Вы успешно завершили этот урок.",
+              helperText: "Чтобы завершить курс, пройдите оставшиеся уроки из списка.",
+              primaryActionLabel: "Продолжить обучение",
+              onPrimaryAction: () => setShowCompletionModal(false)
+            };
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -302,36 +293,21 @@ export function StudentPage() {
   }
 
   function handleNextLesson() {
-    if (!selectedLessonId || !lessons) return;
-    
+    if (!selectedLessonId) return;
     const currentIndex = lessons.findIndex((l) => l.id === selectedLessonId);
     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
       const nextLesson = lessons[currentIndex + 1];
       setSelectedLessonId(nextLesson.id);
       setLessonCompletedLocally(false);
+      setLessonActionMessage(null);
       setShowCompletionModal(false);
-    } else {
-      // No more lessons
-      setShowCompletionModal(false);
+      return;
     }
-  }
-
-  function handleStartScenario() {
-    setScenarioStarted(true);
-    setScenarioResult(null);
-  }
-
-  async function handleAnswerScenario(optionId: number) {
-    if (!session || !lessonScenario?.available || !lessonScenario.scenarioId) return;
-    setScenarioBusy(true);
-    try {
-      const result = await api.answerScenario(session.accessToken, lessonScenario.scenarioId, optionId);
-      setScenarioResult(result);
-    } catch (error: unknown) {
-      setLessonActionMessage(getErrorMessage(error));
-    } finally {
-      setScenarioBusy(false);
+    if (selectedCourseIndex !== -1 && selectedCourseIndex < courses.length - 1) {
+      handleNextCourse();
+      return;
     }
+    setShowCompletionModal(false);
   }
 
   async function handleStartAttempt() {
@@ -402,8 +378,6 @@ export function StudentPage() {
     setLessonProgress({});
     setLessonDetails(null);
     setLessonScenario(null);
-    setScenarioStarted(false);
-    setScenarioResult(null);
     setQuestions([]);
     setAttemptId(null);
     setFinishResult(null);
@@ -533,7 +507,13 @@ export function StudentPage() {
                       {lessonProgress[lesson.id]?.status === "COMPLETED" ? "Пройден" : "Не пройден"}
                     </span>
                   </div>
-                  <p>{lesson.textContent ? "Есть текстовый материал" : "Только видео"}</p>
+                  {lesson.textContent?.trim() ? (
+                    <p className="muted-text" style={{ marginTop: "6px", fontSize: "0.9rem" }}>
+                      {lesson.textContent.trim().length > 120
+                        ? `${lesson.textContent.trim().slice(0, 120)}…`
+                        : lesson.textContent.trim()}
+                    </p>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -564,21 +544,55 @@ export function StudentPage() {
             {lessonDetailsLoading ? <div className="empty-state">Загрузка урока...</div> : null}
             {!lessonDetailsLoading && lessonDetails ? (
               <div className="details-layout">
+                {programFullyCompleted ? (
+                  <div
+                    className="panel-block"
+                    style={{
+                      marginBottom: "8px",
+                      padding: "18px 20px",
+                      borderRadius: "12px",
+                      background: "#eff6ff",
+                      border: "1px solid #bfdbfe",
+                      color: "#1e3a8a",
+                      fontWeight: 600,
+                      lineHeight: 1.5
+                    }}
+                  >
+                    Поздравляем! Вы прошли всю образовательную программу — все доступные курсы успешно завершены.
+                  </div>
+                ) : null}
                 <div className="panel-block">
                   <div className="content-card" style={{ fontSize: '1.05rem', lineHeight: 1.6 }}>
                     <h3 style={{ marginTop: 0 }}>{lessonDetails.title}</h3>
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{lessonDetails.textContent || "Текстовое описание к этому уроку отсутствует."}</p>
+                    {lessonDetails.textContent?.trim() ? (
+                      <p style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>{lessonDetails.textContent.trim()}</p>
+                    ) : null}
                     {lessonDetails.videoUrl ? (
-                      <div style={{ marginTop: "24px" }}>
-                        <a className="primary-link-button" href={parseVideoUrl(lessonDetails.videoUrl)} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                      <div style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}>
+                        <a className="primary-link-button" href={parseMediaUrl(lessonDetails.videoUrl)} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
                           ▶ Открыть видеоурок
                         </a>
                       </div>
                     ) : (
-                      <p className="muted-text" style={{ marginTop: "24px" }}>Видео к этому уроку не прикреплено.</p>
+                      <p className="muted-text" style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}>
+                        Видео к этому уроку не прикреплено.
+                      </p>
                     )}
                   </div>
                 </div>
+                {!programFullyCompleted ? (
+                  <div className="panel-block" style={{ marginTop: "8px" }}>
+                    {hasNextLesson ? (
+                      <button type="button" className="ghost-button" onClick={handleNextLesson} style={{ width: "100%", padding: "14px", fontWeight: 600 }}>
+                        Следующий урок
+                      </button>
+                    ) : hasNextCourse ? (
+                      <button type="button" className="ghost-button" onClick={handleNextCourse} style={{ width: "100%", padding: "14px", fontWeight: 600 }}>
+                        Следующий курс
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
                 
                 {!lessonCompletedLocally ? (
                   <div className="panel-block" style={{ marginTop: '24px' }}>
@@ -599,62 +613,51 @@ export function StudentPage() {
                     <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>Урок успешно пройден</h3>
                     {lessonScenarioLoading ? (
                       <p style={{ color: '#15803d', marginBottom: '16px' }}>Проверяем доступность ситуационного теста...</p>
+                    ) : lessonScenario?.hasScenario && lessonScenario.completed ? (
+                      <div style={{ color: '#15803d' }}>
+                        <p style={{ margin: '0 0 12px 0' }}>
+                          Ситуационный тест по этому уроку уже пройден. Повторно пройти его нельзя — ответ сохранён один раз.
+                        </p>
+                        {selectedCourseId ? (
+                          <Link
+                            className="primary-link-button"
+                            to={`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`}
+                            style={{ display: 'inline-block' }}
+                          >
+                            Посмотреть результат теста
+                          </Link>
+                        ) : null}
+                      </div>
                     ) : lessonScenario?.available ? (
-                      <>
-                        <p style={{ color: '#15803d', marginBottom: '16px' }}>Вам доступен ситуационный тест по этому уроку.</p>
-                        {!scenarioStarted ? (
+                      <div style={{ color: '#15803d' }}>
+                        <p style={{ margin: '0 0 12px 0' }}>
+                          Вы прошли урок. Вам доступен ситуационный тест (одна попытка). На отдельной странице будет описание ситуации и
+                          выбор ответа с подтверждением.
+                        </p>
+                        {selectedCourseId ? (
                           <button
                             type="button"
-                            onClick={handleStartScenario}
-                            style={{ backgroundColor: '#166534', color: '#fff', padding: '12px 24px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer', width: '100%', fontSize: '1rem' }}
+                            onClick={() =>
+                              navigate(`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`)
+                            }
+                            style={{
+                              backgroundColor: '#166534',
+                              color: '#fff',
+                              padding: '12px 24px',
+                              borderRadius: '8px',
+                              border: 'none',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              width: '100%',
+                              fontSize: '1rem'
+                            }}
                           >
-                            Начать ситуационный тест
+                            Перейти к ситуационному тесту
                           </button>
-                        ) : (
-                          <div style={{ display: 'grid', gap: '12px' }}>
-                            <div style={{ textAlign: 'left', background: '#fff', borderRadius: '10px', padding: '16px', border: '1px solid #bbf7d0' }}>
-                              <strong style={{ display: 'block', marginBottom: '8px', color: '#166534' }}>
-                                {lessonScenario.title || 'Ситуационный тест'}
-                              </strong>
-                              {lessonScenario.description ? (
-                                <p style={{ margin: 0, color: '#4b5563' }}>{lessonScenario.description}</p>
-                              ) : null}
-                            </div>
-                            {lessonScenario.options.map((option) => (
-                              <button
-                                key={option.id}
-                                type="button"
-                                disabled={scenarioBusy || Boolean(scenarioResult)}
-                                onClick={() => handleAnswerScenario(option.id)}
-                                style={{
-                                  padding: '12px 16px',
-                                  borderRadius: '10px',
-                                  border: '1px solid #86efac',
-                                  background: '#fff',
-                                  color: '#166534',
-                                  fontWeight: 600,
-                                  cursor: scenarioBusy || scenarioResult ? 'default' : 'pointer'
-                                }}
-                              >
-                                {option.optionText}
-                              </button>
-                            ))}
-                            {scenarioResult ? (
-                              <div style={{ textAlign: 'left', background: '#fff', borderRadius: '10px', padding: '16px', border: '1px solid #bbf7d0' }}>
-                                <strong style={{ display: 'block', marginBottom: '8px', color: '#166534' }}>Результат</strong>
-                                <p style={{ margin: 0, color: '#4b5563' }}>{scenarioResult.resultText || 'Ответ сохранён.'}</p>
-                                {scenarioResult.resultImageUrl ? (
-                                  <img
-                                    alt="Результат сценария"
-                                    src={scenarioResult.resultImageUrl.startsWith("http") ? scenarioResult.resultImageUrl : `${api.baseUrl}${scenarioResult.resultImageUrl}`}
-                                    style={{ width: '100%', marginTop: '12px', borderRadius: '10px' }}
-                                  />
-                                ) : null}
-                              </div>
-                            ) : null}
-                          </div>
-                        )}
-                      </>
+                        ) : null}
+                      </div>
+                    ) : lessonScenario?.hasScenario && lessonScenario.message ? (
+                      <p style={{ color: '#15803d', margin: 0 }}>{lessonScenario.message}</p>
                     ) : null}
                   </div>
                   </>

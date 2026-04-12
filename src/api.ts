@@ -167,8 +167,11 @@ export const api = {
     });
   },
 
-  getLessonScenario(token: string, lessonId: number) {
-    return request<StudentLessonScenario>(`/api/student/lessons/${lessonId}/scenario`, { token });
+  getLessonScenario(token: string, courseId: number, lessonId: number) {
+    return request<StudentLessonScenario>(
+      `/api/student/courses/${courseId}/lessons/${lessonId}/scenario`,
+      { token }
+    );
   },
 
   answerScenario(token: string, scenarioId: number, optionId: number) {
