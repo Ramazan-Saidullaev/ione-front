@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import { saveSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
+import { PasswordToggleField } from "../components/PasswordToggleField";
 import { getErrorMessage, redirectToRole } from "../utils/helpers";
 import type { PublicSchoolDto, PublicTeacherDto } from "../types";
 
@@ -123,12 +124,7 @@ export function StudentRegisterPage() {
 
           <label className="field">
             <span>Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <PasswordToggleField value={password} onChange={setPassword} required />
           </label>
 
           <label className="field">

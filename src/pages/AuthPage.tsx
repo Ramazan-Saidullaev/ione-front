@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import { loadSession, saveSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
+import { PasswordToggleField } from "../components/PasswordToggleField";
 import { getErrorMessage, redirectToRole } from "../utils/helpers";
 
 export function AuthPage() {
@@ -44,7 +45,7 @@ export function AuthPage() {
           </label>
           <label className="field">
             <span>Password</span>
-            <input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
+            <PasswordToggleField value={loginPassword} onChange={setLoginPassword} required />
           </label>
           {authError ? <div className="banner error">{authError}</div> : null}
           <button className="primary-button" type="submit" disabled={authBusy}>{authBusy ? "Signing in..." : "Sign in"}</button>
