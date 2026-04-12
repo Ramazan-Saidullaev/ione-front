@@ -122,6 +122,27 @@ export type StudentCourseProgress = {
   completed: boolean;
 };
 
+export type StudentScenarioOption = {
+  id: number;
+  optionText: string;
+};
+
+export type StudentLessonScenario = {
+  available: boolean;
+  scenarioId: number | null;
+  title: string | null;
+  description: string | null;
+  options: StudentScenarioOption[];
+};
+
+export type StudentScenarioAnswerResult = {
+  answerId: number;
+  selectedOptionId: number;
+  resultText: string | null;
+  resultImageUrl: string | null;
+  score: number;
+};
+
 export type TestListItem = {
   id: number;
   title: string;

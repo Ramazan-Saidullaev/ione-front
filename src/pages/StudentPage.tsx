@@ -11,6 +11,8 @@ import type {
   Lesson,
   StudentCourseProgress,
   StudentLessonProgress,
+  StudentLessonScenario,
+  StudentScenarioAnswerResult,
   TestListItem,
   TestQuestion
 } from "../types";
@@ -50,6 +52,11 @@ export function StudentPage() {
   const [lessonsError, setLessonsError] = useState<string | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [lessonDetails, setLessonDetails] = useState<Lesson | null>(null);
+  const [lessonScenario, setLessonScenario] = useState<StudentLessonScenario | null>(null);
+  const [lessonScenarioLoading, setLessonScenarioLoading] = useState(false);
+  const [scenarioStarted, setScenarioStarted] = useState(false);
+  const [scenarioBusy, setScenarioBusy] = useState(false);
+  const [scenarioResult, setScenarioResult] = useState<StudentScenarioAnswerResult | null>(null);
   const [lessonDetailsLoading, setLessonDetailsLoading] = useState(false);
   const [lessonActionMessage, setLessonActionMessage] = useState<string | null>(null);
   const [lessonActionBusy, setLessonActionBusy] = useState(false);
@@ -136,18 +143,34 @@ export function StudentPage() {
   useEffect(() => {
     if (!selectedLessonId) {
       setLessonDetails(null);
+      setLessonScenario(null);
+      setScenarioStarted(false);
+      setScenarioResult(null);
       setLessonCompletedLocally(false);
       setLessonActionMessage(null);
       return;
     }
     setLessonCompletedLocally(lessonProgress[selectedLessonId]?.status === "COMPLETED");
     setLessonDetailsLoading(true);
+    setLessonScenarioLoading(true);
+    setScenarioStarted(false);
+    setScenarioResult(null);
     api
       .getLesson(selectedLessonId)
       .then(setLessonDetails)
       .catch(() => setLessonDetails(null))
       .finally(() => setLessonDetailsLoading(false));
-  }, [selectedLessonId, lessonProgress]);
+    if (session) {
+      api
+        .getLessonScenario(session.accessToken, selectedLessonId)
+        .then(setLessonScenario)
+        .catch(() => setLessonScenario(null))
+        .finally(() => setLessonScenarioLoading(false));
+    } else {
+      setLessonScenario(null);
+      setLessonScenarioLoading(false);
+    }
+  }, [selectedLessonId, lessonProgress, session]);
 
   useEffect(() => {
     if (!session || !selectedTestId) {
@@ -172,6 +195,53 @@ export function StudentPage() {
       })
       .finally(() => setQuestionsLoading(false));
   }, [selectedTestId, session]);
+
+  const selectedCourseIndex = selectedCourseId ? courses.findIndex((course) => course.id === selectedCourseId) : -1;
+  const selectedCourseProgress = selectedCourseId ? courseProgress[selectedCourseId] : undefined;
+  const isCurrentCourseCompleted = Boolean(selectedCourseProgress?.completed);
+  const hasNextLesson = selectedLessonId ? lessons.findIndex((lesson) => lesson.id === selectedLessonId) < lessons.length - 1 : false;
+  const hasNextCourse = selectedCourseIndex !== -1 && selectedCourseIndex < courses.length - 1;
+
+  function handleNextCourse() {
+    if (!hasNextCourse || selectedCourseIndex === -1) {
+      setShowCompletionModal(false);
+      return;
+    }
+
+    const nextCourse = courses[selectedCourseIndex + 1];
+    setSelectedCourseId(nextCourse.id);
+    setLessonCompletedLocally(false);
+    setLessonActionMessage(null);
+    setShowCompletionModal(false);
+  }
+
+  const completionModalConfig = hasNextLesson
+    ? {
+        completionMessage: "Вы успешно завершили этот урок.",
+        helperText: "Готовы перейти к следующему уроку?",
+        primaryActionLabel: "Перейти на следующий урок",
+        onPrimaryAction: handleNextLesson
+      }
+    : isCurrentCourseCompleted && hasNextCourse
+      ? {
+          completionMessage: "Поздравляем, вы завершили все уроки этого курса.",
+          helperText: "Можно сразу перейти к следующему курсу и продолжить обучение.",
+          primaryActionLabel: "Перейти на следующий курс",
+          onPrimaryAction: handleNextCourse
+        }
+      : isCurrentCourseCompleted
+        ? {
+          completionMessage: "Поздравляем, вы завершили все доступные курсы.",
+          helperText: "Вы прошли всю программу обучения.",
+          primaryActionLabel: "Завершить",
+          onPrimaryAction: () => setShowCompletionModal(false)
+          }
+        : {
+            completionMessage: "Вы успешно завершили этот урок.",
+            helperText: "Чтобы завершить курс, пройдите оставшиеся уроки из списка.",
+            primaryActionLabel: "Продолжить обучение",
+            onPrimaryAction: () => setShowCompletionModal(false)
+          };
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -246,6 +316,24 @@ export function StudentPage() {
     }
   }
 
+  function handleStartScenario() {
+    setScenarioStarted(true);
+    setScenarioResult(null);
+  }
+
+  async function handleAnswerScenario(optionId: number) {
+    if (!session || !lessonScenario?.available || !lessonScenario.scenarioId) return;
+    setScenarioBusy(true);
+    try {
+      const result = await api.answerScenario(session.accessToken, lessonScenario.scenarioId, optionId);
+      setScenarioResult(result);
+    } catch (error: unknown) {
+      setLessonActionMessage(getErrorMessage(error));
+    } finally {
+      setScenarioBusy(false);
+    }
+  }
+
   async function handleStartAttempt() {
     if (!session || !selectedTestId) return;
     setTestActionBusy(true);
@@ -313,6 +401,9 @@ export function StudentPage() {
     setLessons([]);
     setLessonProgress({});
     setLessonDetails(null);
+    setLessonScenario(null);
+    setScenarioStarted(false);
+    setScenarioResult(null);
     setQuestions([]);
     setAttemptId(null);
     setFinishResult(null);
@@ -406,6 +497,11 @@ export function StudentPage() {
                     <span className="mini-pill">{course.ageGroup || "Для всех"}</span>
                   </div>
                   <p>{course.description || "Описание отсутствует."}</p>
+                  {courseProgress[course.id] ? (
+                    <p style={{ marginTop: "8px", color: courseProgress[course.id].completed ? "#166534" : "#4b5563", fontWeight: 600 }}>
+                      {courseProgress[course.id].completedLessons} из {courseProgress[course.id].totalLessons} уроков пройдено
+                    </p>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -444,6 +540,23 @@ export function StudentPage() {
           </aside>
 
           <section className="card details-card">
+            {selectedCourseProgress ? (
+              <div
+                style={{
+                  marginBottom: "20px",
+                  padding: "14px 18px",
+                  borderRadius: "12px",
+                  background: selectedCourseProgress.completed ? "#f0fdf4" : "#f8fafc",
+                  border: selectedCourseProgress.completed ? "1px solid #bbf7d0" : "1px solid #e5e7eb",
+                  color: selectedCourseProgress.completed ? "#166534" : "#334155",
+                  fontWeight: 600
+                }}
+              >
+                {selectedCourseProgress.completed
+                  ? `Курс завершён: ${selectedCourseProgress.completedLessons} из ${selectedCourseProgress.totalLessons} уроков`
+                  : `Пройдено ${selectedCourseProgress.completedLessons} из ${selectedCourseProgress.totalLessons} уроков`}
+              </div>
+            ) : null}
             <div className="section-heading">
               <p className="eyebrow">Содержимое</p>
               <h2>Просмотр урока</h2>
@@ -474,13 +587,77 @@ export function StudentPage() {
                     </button>
                   </div>
                 ) : (
-                  <div style={{ marginTop: '24px', padding: '24px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px' }}>
+                  <>
+                  <div style={{ marginTop: '24px', padding: '24px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', display: 'none' }}>
                     <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>✅ Урок успешно пройден</h3>
                     <p style={{ color: '#15803d', marginBottom: '16px' }}>Вам стал доступен ситуационный сценарий для закрепления материала.</p>
                     <button style={{ backgroundColor: '#166534', color: '#fff', padding: '12px 24px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer', width: '100%', fontSize: '1rem' }} onClick={() => alert('Раздел загрузки ситуационных сценариев в разработке. Здесь откроется диалог для выбора вариантов ответа.')}>
                       🎭 Начать ситуационный тест (Сценарий)
                     </button>
                   </div>
+                  <div style={{ marginTop: '24px', padding: '24px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px' }}>
+                    <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>Урок успешно пройден</h3>
+                    {lessonScenarioLoading ? (
+                      <p style={{ color: '#15803d', marginBottom: '16px' }}>Проверяем доступность ситуационного теста...</p>
+                    ) : lessonScenario?.available ? (
+                      <>
+                        <p style={{ color: '#15803d', marginBottom: '16px' }}>Вам доступен ситуационный тест по этому уроку.</p>
+                        {!scenarioStarted ? (
+                          <button
+                            type="button"
+                            onClick={handleStartScenario}
+                            style={{ backgroundColor: '#166534', color: '#fff', padding: '12px 24px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer', width: '100%', fontSize: '1rem' }}
+                          >
+                            Начать ситуационный тест
+                          </button>
+                        ) : (
+                          <div style={{ display: 'grid', gap: '12px' }}>
+                            <div style={{ textAlign: 'left', background: '#fff', borderRadius: '10px', padding: '16px', border: '1px solid #bbf7d0' }}>
+                              <strong style={{ display: 'block', marginBottom: '8px', color: '#166534' }}>
+                                {lessonScenario.title || 'Ситуационный тест'}
+                              </strong>
+                              {lessonScenario.description ? (
+                                <p style={{ margin: 0, color: '#4b5563' }}>{lessonScenario.description}</p>
+                              ) : null}
+                            </div>
+                            {lessonScenario.options.map((option) => (
+                              <button
+                                key={option.id}
+                                type="button"
+                                disabled={scenarioBusy || Boolean(scenarioResult)}
+                                onClick={() => handleAnswerScenario(option.id)}
+                                style={{
+                                  padding: '12px 16px',
+                                  borderRadius: '10px',
+                                  border: '1px solid #86efac',
+                                  background: '#fff',
+                                  color: '#166534',
+                                  fontWeight: 600,
+                                  cursor: scenarioBusy || scenarioResult ? 'default' : 'pointer'
+                                }}
+                              >
+                                {option.optionText}
+                              </button>
+                            ))}
+                            {scenarioResult ? (
+                              <div style={{ textAlign: 'left', background: '#fff', borderRadius: '10px', padding: '16px', border: '1px solid #bbf7d0' }}>
+                                <strong style={{ display: 'block', marginBottom: '8px', color: '#166534' }}>Результат</strong>
+                                <p style={{ margin: 0, color: '#4b5563' }}>{scenarioResult.resultText || 'Ответ сохранён.'}</p>
+                                {scenarioResult.resultImageUrl ? (
+                                  <img
+                                    alt="Результат сценария"
+                                    src={scenarioResult.resultImageUrl.startsWith("http") ? scenarioResult.resultImageUrl : `${api.baseUrl}${scenarioResult.resultImageUrl}`}
+                                    style={{ width: '100%', marginTop: '12px', borderRadius: '10px' }}
+                                  />
+                                ) : null}
+                              </div>
+                            ) : null}
+                          </div>
+                        )}
+                      </>
+                    ) : null}
+                  </div>
+                  </>
                 )}
                 {lessonActionMessage && !lessonCompletedLocally ? <div className="banner info">{lessonActionMessage}</div> : null}
               </div>
@@ -618,12 +795,10 @@ export function StudentPage() {
 
       {showCompletionModal && (
         <LessonCompletedModal 
-          onNextLesson={handleNextLesson}
-          hasNextLesson={
-            selectedLessonId && lessons 
-              ? lessons.findIndex((l) => l.id === selectedLessonId) < lessons.length - 1
-              : false
-          }
+          onPrimaryAction={completionModalConfig.onPrimaryAction}
+          primaryActionLabel={completionModalConfig.primaryActionLabel}
+          completionMessage={completionModalConfig.completionMessage}
+          helperText={completionModalConfig.helperText}
           onClose={() => setShowCompletionModal(false)}
         />
       )}

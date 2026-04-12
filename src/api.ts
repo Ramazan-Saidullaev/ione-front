@@ -6,6 +6,8 @@ import type {
   LessonCompletionResponse,
   StudentCourseProgress,
   StudentLessonProgress,
+  StudentLessonScenario,
+  StudentScenarioAnswerResult,
   LoginRequest,
   MeResponse,
   RegisterStudentRequest,
@@ -162,6 +164,18 @@ export const api = {
   getCourseLessonProgress(token: string, courseId: number) {
     return request<StudentLessonProgress[]>(`/api/student/courses/${courseId}/lesson-progress`, {
       token
+    });
+  },
+
+  getLessonScenario(token: string, lessonId: number) {
+    return request<StudentLessonScenario>(`/api/student/lessons/${lessonId}/scenario`, { token });
+  },
+
+  answerScenario(token: string, scenarioId: number, optionId: number) {
+    return request<StudentScenarioAnswerResult>(`/api/student/scenarios/${scenarioId}/answer`, {
+      method: "POST",
+      token,
+      body: { optionId }
     });
   },
 
