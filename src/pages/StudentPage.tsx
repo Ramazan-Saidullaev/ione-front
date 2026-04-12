@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import { loadSession, clearSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
+import { LessonCompletedModal } from "../components/LessonCompletedModal";
 import type {
   AuthResponse,
   CategoryResult,
@@ -65,6 +66,7 @@ export function StudentPage() {
   const [activeTab, setActiveTab] = useState<"courses" | "tests">("courses");
   const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
   const [lessonCompletedLocally, setLessonCompletedLocally] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   useRoleSession("student", "STUDENT", setSession, setAuthLoading);
 
@@ -180,11 +182,27 @@ export function StudentPage() {
     try {
       const result = await api.completeLesson(session.accessToken, lessonDetails.id);
       setLessonCompletedLocally(true);
+      setShowCompletionModal(true);
       setLessonActionMessage(`Урок успешно пройден! (${formatDateTime(result.completedAt)})`);
     } catch (error: unknown) {
       setLessonActionMessage(getErrorMessage(error));
     } finally {
       setLessonActionBusy(false);
+    }
+  }
+
+  function handleNextLesson() {
+    if (!selectedLessonId || !lessons) return;
+    
+    const currentIndex = lessons.findIndex((l) => l.id === selectedLessonId);
+    if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
+      const nextLesson = lessons[currentIndex + 1];
+      setSelectedLessonId(nextLesson.id);
+      setLessonCompletedLocally(false);
+      setShowCompletionModal(false);
+    } else {
+      // No more lessons
+      setShowCompletionModal(false);
     }
   }
 
@@ -535,6 +553,18 @@ export function StudentPage() {
             ) : null}
           </section>
         </section>
+      )}
+
+      {showCompletionModal && (
+        <LessonCompletedModal 
+          onNextLesson={handleNextLesson}
+          hasNextLesson={
+            selectedLessonId && lessons 
+              ? lessons.findIndex((l) => l.id === selectedLessonId) < lessons.length - 1
+              : false
+          }
+          onClose={() => setShowCompletionModal(false)}
+        />
       )}
     </main>
   );
