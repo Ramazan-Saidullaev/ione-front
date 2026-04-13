@@ -17,6 +17,7 @@ import type {
   StartAttemptResponse,
   StudentAnswerResponse,
   TeacherAttemptDetails,
+  TeacherAttemptListItem,
   TeacherStudent,
   TeacherStudentCourseProgress,
   TeacherStudentLatestAttempt,
@@ -150,6 +151,13 @@ export const api = {
 
   getAttemptDetails(token: string, attemptId: number) {
     return request<TeacherAttemptDetails>(`/api/teacher/test-attempts/${attemptId}`, { token });
+  },
+
+  getTeacherStudentTestAttempts(token: string, studentId: number, testId: number) {
+    return request<TeacherAttemptListItem[]>(
+      `/api/teacher/tests/students/${studentId}/tests/${testId}/attempts`,
+      { token }
+    );
   },
 
   getTeacherStudentsLatestAttempts(token: string) {

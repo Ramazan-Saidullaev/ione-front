@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../../api";
-import type { AuthResponse, TeacherAttemptDetails, TeacherStudent, TeacherStudentTestAttemptSummary } from "../../types";
+import type {
+  AuthResponse,
+  TeacherAttemptDetails,
+  TeacherAttemptListItem,
+  TeacherStudent,
+  TeacherStudentTestAttemptSummary
+} from "../../types";
 import { formatDateTime, getErrorMessage } from "../../utils/helpers";
 
 type Props = {
@@ -13,9 +19,15 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
   const studentId = Number(params.studentId);
 
   const [student, setStudent] = useState<TeacherStudent | null>(null);
+  // Latest finished attempt per test (dashboard view)
   const [summaries, setSummaries] = useState<TeacherStudentTestAttemptSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedTestId, setSelectedTestId] = useState<number | null>(null);
+  const [attempts, setAttempts] = useState<TeacherAttemptListItem[]>([]);
+  const [attemptsLoading, setAttemptsLoading] = useState(false);
+  const [attemptsError, setAttemptsError] = useState<string | null>(null);
 
   const [expandedAttemptId, setExpandedAttemptId] = useState<number | null>(null);
   const [detailsByAttemptId, setDetailsByAttemptId] = useState<Record<number, TeacherAttemptDetails>>({});
@@ -38,10 +50,27 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
       .then(([students, results]) => {
         setStudent(students.find((s) => s.id === studentId) ?? null);
         setSummaries(results);
+        setSelectedTestId(null);
+        setAttempts([]);
+        setExpandedAttemptId(null);
       })
       .catch((e: unknown) => setError(getErrorMessage(e)))
       .finally(() => setLoading(false));
   }, [session.accessToken, studentId]);
+
+  useEffect(() => {
+    if (!selectedTestId) return;
+
+    setAttemptsLoading(true);
+    setAttemptsError(null);
+    api.getTeacherStudentTestAttempts(session.accessToken, studentId, selectedTestId)
+      .then((data) => {
+        setAttempts(data);
+        setExpandedAttemptId(data[0]?.attemptId ?? null);
+      })
+      .catch((e: unknown) => setAttemptsError(getErrorMessage(e)))
+      .finally(() => setAttemptsLoading(false));
+  }, [selectedTestId, session.accessToken, studentId]);
 
   useEffect(() => {
     if (!expandedAttemptId) return;
@@ -59,6 +88,11 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
     if (student?.fullName) return student.fullName;
     return `Student ${studentId}`;
   }, [student?.fullName, studentId]);
+
+  const selectedTestSummary = useMemo(() => {
+    if (!selectedTestId) return null;
+    return summaries.find((s) => s.testId === selectedTestId) ?? null;
+  }, [selectedTestId, summaries]);
 
   return (
     <section className="dashboard-grid">
@@ -82,23 +116,76 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
         ) : null}
 
         <div className="student-list">
-          {summaries.map((test) => (
-            <button
-              key={test.attemptId}
-              type="button"
-              className={`student-card ${expandedAttemptId === test.attemptId ? "selected" : ""}`}
-              onClick={() => setExpandedAttemptId((prev) => (prev === test.attemptId ? null : test.attemptId))}
-            >
-              <div className="student-card-top">
-                <strong>{test.testTitle}</strong>
-                <span className={`zone-pill zone-${test.maxZone.toLowerCase()}`}>{test.maxZone}</span>
+          {!selectedTestId ? (
+            summaries.map((test) => (
+              <button
+                key={test.testId}
+                type="button"
+                className="student-card"
+                onClick={() => setSelectedTestId(test.testId)}
+              >
+                <div className="student-card-top">
+                  <strong>{test.testTitle}</strong>
+                  <span className={`zone-pill zone-${test.maxZone.toLowerCase()}`}>{test.maxZone}</span>
+                </div>
+                <p>Last finished: {test.finishedAt ? formatDateTime(test.finishedAt) : "—"}</p>
+                <small>testId: {test.testId}</small>
+              </button>
+            ))
+          ) : (
+            <>
+              <button
+                type="button"
+                className="student-card"
+                onClick={() => {
+                  setSelectedTestId(null);
+                  setAttempts([]);
+                  setExpandedAttemptId(null);
+                  setAttemptsError(null);
+                }}
+              >
+                ← Back to tests
+              </button>
+
+              <div className="empty-state" style={{ marginTop: 8 }}>
+                <strong>{selectedTestSummary?.testTitle ?? `Test ${selectedTestId}`}</strong>
+                <p>Attempts (latest first)</p>
               </div>
-              <p>
-                Finished: {test.finishedAt ? formatDateTime(test.finishedAt) : "—"}
-              </p>
-              <small>attemptId: {test.attemptId}</small>
-            </button>
-          ))}
+
+              {attemptsError ? <div className="banner error">{attemptsError}</div> : null}
+              {attemptsLoading ? <div className="empty-state">Loading attempts...</div> : null}
+
+              {!attemptsLoading && !attemptsError && attempts.length === 0 ? (
+                <div className="empty-state">
+                  <strong>No attempts</strong>
+                  <p>No finished attempts found for this test.</p>
+                </div>
+              ) : null}
+
+              {attempts.map((a, idx) => (
+                <button
+                  key={a.attemptId}
+                  type="button"
+                  className={`student-card ${expandedAttemptId === a.attemptId ? "selected" : ""}`}
+                  onClick={() => setExpandedAttemptId(a.attemptId)}
+                >
+                  {/**
+                   * Attempts are sorted latest-first.
+                   * We still show the ordinal as 1..N in chronological order for readability.
+                   */}
+                  <div className="student-card-top">
+                    <strong>
+                      Attempt #{attempts.length - idx} of {attempts.length}
+                    </strong>
+                    <span className={`zone-pill zone-${a.maxZone.toLowerCase()}`}>{a.maxZone}</span>
+                  </div>
+                  <p>Started: {formatDateTime(a.startedAt)}</p>
+                  <p>Finished: {a.finishedAt ? formatDateTime(a.finishedAt) : "—"}</p>
+                  <small>attemptId: {a.attemptId}</small>
+                </button>
+              ))}
+            </>
+          )}
         </div>
       </aside>
 
@@ -110,8 +197,12 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
         {!expandedAttemptId ? (
           <div className="empty-state">
-            <strong>Select a test attempt</strong>
-            <p>Pick a test on the left to view category-level zones and (optionally) the full answer table.</p>
+            <strong>{selectedTestId ? "Select an attempt" : "Select a test"}</strong>
+            <p>
+              {selectedTestId
+                ? "Pick an attempt on the left to view category-level zones and the full answer table."
+                : "Pick a test on the left to see all attempts, then open one attempt to see details."}
+            </p>
           </div>
         ) : null}
 
@@ -123,10 +214,21 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
             ) : null}
 
             {(() => {
-              const summary = summaries.find((s) => s.attemptId === expandedAttemptId);
-              if (!summary) return null;
-
               const details = detailsByAttemptId[expandedAttemptId];
+              const summary =
+                summaries.find((s) => s.attemptId === expandedAttemptId) ??
+                (details
+                  ? ({
+                      attemptId: details.attemptId,
+                      testId: details.testId,
+                      testTitle: details.testTitle,
+                      startedAt: details.startedAt,
+                      finishedAt: details.finishedAt,
+                      maxZone: details.maxZone,
+                      categoryResults: details.categoryResults
+                    } satisfies TeacherStudentTestAttemptSummary)
+                  : null);
+              if (!summary) return null;
 
               return (
                 <div className="details-layout">

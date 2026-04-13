@@ -118,6 +118,13 @@ export type TeacherStudentTestAttemptSummary = {
   categoryResults: CategoryResult[];
 };
 
+export type TeacherAttemptListItem = {
+  attemptId: number;
+  startedAt: string;
+  finishedAt: string | null;
+  maxZone: RiskZone;
+};
+
 export type TeacherCourseProgress = {
   courseId: number;
   courseTitle: string;
