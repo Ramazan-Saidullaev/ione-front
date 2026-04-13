@@ -18,6 +18,9 @@ import type {
   StudentAnswerResponse,
   TeacherAttemptDetails,
   TeacherStudent,
+  TeacherStudentCourseProgress,
+  TeacherStudentLatestAttempt,
+  TeacherStudentTestAttemptSummary,
   TestListItem,
   TestQuestion,
   AdminDashboardDto,
@@ -147,6 +150,21 @@ export const api = {
 
   getAttemptDetails(token: string, attemptId: number) {
     return request<TeacherAttemptDetails>(`/api/teacher/test-attempts/${attemptId}`, { token });
+  },
+
+  getTeacherStudentsLatestAttempts(token: string) {
+    return request<TeacherStudentLatestAttempt[]>("/api/teacher/tests/students/latest", { token });
+  },
+
+  getTeacherStudentLatestTestResults(token: string, studentId: number) {
+    return request<TeacherStudentTestAttemptSummary[]>(
+      `/api/teacher/tests/students/${studentId}/results`,
+      { token }
+    );
+  },
+
+  getTeacherStudentsCourseProgress(token: string) {
+    return request<TeacherStudentCourseProgress[]>("/api/teacher/students/course-progress", { token });
   },
 
   getCourses() {

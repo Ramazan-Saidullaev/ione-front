@@ -93,6 +93,46 @@ export type TeacherAttemptDetails = {
   answers: AttemptAnswer[];
 };
 
+export type TeacherLatestAttemptBrief = {
+  attemptId: number;
+  testId: number;
+  testTitle: string;
+  finishedAt: string | null;
+  maxZone: RiskZone;
+};
+
+export type TeacherStudentLatestAttempt = {
+  studentId: number;
+  studentName: string;
+  className: string | null;
+  latestAttempt: TeacherLatestAttemptBrief | null;
+};
+
+export type TeacherStudentTestAttemptSummary = {
+  attemptId: number;
+  testId: number;
+  testTitle: string;
+  startedAt: string;
+  finishedAt: string | null;
+  maxZone: RiskZone;
+  categoryResults: CategoryResult[];
+};
+
+export type TeacherCourseProgress = {
+  courseId: number;
+  courseTitle: string;
+  totalLessons: number;
+  completedLessons: number;
+  completed: boolean;
+};
+
+export type TeacherStudentCourseProgress = {
+  studentId: number;
+  studentName: string;
+  className: string | null;
+  courses: TeacherCourseProgress[];
+};
+
 export type Course = {
   id: number;
   title: string;
