@@ -6,6 +6,8 @@ export type AuthResponse = {
   role: UserRole;
   fullName?: string;
   studentId?: number;  // Added for students
+  teacherFullName?: string;
+  className?: string;
 };
 
 export type LoginRequest = {
@@ -26,8 +28,7 @@ export type RegisterStudentRequest = {
   email: string;
   password: string;
   schoolId: number;
-  teacherId: number;
-  className: string | null;
+  className: string;
 };
 
 export type PublicSchoolDto = {
@@ -38,6 +39,10 @@ export type PublicSchoolDto = {
 export type PublicTeacherDto = {
   id: number;
   fullName: string;
+};
+
+export type PublicClassDto = {
+  className: string;
 };
 
 export type MeResponse = {

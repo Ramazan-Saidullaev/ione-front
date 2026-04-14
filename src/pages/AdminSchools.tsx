@@ -97,7 +97,21 @@ export function AdminSchools() {
         await api.updateStudent(session.accessToken, editingStudentId, { fullName: studentName.trim(), className: studentClass.trim() || undefined });
       } else {
         if (!selectedSchoolId || !selectedTeacherId) return;
-        await api.registerStudent({ fullName: studentName.trim(), email: studentEmail.trim(), password: studentPassword, schoolId: selectedSchoolId, teacherId: selectedTeacherId, className: studentClass.trim() || null });
+        const teacher = data?.schools
+          .find(s => s.id === selectedSchoolId)
+          ?.teachers.find(t => t.id === selectedTeacherId);
+        const targetClass = (teacher?.homeroomClass || studentClass).trim();
+        if (!targetClass) {
+          alert("У выбранного учителя не указан классный руководитель. Укажите класс вручную.");
+          return;
+        }
+        await api.registerStudent({
+          fullName: studentName.trim(),
+          email: studentEmail.trim(),
+          password: studentPassword,
+          schoolId: selectedSchoolId,
+          className: targetClass.toUpperCase().replace(/\s+/g, "")
+        });
       }
       await refetch();
       setIsStudentModalOpen(false);

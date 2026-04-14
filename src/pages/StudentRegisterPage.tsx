@@ -4,7 +4,7 @@ import { saveSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
 import { PasswordToggleField } from "../components/PasswordToggleField";
 import { getErrorMessage, redirectToRole } from "../utils/helpers";
-import type { PublicSchoolDto, PublicTeacherDto } from "../types";
+import type { PublicClassDto, PublicSchoolDto } from "../types";
 
 export function StudentRegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -12,11 +12,10 @@ export function StudentRegisterPage() {
   const [password, setPassword] = useState("");
   const [className, setClassName] = useState("");
   const [schoolId, setSchoolId] = useState<number | "">("");
-  const [teacherId, setTeacherId] = useState<number | "">("");
   const [schools, setSchools] = useState<PublicSchoolDto[]>([]);
-  const [teachers, setTeachers] = useState<PublicTeacherDto[]>([]);
+  const [classes, setClasses] = useState<PublicClassDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingTeachers, setLoadingTeachers] = useState(false);
+  const [loadingClasses, setLoadingClasses] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,22 +38,22 @@ export function StudentRegisterPage() {
 
   async function handleSchoolChange(newSchoolId: number | string) {
     setSchoolId(newSchoolId as number | "");
-    setTeacherId("");
-    setTeachers([]);
+    setClassName("");
+    setClasses([]);
 
     if (newSchoolId === "") {
       return;
     }
 
     try {
-      setLoadingTeachers(true);
-      const data = await api.getTeachersBySchool(newSchoolId as number);
-      setTeachers(data);
+      setLoadingClasses(true);
+      const data = await api.getClassesBySchool(newSchoolId as number);
+      setClasses(data);
       setError(null);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
     } finally {
-      setLoadingTeachers(false);
+      setLoadingClasses(false);
     }
   }
 
@@ -66,8 +65,8 @@ export function StudentRegisterPage() {
       return;
     }
 
-    if (teacherId === "") {
-      setError("Пожалуйста, выберите учителя");
+    if (!className.trim()) {
+      setError("Пожалуйста, выберите класс");
       return;
     }
 
@@ -80,9 +79,11 @@ export function StudentRegisterPage() {
         email: email.trim(),
         password,
         schoolId: typeof schoolId === "number" ? schoolId : parseInt(schoolId),
-        teacherId: typeof teacherId === "number" ? teacherId : parseInt(teacherId),
-        className: className.trim() || null
+        className: className.trim().toUpperCase().replace(/\s+/g, "")
       });
+      if (result.teacherFullName) {
+        alert(`Ваш учитель: ${result.teacherFullName}`);
+      }
       saveSession("student", result);
       redirectToRole("STUDENT");
     } catch (err: unknown) {
@@ -148,37 +149,27 @@ export function StudentRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Teacher</span>
+            <span>Class</span>
             {schoolId === "" ? (
               <p style={{ color: "#999", margin: 0 }}>Please select a school first</p>
-            ) : loadingTeachers ? (
-              <p style={{ color: "#666", margin: 0 }}>Loading teachers...</p>
-            ) : teachers.length === 0 ? (
-              <p style={{ color: "#999", margin: 0 }}>No teachers found for this school</p>
+            ) : loadingClasses ? (
+              <p style={{ color: "#666", margin: 0 }}>Loading classes...</p>
+            ) : classes.length === 0 ? (
+              <p style={{ color: "#999", margin: 0 }}>No classes found for this school</p>
             ) : (
               <select
-                value={teacherId}
-                onChange={(e) => setTeacherId(e.target.value ? parseInt(e.target.value) : "")}
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
                 required
               >
-                <option value="">Select a teacher</option>
-                {teachers.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.fullName}
+                <option value="">Select a class</option>
+                {classes.map((c) => (
+                  <option key={c.className} value={c.className}>
+                    {c.className}
                   </option>
                 ))}
               </select>
             )}
-          </label>
-
-          <label className="field">
-            <span>Class (Optional)</span>
-            <input
-              type="text"
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
-              placeholder="e.g., 9A, 10B"
-            />
           </label>
 
           {error ? <div className="banner error">{error}</div> : null}

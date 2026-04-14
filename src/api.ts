@@ -61,7 +61,8 @@ import type {
   CreateScenarioOptionRequest,
   UpdateScenarioOptionRequest,
   PublicSchoolDto,
-  PublicTeacherDto
+  PublicTeacherDto,
+  PublicClassDto
 } from "./types";
 
 const API_BASE_URL =
@@ -431,6 +432,10 @@ export const api = {
 
   getTeachersBySchool(schoolId: number) {
     return request<PublicTeacherDto[]>(`/api/public/schools/${schoolId}/teachers`);
+  },
+
+  getClassesBySchool(schoolId: number) {
+    return request<PublicClassDto[]>(`/api/public/schools/${schoolId}/classes`);
   }
 };
 
