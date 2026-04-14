@@ -16,6 +16,7 @@ export function AdminCourses() {
 
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<AdminCourseDto | null>(null);
   const [title, setTitle] = useState("");
@@ -34,6 +35,7 @@ export function AdminCourses() {
 
   // Scenario Modal State
   const [isScenModalOpen, setIsScenModalOpen] = useState(false);
+  const [editingScenarioId, setEditingScenarioId] = useState<number | null>(null);
   const [scenTitle, setScenTitle] = useState("");
   const [scenDesc, setScenDesc] = useState("");
   const [scenImageType, setScenImageType] = useState<"url" | "file">("url");
@@ -56,8 +58,13 @@ export function AdminCourses() {
   const courses = data?.courses || [];
   const selectedCourse = courses.find(c => c.id === selectedCourseId);
   const selectedLesson = selectedCourse?.lessons.find(l => l.id === selectedLessonId);
-  // Находим сценарий для выбранного урока (используем any пока типы не обновлены в types.ts)
-  const lessonScenario: any = data?.scenarios?.find((s: any) => s.lessonId === selectedLessonId);
+  const lessonScenarios: any[] = (data?.scenarios || []).filter((s: any) => s.lessonId === selectedLessonId);
+  lessonScenarios.sort((a, b) => (a.id || 0) - (b.id || 0));
+  const activeScenarioId =
+    selectedScenarioId && lessonScenarios.some(s => s.id === selectedScenarioId)
+      ? selectedScenarioId
+      : (lessonScenarios[0]?.id ?? null);
+  const activeScenario: any = activeScenarioId ? lessonScenarios.find(s => s.id === activeScenarioId) : null;
 
   // Функция для правильного отображения картинок (локальных и по ссылке)
   function getMediaUrl(path: string | undefined | null) {
@@ -170,23 +177,34 @@ export function AdminCourses() {
       
       const payload = { lessonId: selectedLessonId, title: scenTitle.trim(), description: scenDesc.trim() || undefined, baseImagePath: finalImagePath || undefined };
       
-      if (lessonScenario) {
-        await api.updateScenario(session.accessToken, lessonScenario.id, payload);
+      if (editingScenarioId) {
+        await api.updateScenario(session.accessToken, editingScenarioId, {
+          title: payload.title,
+          description: payload.description,
+          baseImagePath: payload.baseImagePath
+        });
       } else {
-        await api.createScenario(session.accessToken, payload);
+        const created = await api.createScenario(session.accessToken, payload);
+        setSelectedScenarioId(created.id);
       }
       setIsScenModalOpen(false); refetch();
     } catch (err) { alert(getErrorMessage(err)); } finally { setScenBusy(false); }
   }
 
-  async function handleDeleteScenario() {
-    if (!session || !lessonScenario || !confirm("Удалить сценарий и все его варианты ответа?")) return;
-    try { await api.deleteScenario(session.accessToken, lessonScenario.id); refetch(); } catch (err) { alert(getErrorMessage(err)); }
+  async function handleDeleteScenario(scenarioId: number) {
+    if (!session || !confirm("Удалить сценарий и все его варианты ответа?")) return;
+    try {
+      await api.deleteScenario(session.accessToken, scenarioId);
+      if (selectedScenarioId === scenarioId) setSelectedScenarioId(null);
+      refetch();
+    } catch (err) {
+      alert(getErrorMessage(err));
+    }
   }
 
   async function handleOptionSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!session || !lessonScenario) return;
+    if (!session || !activeScenario) return;
     setOptBusy(true);
     try {
       let finalImagePath = optImageUrl;
@@ -195,7 +213,7 @@ export function AdminCourses() {
         finalImagePath = uploadRes.url;
       }
 
-      const payload = { scenarioId: lessonScenario.id, optionText: optText.trim(), resultText: optResultText.trim(), resultImagePath: finalImagePath || undefined, score: Number(optScore) };
+      const payload = { scenarioId: activeScenario.id, optionText: optText.trim(), resultText: optResultText.trim(), resultImagePath: finalImagePath || undefined, score: Number(optScore) };
 
       if (editingOptId) {
         await api.updateScenarioOption(session.accessToken, editingOptId, payload);
@@ -216,36 +234,103 @@ export function AdminCourses() {
     return (
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
-          <button onClick={() => setSelectedLessonId(null)} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500 }}>
+          <button onClick={() => { setSelectedLessonId(null); setSelectedScenarioId(null); }} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500 }}>
             ← Back to Lessons
           </button>
           <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Scenario: {selectedLesson.title}</h1>
         </div>
 
-        {!lessonScenario ? (
+        {lessonScenarios.length === 0 ? (
           <div style={{ background: "#fff", padding: "40px", borderRadius: "12px", border: "1px dashed #d1d5db", textAlign: "center" }}>
             <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🎭</div>
             <h3 style={{ color: "#111827", marginBottom: "8px" }}>У этого урока еще нет интерактивного сценария</h3>
             <p style={{ color: "#6b7280", marginBottom: "24px", maxWidth: "500px", margin: "0 auto 24px auto" }}>Добавьте сценарий, чтобы ученики могли прочитать ситуацию, увидеть фото и принять решение, влияющее на результат.</p>
-            <button onClick={() => { setScenTitle(""); setScenDesc(""); setScenImageUrl(""); setIsScenModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "10px 20px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>
+            <button onClick={() => { setEditingScenarioId(null); setScenTitle(""); setScenDesc(""); setScenImageUrl(""); setScenImageFile(null); setIsScenModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "10px 20px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>
               + Создать сценарий
             </button>
           </div>
         ) : (
           <div style={{ display: "grid", gap: "24px" }}>
+            {/* SCENARIO LIST */}
+            <div style={{ background: "#fff", padding: "20px 24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
+                <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#111827" }}>Ситуационные тесты урока</h3>
+                <button
+                  onClick={() => {
+                    setEditingScenarioId(null);
+                    setScenTitle("");
+                    setScenDesc("");
+                    setScenImageUrl("");
+                    setScenImageFile(null);
+                    setScenImageType("url");
+                    setIsScenModalOpen(true);
+                  }}
+                  style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 14px", borderRadius: "6px", border: "none", fontWeight: 600, cursor: "pointer" }}
+                >
+                  + Добавить вариант
+                </button>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {lessonScenarios.map(s => {
+                  const active = s.id === activeScenarioId;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setSelectedScenarioId(s.id)}
+                      style={{
+                        borderRadius: "9999px",
+                        border: active ? "1px solid #2563eb" : "1px solid #e5e7eb",
+                        background: active ? "#eff6ff" : "#fff",
+                        color: active ? "#1d4ed8" : "#374151",
+                        padding: "8px 12px",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px"
+                      }}
+                      title={s.title}
+                    >
+                      #{s.id} {s.title || "Без названия"}
+                      <span style={{ fontWeight: 600, fontSize: "0.8rem", opacity: 0.75 }}>
+                        ({(s.options?.length ?? 0)} вариантов)
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* SCENARIO HEADER */}
             <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", display: "flex", gap: "24px" }}>
-              {lessonScenario.baseImagePath ? (
-                 <img src={getMediaUrl(lessonScenario.baseImagePath)} alt="Scenario" style={{ width: "200px", height: "150px", objectFit: "cover", borderRadius: "8px", border: "1px solid #e5e7eb" }} />
+              {activeScenario?.baseImagePath ? (
+                 <img src={getMediaUrl(activeScenario.baseImagePath)} alt="Scenario" style={{ width: "200px", height: "150px", objectFit: "cover", borderRadius: "8px", border: "1px solid #e5e7eb" }} />
               ) : (
                  <div style={{ width: "200px", height: "150px", background: "#f3f4f6", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", border: "1px dashed #d1d5db" }}>Нет фото</div>
               )}
               <div style={{ flex: 1 }}>
-                <h2 style={{ margin: "0 0 8px 0", fontSize: "1.4rem", color: "#111827" }}>{lessonScenario.title}</h2>
-                <p style={{ color: "#4b5563", marginBottom: "16px", lineHeight: "1.5" }}>{lessonScenario.description}</p>
+                <h2 style={{ margin: "0 0 8px 0", fontSize: "1.4rem", color: "#111827" }}>{activeScenario?.title}</h2>
+                <p style={{ color: "#4b5563", marginBottom: "16px", lineHeight: "1.5" }}>{activeScenario?.description}</p>
                 <div style={{ display: "flex", gap: "12px" }}>
-                  <button onClick={() => { setScenTitle(lessonScenario.title); setScenDesc(lessonScenario.description || ""); setScenImageUrl(lessonScenario.baseImagePath || ""); setIsScenModalOpen(true); }} style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Изменить сценарий</button>
-                  <button onClick={handleDeleteScenario} style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #fecaca", background: "#fef2f2", color: "#dc2626", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Удалить</button>
+                  <button
+                    onClick={() => {
+                      if (!activeScenario) return;
+                      setEditingScenarioId(activeScenario.id);
+                      setScenTitle(activeScenario.title || "");
+                      setScenDesc(activeScenario.description || "");
+                      setScenImageUrl(activeScenario.baseImagePath || "");
+                      setScenImageFile(null);
+                      setScenImageType("url");
+                      setIsScenModalOpen(true);
+                    }}
+                    style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}
+                  >
+                    Изменить выбранный
+                  </button>
+                  {activeScenario ? (
+                    <button onClick={() => handleDeleteScenario(activeScenario.id)} style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #fecaca", background: "#fef2f2", color: "#dc2626", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Удалить</button>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -258,8 +343,8 @@ export function AdminCourses() {
               </div>
 
               <div style={{ display: "grid", gap: "16px" }}>
-                {(!lessonScenario.options || lessonScenario.options.length === 0) && <p style={{ color: "#6b7280" }}>Пока нет вариантов ответа. Добавьте первый!</p>}
-                {lessonScenario.options?.map((opt: any) => (
+                {(!activeScenario?.options || activeScenario.options.length === 0) && <p style={{ color: "#6b7280" }}>Пока нет вариантов ответа. Добавьте первый!</p>}
+                {activeScenario?.options?.map((opt: any) => (
                   <div key={opt.id} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden", display: "flex" }}>
                     <div style={{ padding: "16px", background: "#f9fafb", width: "35%", borderRight: "1px solid #e5e7eb" }}>
                       <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Если ученик выберет:</span>
@@ -285,7 +370,7 @@ export function AdminCourses() {
         )}
 
         {/* SCENARIO MODAL */}
-        <Modal isOpen={isScenModalOpen} onClose={() => setIsScenModalOpen(false)} title={lessonScenario ? "Редактировать сценарий" : "Новый сценарий"}>
+        <Modal isOpen={isScenModalOpen} onClose={() => setIsScenModalOpen(false)} title={editingScenarioId ? "Редактировать сценарий" : "Новый сценарий"}>
           <form onSubmit={handleScenarioSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Название ситуации</span><input type="text" value={scenTitle} onChange={e => setScenTitle(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="Напр: Ситуация на перемене" /></label>
             <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Текст (описание)</span><textarea value={scenDesc} onChange={e => setScenDesc(e.target.value)} required rows={4} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} placeholder="Опишите ситуацию для ученика..." /></label>
