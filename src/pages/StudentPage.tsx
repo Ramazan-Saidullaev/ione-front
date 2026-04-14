@@ -414,7 +414,13 @@ export function StudentPage() {
         <div className="topbar-actions">
           <div className="identity-card">
             <span>Роль: Ученик</span>
-            <strong>{session.fullName || session.userId}</strong>
+            <strong>{session.fullName || "Ученик"}</strong>
+            <span style={{ marginTop: "6px", color: "#6b7280", fontSize: "0.9rem" }}>
+              Ваш учитель: <strong style={{ color: "#111827" }}>{session.teacherFullName || "—"}</strong>
+            </span>
+            <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>
+              Ваш класс: <strong style={{ color: "#111827" }}>{session.className || "—"}</strong>
+            </span>
           </div>
           <button className="ghost-button" onClick={handleLogout} type="button">
             Выйти

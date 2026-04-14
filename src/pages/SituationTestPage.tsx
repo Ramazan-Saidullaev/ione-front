@@ -143,6 +143,36 @@ export function SituationTestPage() {
         resultText: res.resultText,
         resultImageUrl: res.resultImageUrl
       });
+      setScenariosBundle((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          scenarios: (prev.scenarios || []).map((s) =>
+            s.scenarioId === scenario.scenarioId
+              ? {
+                  ...s,
+                  available: false,
+                  completed: true,
+                  selectedOptionText: res.selectedOptionText,
+                  resultText: res.resultText,
+                  resultImageUrl: res.resultImageUrl
+                }
+              : s
+          )
+        };
+      });
+      setScenario((prev) =>
+        prev && prev.scenarioId === scenario.scenarioId
+          ? {
+              ...prev,
+              available: false,
+              completed: true,
+              selectedOptionText: res.selectedOptionText,
+              resultText: res.resultText,
+              resultImageUrl: res.resultImageUrl
+            }
+          : prev
+      );
       setStep("result");
     } catch (e: unknown) {
       setSubmitError(getErrorMessage(e));
@@ -226,6 +256,21 @@ export function SituationTestPage() {
       : null);
 
   const list = scenariosBundle.scenarios || [];
+  const currentScenarioIndex =
+    scenario?.scenarioId != null ? list.findIndex((s) => s.scenarioId === scenario.scenarioId) : -1;
+  const nextScenario =
+    currentScenarioIndex >= 0 && currentScenarioIndex < list.length - 1 ? list[currentScenarioIndex + 1] : null;
+
+  function goToScenario(target: StudentLessonScenario) {
+    setActiveScenarioId(target.scenarioId ?? null);
+    setScenario(target);
+    setSelectedOptionId(null);
+    setSubmitError(null);
+    setOutcome(null);
+    if (target.completed) setStep("result");
+    else if (target.available) setStep("intro");
+    else setStep("intro");
+  }
 
   return (
     <main className="dashboard-shell">
@@ -422,6 +467,16 @@ export function SituationTestPage() {
                 alt="Иллюстрация к результату"
                 style={scenarioImageStyle}
               />
+            ) : null}
+            {nextScenario ? (
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => goToScenario(nextScenario)}
+                style={{ marginTop: "16px", width: "100%", maxWidth: "420px" }}
+              >
+                Перейти к следующему ситуационному тесту →
+              </button>
             ) : null}
             <button type="button" className="ghost-button" onClick={() => setStep("list")} style={{ marginTop: "16px" }}>
               ← К списку ситуационных тестов

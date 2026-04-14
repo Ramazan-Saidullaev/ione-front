@@ -81,9 +81,6 @@ export function StudentRegisterPage() {
         schoolId: typeof schoolId === "number" ? schoolId : parseInt(schoolId),
         className: className.trim().toUpperCase().replace(/\s+/g, "")
       });
-      if (result.teacherFullName) {
-        alert(`Ваш учитель: ${result.teacherFullName}`);
-      }
       saveSession("student", result);
       redirectToRole("STUDENT");
     } catch (err: unknown) {
