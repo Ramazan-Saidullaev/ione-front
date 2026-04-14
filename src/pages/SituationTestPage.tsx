@@ -3,11 +3,11 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { loadSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
-import type { AuthResponse, StudentLessonScenario } from "../types";
+import type { AuthResponse, StudentLessonScenario, StudentLessonScenarios } from "../types";
 import { getErrorMessage } from "../utils/helpers";
 import { resolveStudentMediaSrc } from "../utils/mediaUrl";
 
-type Step = "intro" | "test" | "result";
+type Step = "list" | "intro" | "test" | "result";
 
 type ScenarioOutcome = {
   selectedOptionText: string | null;
@@ -61,10 +61,12 @@ export function SituationTestPage() {
 
   const [session] = useState<AuthResponse | null>(() => loadSession("student"));
   const [lessonTitle, setLessonTitle] = useState("");
+  const [scenariosBundle, setScenariosBundle] = useState<StudentLessonScenarios | null>(null);
+  const [activeScenarioId, setActiveScenarioId] = useState<number | null>(null);
   const [scenario, setScenario] = useState<StudentLessonScenario | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState<Step>("intro");
+  const [step, setStep] = useState<Step>("list");
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [submitBusy, setSubmitBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -89,23 +91,27 @@ export function SituationTestPage() {
     setLoading(true);
     setLoadError(null);
 
-    Promise.all([api.getLesson(lessonId), api.getLessonScenario(session.accessToken, courseId, lessonId)])
-      .then(([lesson, scen]) => {
+    Promise.all([api.getLesson(lessonId), api.getLessonScenarios(session.accessToken, courseId, lessonId)])
+      .then(([lesson, bundle]) => {
         if (cancelled) return;
         setLessonTitle(lesson.title);
-        setScenario(scen);
-        if (scen.completed) {
-          setOutcome({
-            selectedOptionText: scen.selectedOptionText,
-            resultText: scen.resultText,
-            resultImageUrl: scen.resultImageUrl
-          });
-          setStep("result");
-        } else if (scen.available) {
-          setStep("intro");
-        } else {
-          setStep("intro");
+        setScenariosBundle(bundle);
+
+        const list = bundle.scenarios || [];
+        if (!bundle.hasScenarios || list.length === 0) {
+          setActiveScenarioId(null);
+          setScenario(null);
+          setStep("list");
+          return;
         }
+
+        const preferred = list.find((s) => s.available) ?? list[0];
+        setActiveScenarioId(preferred.scenarioId ?? null);
+        setScenario(preferred);
+        setOutcome(null);
+        setSelectedOptionId(null);
+        setSubmitError(null);
+        setStep("list");
       })
       .catch((e: unknown) => {
         if (!cancelled) setLoadError(getErrorMessage(e));
@@ -181,7 +187,7 @@ export function SituationTestPage() {
     );
   }
 
-  if (loadError || !scenario) {
+  if (loadError || !scenariosBundle) {
     return (
       <main className="dashboard-shell">
         <GlobalHeader />
@@ -195,7 +201,7 @@ export function SituationTestPage() {
     );
   }
 
-  if (!scenario.hasScenario) {
+  if (!scenariosBundle.hasScenarios) {
     return (
       <main className="dashboard-shell">
         <GlobalHeader />
@@ -208,10 +214,10 @@ export function SituationTestPage() {
     );
   }
 
-  const showUnavailable = !scenario.available && !scenario.completed;
+  const showUnavailable = !!scenario && !scenario.available && !scenario.completed;
   const displayOutcome: ScenarioOutcome | null =
     outcome ??
-    (scenario.completed
+    (scenario && scenario.completed
       ? {
           selectedOptionText: scenario.selectedOptionText,
           resultText: scenario.resultText,
@@ -219,25 +225,106 @@ export function SituationTestPage() {
         }
       : null);
 
+  const list = scenariosBundle.scenarios || [];
+
   return (
     <main className="dashboard-shell">
       <GlobalHeader />
       <section style={{ padding: "24px 32px", maxWidth: "720px" }}>
         <p className="eyebrow">Ситуационный тест</p>
-        <h1 style={{ marginTop: "4px", color: "#1e3a8a" }}>{scenario.title || "Сценарий"}</h1>
+        <h1 style={{ marginTop: "4px", color: "#1e3a8a" }}>{scenario?.title || "Сценарии урока"}</h1>
         <p style={{ color: "#64748b", marginBottom: "24px" }}>
           Урок: <strong>{lessonTitle}</strong>
         </p>
 
+        {step === "list" ? (
+          <div className="content-card" style={{ padding: "20px", marginBottom: "20px" }}>
+            <p style={{ marginTop: 0, color: "#334155", lineHeight: 1.6 }}>
+              Выберите один из ситуационных тестов для этого урока. Каждый тест можно пройти <strong>один раз</strong>.
+            </p>
+            <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
+              {list.map((s) => {
+                const isActive = (s.scenarioId ?? null) === activeScenarioId;
+                const statusLabel = s.completed ? "Пройден" : s.available ? "Доступен" : "Недоступен";
+                const statusBg = s.completed ? "#dcfce7" : s.available ? "#e0e7ff" : "#f3f4f6";
+                const statusColor = s.completed ? "#166534" : s.available ? "#1d4ed8" : "#374151";
+                return (
+                  <div
+                    key={String(s.scenarioId ?? s.title ?? "scenario")}
+                    style={{
+                      border: isActive ? "2px solid #2563eb" : "1px solid #e5e7eb",
+                      borderRadius: "12px",
+                      padding: "14px 16px",
+                      background: "#fff"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 800, color: "#0f172a" }}>{s.title || "Сценарий"}</div>
+                        {s.description ? (
+                          <div style={{ color: "#475569", marginTop: "6px", whiteSpace: "pre-wrap" }}>
+                            {s.description.length > 180 ? `${s.description.slice(0, 180)}…` : s.description}
+                          </div>
+                        ) : null}
+                        {s.message && !s.available && !s.completed ? (
+                          <div style={{ marginTop: "8px", color: "#64748b" }}>{s.message}</div>
+                        ) : null}
+                      </div>
+                      <span
+                        style={{
+                          background: statusBg,
+                          color: statusColor,
+                          padding: "4px 10px",
+                          borderRadius: "9999px",
+                          fontWeight: 700,
+                          fontSize: "0.85rem",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        {statusLabel}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveScenarioId(s.scenarioId ?? null);
+                          setScenario(s);
+                          setSelectedOptionId(null);
+                          setSubmitError(null);
+                          setOutcome(null);
+                          if (s.completed) setStep("result");
+                          else if (s.available) setStep("intro");
+                          else setStep("intro");
+                        }}
+                        className="primary-button"
+                        style={{ padding: "10px 16px" }}
+                        disabled={!s.scenarioId}
+                      >
+                        {s.completed ? "Открыть результат" : s.available ? "Начать" : "Открыть"}
+                      </button>
+                      {isActive ? (
+                        <button type="button" className="ghost-button" onClick={() => setStep("intro")} style={{ padding: "10px 16px" }}>
+                          Подробнее
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
         {showUnavailable ? (
           <div className="content-card" style={{ padding: "20px", marginBottom: "20px" }}>
             <p style={{ margin: 0, color: "#334155", lineHeight: 1.6 }}>
-              {scenario.message || "Ситуационный тест сейчас недоступен."}
+              {scenario?.message || "Ситуационный тест сейчас недоступен."}
             </p>
           </div>
         ) : null}
 
-        {step === "intro" && scenario.available && !scenario.completed ? (
+        {step === "intro" && scenario?.available && !scenario.completed ? (
           <div className="content-card" style={{ padding: "24px", marginBottom: "20px", lineHeight: 1.65 }}>
             <p style={{ marginTop: 0, color: "#334155" }}>
               Вы завершили урок «{lessonTitle}». Вам доступен ситуационный тест: короткая ситуация и выбор действия. Его можно
@@ -246,10 +333,13 @@ export function SituationTestPage() {
             <button type="button" className="primary-button" onClick={() => setStep("test")} style={{ marginTop: "16px" }}>
               Перейти к ситуации
             </button>
+            <button type="button" className="ghost-button" onClick={() => setStep("list")} style={{ marginTop: "12px" }}>
+              ← К списку ситуационных тестов
+            </button>
           </div>
         ) : null}
 
-        {step === "test" && scenario.available && !scenario.completed ? (
+        {step === "test" && scenario?.available && !scenario.completed ? (
           <div className="content-card" style={{ padding: "24px", marginBottom: "20px" }}>
             {scenario.baseImageUrl ? (
               <img
@@ -291,6 +381,9 @@ export function SituationTestPage() {
             >
               {submitBusy ? "Отправка…" : "Подтвердить выбор и посмотреть ответ"}
             </button>
+            <button type="button" className="ghost-button" onClick={() => setStep("list")} style={{ marginTop: "12px" }}>
+              ← К списку ситуационных тестов
+            </button>
           </div>
         ) : null}
 
@@ -305,14 +398,14 @@ export function SituationTestPage() {
             }}
           >
             <h2 style={{ marginTop: 0, fontSize: "1.25rem", color: "#0f172a" }}>Итог</h2>
-            {scenario.baseImageUrl ? (
+            {scenario?.baseImageUrl ? (
               <img
                 src={resolveStudentMediaSrc(api.baseUrl, scenario.baseImageUrl)}
                 alt=""
                 style={scenarioImageStyle}
               />
             ) : null}
-            {scenario.description ? (
+            {scenario?.description ? (
               <p style={{ color: "#475569", marginBottom: "12px" }}>
                 <strong>Ситуация:</strong> {scenario.description}
               </p>
@@ -330,6 +423,9 @@ export function SituationTestPage() {
                 style={scenarioImageStyle}
               />
             ) : null}
+            <button type="button" className="ghost-button" onClick={() => setStep("list")} style={{ marginTop: "16px" }}>
+              ← К списку ситуационных тестов
+            </button>
           </div>
         ) : null}
 

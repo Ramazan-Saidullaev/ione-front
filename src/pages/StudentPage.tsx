@@ -12,7 +12,7 @@ import type {
   Lesson,
   StudentCourseProgress,
   StudentLessonProgress,
-  StudentLessonScenario,
+  StudentLessonScenarios,
   TestListItem,
   TestQuestion
 } from "../types";
@@ -40,7 +40,7 @@ export function StudentPage() {
   const [lessonsError, setLessonsError] = useState<string | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [lessonDetails, setLessonDetails] = useState<Lesson | null>(null);
-  const [lessonScenario, setLessonScenario] = useState<StudentLessonScenario | null>(null);
+  const [lessonScenarios, setLessonScenarios] = useState<StudentLessonScenarios | null>(null);
   const [lessonScenarioLoading, setLessonScenarioLoading] = useState(false);
   const [lessonDetailsLoading, setLessonDetailsLoading] = useState(false);
   const [lessonActionMessage, setLessonActionMessage] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export function StudentPage() {
   useEffect(() => {
     if (!selectedLessonId) {
       setLessonDetails(null);
-      setLessonScenario(null);
+      setLessonScenarios(null);
       setLessonCompletedLocally(false);
       setLessonActionMessage(null);
       return;
@@ -143,12 +143,12 @@ export function StudentPage() {
       .finally(() => setLessonDetailsLoading(false));
     if (session && selectedCourseId) {
       api
-        .getLessonScenario(session.accessToken, selectedCourseId, selectedLessonId)
-        .then(setLessonScenario)
-        .catch(() => setLessonScenario(null))
+        .getLessonScenarios(session.accessToken, selectedCourseId, selectedLessonId)
+        .then(setLessonScenarios)
+        .catch(() => setLessonScenarios(null))
         .finally(() => setLessonScenarioLoading(false));
     } else {
-      setLessonScenario(null);
+      setLessonScenarios(null);
       setLessonScenarioLoading(false);
     }
   }, [selectedLessonId, lessonProgress, session, selectedCourseId]);
@@ -377,7 +377,7 @@ export function StudentPage() {
     setLessons([]);
     setLessonProgress({});
     setLessonDetails(null);
-    setLessonScenario(null);
+    setLessonScenarios(null);
     setQuestions([]);
     setAttemptId(null);
     setFinishResult(null);
@@ -613,51 +613,73 @@ export function StudentPage() {
                     <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>Урок успешно пройден</h3>
                     {lessonScenarioLoading ? (
                       <p style={{ color: '#15803d', marginBottom: '16px' }}>Проверяем доступность ситуационного теста...</p>
-                    ) : lessonScenario?.hasScenario && lessonScenario.completed ? (
+                    ) : lessonScenarios?.hasScenarios ? (
                       <div style={{ color: '#15803d' }}>
-                        <p style={{ margin: '0 0 12px 0' }}>
-                          Ситуационный тест по этому уроку уже пройден. Повторно пройти его нельзя — ответ сохранён один раз.
-                        </p>
-                        {selectedCourseId ? (
-                          <Link
-                            className="primary-link-button"
-                            to={`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`}
-                            style={{ display: 'inline-block' }}
-                          >
-                            Посмотреть результат теста
-                          </Link>
-                        ) : null}
+                        {(() => {
+                          const list = lessonScenarios.scenarios || [];
+                          const anyAvailable = list.some((s) => s.available);
+                          const anyCompleted = list.some((s) => s.completed);
+                          const allCompleted = list.length > 0 && list.every((s) => s.completed);
+                          const message = list.find((s) => s.message)?.message;
+
+                          if (anyAvailable) {
+                            return (
+                              <>
+                                <p style={{ margin: '0 0 12px 0' }}>
+                                  Вам доступно <strong>{list.filter((s) => s.available).length}</strong> ситуационных тест(а/ов) для этого урока.
+                                  Каждый можно пройти <strong>один раз</strong>.
+                                </p>
+                                {selectedCourseId ? (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      navigate(`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`)
+                                    }
+                                    style={{
+                                      backgroundColor: '#166534',
+                                      color: '#fff',
+                                      padding: '12px 24px',
+                                      borderRadius: '8px',
+                                      border: 'none',
+                                      fontWeight: 600,
+                                      cursor: 'pointer',
+                                      width: '100%',
+                                      fontSize: '1rem'
+                                    }}
+                                  >
+                                    🎭 Начать ситуационный тест
+                                  </button>
+                                ) : null}
+                              </>
+                            );
+                          }
+
+                          if (allCompleted && anyCompleted) {
+                            return (
+                              <>
+                                <p style={{ margin: '0 0 12px 0' }}>
+                                  Все ситуационные тесты по этому уроку уже пройдены. Можно открыть страницу и посмотреть результаты.
+                                </p>
+                                {selectedCourseId ? (
+                                  <Link
+                                    className="primary-link-button"
+                                    to={`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`}
+                                    style={{ display: 'inline-block' }}
+                                  >
+                                    Посмотреть результаты
+                                  </Link>
+                                ) : null}
+                              </>
+                            );
+                          }
+
+                          if (message) {
+                            return <p style={{ color: '#15803d', margin: 0 }}>{message}</p>;
+                          }
+
+                          return null;
+                        })()}
                       </div>
-                    ) : lessonScenario?.available ? (
-                      <div style={{ color: '#15803d' }}>
-                        <p style={{ margin: '0 0 12px 0' }}>
-                          Вы прошли урок. Вам доступен ситуационный тест (одна попытка). На отдельной странице будет описание ситуации и
-                          выбор ответа с подтверждением.
-                        </p>
-                        {selectedCourseId ? (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`)
-                            }
-                            style={{
-                              backgroundColor: '#166534',
-                              color: '#fff',
-                              padding: '12px 24px',
-                              borderRadius: '8px',
-                              border: 'none',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              width: '100%',
-                              fontSize: '1rem'
-                            }}
-                          >
-                            Перейти к ситуационному тесту
-                          </button>
-                        ) : null}
-                      </div>
-                    ) : lessonScenario?.hasScenario && lessonScenario.message ? (
-                      <p style={{ color: '#15803d', margin: 0 }}>{lessonScenario.message}</p>
                     ) : null}
                   </div>
                   </>

@@ -189,6 +189,11 @@ export type StudentLessonScenario = {
   resultImageUrl: string | null;
 };
 
+export type StudentLessonScenarios = {
+  hasScenarios: boolean;
+  scenarios: StudentLessonScenario[];
+};
+
 export type StudentScenarioAnswerResult = {
   answerId: number;
   selectedOptionId: number;

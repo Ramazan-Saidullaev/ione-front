@@ -7,6 +7,7 @@ import type {
   StudentCourseProgress,
   StudentLessonProgress,
   StudentLessonScenario,
+  StudentLessonScenarios,
   StudentScenarioAnswerResult,
   LoginRequest,
   MeResponse,
@@ -196,6 +197,13 @@ export const api = {
   getLessonScenario(token: string, courseId: number, lessonId: number) {
     return request<StudentLessonScenario>(
       `/api/student/courses/${courseId}/lessons/${lessonId}/scenario`,
+      { token }
+    );
+  },
+
+  getLessonScenarios(token: string, courseId: number, lessonId: number) {
+    return request<StudentLessonScenarios>(
+      `/api/student/courses/${courseId}/lessons/${lessonId}/scenarios`,
       { token }
     );
   },
