@@ -141,6 +141,7 @@ export type TeacherScenarioProgress = {
   title: string;
   completed: boolean;
   selectedOptionText: string | null;
+  selectedOptionScore: number | null;
   resultText: string | null;
 };
 

@@ -192,7 +192,14 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                               </div>
                               {sc.completed ? (
                                 <div style={{ marginTop: "8px", color: "#374151" }}>
-                                  <div><strong>Selected:</strong> {sc.selectedOptionText || "—"}</div>
+                                  <div>
+                                    <strong>Selected:</strong> {sc.selectedOptionText || "—"}
+                                    {typeof sc.selectedOptionScore === "number" ? (
+                                      <span style={{ marginLeft: "8px", fontWeight: 700, color: "#166534" }}>
+                                        (+{sc.selectedOptionScore})
+                                      </span>
+                                    ) : null}
+                                  </div>
                                   {sc.resultText ? <div style={{ marginTop: "4px" }}><strong>Result:</strong> {sc.resultText}</div> : null}
                                 </div>
                               ) : null}
