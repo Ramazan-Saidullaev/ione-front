@@ -12,6 +12,7 @@ export function TeacherStudentsProgressPage({ session }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedStudentId, setExpandedStudentId] = useState<number | null>(null);
+  const [expandedCourseId, setExpandedCourseId] = useState<number | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -19,7 +20,10 @@ export function TeacherStudentsProgressPage({ session }: Props) {
     api.getTeacherStudentsCourseProgress(session.accessToken)
       .then((data) => {
         setRows(data);
-        if (data.length > 0) setExpandedStudentId(data[0].studentId);
+        if (data.length > 0) {
+          setExpandedStudentId(data[0].studentId);
+          setExpandedCourseId(data[0].courses[0]?.courseId ?? null);
+        }
       })
       .catch((e: unknown) => setError(getErrorMessage(e)))
       .finally(() => setLoading(false));
@@ -28,6 +32,10 @@ export function TeacherStudentsProgressPage({ session }: Props) {
   const selected = useMemo(
     () => rows.find((s) => s.studentId === expandedStudentId) ?? null,
     [expandedStudentId, rows]
+  );
+  const selectedCourse = useMemo(
+    () => selected?.courses.find((c) => c.courseId === expandedCourseId) ?? null,
+    [selected, expandedCourseId]
   );
 
   return (
@@ -53,7 +61,10 @@ export function TeacherStudentsProgressPage({ session }: Props) {
               key={student.studentId}
               type="button"
               className={`student-card ${expandedStudentId === student.studentId ? "selected" : ""}`}
-              onClick={() => setExpandedStudentId(student.studentId)}
+              onClick={() => {
+                setExpandedStudentId(student.studentId);
+                setExpandedCourseId(student.courses[0]?.courseId ?? null);
+              }}
             >
               <div className="student-card-top">
                 <strong>{student.studentName}</strong>
@@ -94,6 +105,12 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                   {selected.courses.filter((c) => c.completed).length} / {selected.courses.length}
                 </strong>
               </div>
+              <div className="info-box">
+                <span>Situational tests</span>
+                <strong>
+                  {selected.courses.reduce((sum, c) => sum + c.completedScenarios, 0)} / {selected.courses.reduce((sum, c) => sum + c.totalScenarios, 0)}
+                </strong>
+              </div>
             </div>
 
             <div className="panel-block">
@@ -104,8 +121,18 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                 {selected.courses.map((course) => {
                   const percent =
                     course.totalLessons === 0 ? 0 : Math.round((course.completedLessons / course.totalLessons) * 100);
+                  const scenarioPercent =
+                    course.totalScenarios === 0 ? 0 : Math.round((course.completedScenarios / course.totalScenarios) * 100);
                   return (
-                    <article key={course.courseId} className="content-card">
+                    <article
+                      key={course.courseId}
+                      className="content-card"
+                      style={{
+                        cursor: "pointer",
+                        border: expandedCourseId === course.courseId ? "2px solid #2563eb" : undefined
+                      }}
+                      onClick={() => setExpandedCourseId(course.courseId)}
+                    >
                       <div className="progress-card-top">
                         <strong>{course.courseTitle}</strong>
                         <span className="mini-pill">
@@ -116,10 +143,67 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                         <div className="progress-bar-fill" style={{ width: `${percent}%` }} />
                       </div>
                       <p className="muted-text">{course.completed ? "Completed" : `In progress · ${percent}%`}</p>
+                      <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <small style={{ color: "#64748b", fontWeight: 600 }}>Situational tests</small>
+                        <span className="mini-pill">{course.completedScenarios}/{course.totalScenarios}</span>
+                      </div>
+                      <div className="progress-bar" aria-label={`Scenarios progress ${scenarioPercent}%`}>
+                        <div className="progress-bar-fill" style={{ width: `${scenarioPercent}%`, background: "#8b5cf6" }} />
+                      </div>
                     </article>
                   );
                 })}
               </div>
+            </div>
+
+            <div className="panel-block">
+              <div className="panel-heading">
+                <h3>Situational tests details</h3>
+              </div>
+              {!selectedCourse ? (
+                <p className="muted-text">Select a course card above to view scenario results.</p>
+              ) : selectedCourse.totalScenarios === 0 ? (
+                <p className="muted-text">No situational tests configured for this course yet.</p>
+              ) : (
+                <div style={{ display: "grid", gap: "12px" }}>
+                  {selectedCourse.lessonScenarioProgress.map((lesson) => (
+                    <article key={lesson.lessonId} className="content-card">
+                      <div className="progress-card-top" style={{ marginBottom: "8px" }}>
+                        <strong>{lesson.lessonTitle}</strong>
+                        <span className="mini-pill">{lesson.completedScenarios}/{lesson.totalScenarios}</span>
+                      </div>
+                      {lesson.totalScenarios === 0 ? (
+                        <p className="muted-text">No situational tests in this lesson.</p>
+                      ) : (
+                        <div style={{ display: "grid", gap: "8px" }}>
+                          {lesson.scenarios.map((sc) => (
+                            <div key={sc.scenarioId} style={{ border: "1px solid #e5e7eb", borderRadius: "10px", padding: "10px 12px", background: "#fff" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+                                <strong>{sc.title}</strong>
+                                <span
+                                  className="mini-pill"
+                                  style={{
+                                    background: sc.completed ? "#dcfce7" : "#f3f4f6",
+                                    color: sc.completed ? "#166534" : "#4b5563"
+                                  }}
+                                >
+                                  {sc.completed ? "Completed" : "Not completed"}
+                                </span>
+                              </div>
+                              {sc.completed ? (
+                                <div style={{ marginTop: "8px", color: "#374151" }}>
+                                  <div><strong>Selected:</strong> {sc.selectedOptionText || "—"}</div>
+                                  {sc.resultText ? <div style={{ marginTop: "4px" }}><strong>Result:</strong> {sc.resultText}</div> : null}
+                                </div>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

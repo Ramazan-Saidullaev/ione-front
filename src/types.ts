@@ -131,6 +131,25 @@ export type TeacherCourseProgress = {
   totalLessons: number;
   completedLessons: number;
   completed: boolean;
+  totalScenarios: number;
+  completedScenarios: number;
+  lessonScenarioProgress: TeacherLessonScenarioProgress[];
+};
+
+export type TeacherScenarioProgress = {
+  scenarioId: number;
+  title: string;
+  completed: boolean;
+  selectedOptionText: string | null;
+  resultText: string | null;
+};
+
+export type TeacherLessonScenarioProgress = {
+  lessonId: number;
+  lessonTitle: string;
+  totalScenarios: number;
+  completedScenarios: number;
+  scenarios: TeacherScenarioProgress[];
 };
 
 export type TeacherStudentCourseProgress = {
