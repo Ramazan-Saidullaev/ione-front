@@ -9,9 +9,29 @@ type Props = {
   session: AuthResponse;
 };
 
+const zoneSeverity: Record<RiskZone, number> = {
+  BLACK: 3,
+  RED: 2,
+  YELLOW: 1,
+  GREEN: 0
+};
+
+function zoneToneStyles(zone: RiskZone): { bg: string; fg: string; border: string } {
+  switch (zone) {
+    case "BLACK":
+      return { bg: "#0f172a", fg: "#ffffff", border: "#0f172a" };
+    case "RED":
+      return { bg: "#fee2e2", fg: "#991b1b", border: "#fecaca" };
+    case "YELLOW":
+      return { bg: "#fef9c3", fg: "#854d0e", border: "#fde68a" };
+    case "GREEN":
+      return { bg: "#dcfce7", fg: "#166534", border: "#bbf7d0" };
+  }
+}
+
 export function TeacherRiskDashboardPage({ session }: Props) {
   const [testIdInput, setTestIdInput] = useState("1");
-  const [minZone, setMinZone] = useState<RiskZone>("YELLOW");
+  const [minZone, setMinZone] = useState<RiskZone>("GREEN");
   const [riskStudents, setRiskStudents] = useState<RiskStudent[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
@@ -44,6 +64,30 @@ export function TeacherRiskDashboardPage({ session }: Props) {
       .finally(() => setDetailsLoading(false));
   }, [selectedAttemptId, session.accessToken]);
 
+  // Auto-load on first open (so teacher immediately sees the "state of students")
+  useEffect(() => {
+    const testId = Number(testIdInput);
+    if (!Number.isInteger(testId) || testId <= 0) return;
+    setListLoading(true);
+    setListError(null);
+    setHasSearched(true);
+    api
+      .getRiskStudents(session.accessToken, testId, minZone)
+      .then((students) => {
+        setRiskStudents(students);
+        setSelectedAttemptId(students[0]?.attemptId ?? null);
+        if (!students[0]?.attemptId) setAttemptDetails(null);
+      })
+      .catch((error: unknown) => {
+        setRiskStudents([]);
+        setAttemptDetails(null);
+        setSelectedAttemptId(null);
+        setListError(getErrorMessage(error));
+      })
+      .finally(() => setListLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.accessToken]);
+
   async function handleLoadRiskStudents(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const testId = Number(testIdInput);
@@ -72,6 +116,27 @@ export function TeacherRiskDashboardPage({ session }: Props) {
     }
   }
 
+  const sortedRiskStudents = useMemo(() => {
+    const copy = [...riskStudents];
+    copy.sort((a, b) => {
+      const za = a.maxZone as RiskZone;
+      const zb = b.maxZone as RiskZone;
+      const dz = (zoneSeverity[zb] ?? -1) - (zoneSeverity[za] ?? -1);
+      if (dz !== 0) return dz;
+      return a.studentName.localeCompare(b.studentName);
+    });
+    return copy;
+  }, [riskStudents]);
+
+  const zoneCounts = useMemo(() => {
+    const counts: Record<RiskZone, number> = { BLACK: 0, RED: 0, YELLOW: 0, GREEN: 0 };
+    for (const s of sortedRiskStudents) {
+      const z = s.maxZone as RiskZone;
+      if (counts[z] != null) counts[z] += 1;
+    }
+    return counts;
+  }, [sortedRiskStudents]);
+
   const studentsList = useMemo(() => {
     if (!hasSearched) return null;
     if (riskStudents.length === 0) {
@@ -83,35 +148,79 @@ export function TeacherRiskDashboardPage({ session }: Props) {
       );
     }
 
-    return riskStudents.map((student) => (
-      <button
-        key={student.attemptId}
-        className={`student-card ${selectedAttemptId === student.attemptId ? "selected" : ""}`}
-        onClick={() => setSelectedAttemptId(student.attemptId)}
-        type="button"
-      >
-        <div className="student-card-top">
-          <strong>{student.studentName}</strong>
-          <span className={`zone-pill zone-${student.maxZone.toLowerCase()}`}>{student.maxZone}</span>
-        </div>
-        <p>{student.className || "Class is not set"}</p>
-        <small>
-          studentId: {student.studentId} | attemptId: {student.attemptId}
-        </small>
-      </button>
-    ));
-  }, [hasSearched, riskStudents, selectedAttemptId]);
+    const grouped: Record<RiskZone, RiskStudent[]> = { BLACK: [], RED: [], YELLOW: [], GREEN: [] };
+    for (const s of sortedRiskStudents) {
+      grouped[s.maxZone as RiskZone]?.push(s);
+    }
+    const order: RiskZone[] = ["BLACK", "RED", "YELLOW", "GREEN"];
+
+    return (
+      <div style={{ display: "grid", gap: "16px" }}>
+        {order.map((zone) => {
+          const items = grouped[zone];
+          if (!items || items.length === 0) return null;
+          const tone = zoneToneStyles(zone);
+          return (
+            <div key={zone}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "6px 2px 10px" }}>
+                <div style={{ fontWeight: 800, color: "#0f172a" }}>
+                  {zoneLabels[zone]} <span style={{ fontWeight: 700, color: "#64748b" }}>({items.length})</span>
+                </div>
+                <span style={{ padding: "4px 10px", borderRadius: "9999px", background: tone.bg, color: tone.fg, border: `1px solid ${tone.border}`, fontWeight: 800, fontSize: "0.85rem" }}>
+                  {zone}
+                </span>
+              </div>
+              <div className="student-list" style={{ gap: "10px" }}>
+                {items.map((student) => (
+                  <button
+                    key={student.attemptId}
+                    className={`student-card ${selectedAttemptId === student.attemptId ? "selected" : ""}`}
+                    onClick={() => setSelectedAttemptId(student.attemptId)}
+                    type="button"
+                    style={{
+                      borderLeft: `6px solid ${tone.border}`
+                    }}
+                  >
+                    <div className="student-card-top">
+                      <strong>{student.studentName}</strong>
+                      <span
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: "9999px",
+                          background: tone.bg,
+                          color: tone.fg,
+                          border: `1px solid ${tone.border}`,
+                          fontWeight: 800,
+                          fontSize: "0.85rem"
+                        }}
+                      >
+                        {zoneLabels[zone]}
+                      </span>
+                    </div>
+                    <p style={{ marginBottom: "6px" }}>{student.className || "Class is not set"}</p>
+                    <small style={{ color: "#64748b" }}>
+                      attemptId: {student.attemptId}
+                    </small>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }, [hasSearched, riskStudents.length, selectedAttemptId, sortedRiskStudents]);
 
   return (
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
         <div className="section-heading">
-          <p className="eyebrow">Filter</p>
-          <h2>Risk students</h2>
+          <p className="eyebrow">Monitoring</p>
+          <h2>Риск-группы по тесту</h2>
         </div>
         <form className="stack" onSubmit={handleLoadRiskStudents}>
           <label className="field">
-            <span>Test ID</span>
+            <span>ID психологического теста</span>
             <input
               type="number"
               min="1"
@@ -122,7 +231,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
             />
           </label>
           <label className="field">
-            <span>Minimum risk zone</span>
+            <span>Показывать зоны начиная с</span>
             <select value={minZone} onChange={(e) => setMinZone(e.target.value as RiskZone)}>
               {zoneOptions.map((zone) => (
                 <option key={zone} value={zone}>
@@ -131,18 +240,49 @@ export function TeacherRiskDashboardPage({ session }: Props) {
               ))}
             </select>
           </label>
-          <div className="banner info">
-            Teacher API still does not expose a test catalog here, so testId is entered manually.
-          </div>
+          <div className="banner info">Список тестов тут пока не выбирается из каталога — ID вводится вручную.</div>
           {listError ? <div className="banner error">{listError}</div> : null}
           <button className="primary-button" type="submit" disabled={listLoading}>
-            {listLoading ? "Loading..." : "Load students"}
+            {listLoading ? "Загрузка..." : "Обновить"}
           </button>
         </form>
 
+        {hasSearched ? (
+          <div style={{ marginTop: "18px" }}>
+            <div className="section-heading compact-heading">
+              <p className="eyebrow">Summary</p>
+              <h2>Сводка по зонам</h2>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "10px" }}>
+              {(["BLACK", "RED", "YELLOW", "GREEN"] as RiskZone[]).map((z) => {
+                const tone = zoneToneStyles(z);
+                return (
+                  <div
+                    key={z}
+                    style={{
+                      background: "#fff",
+                      border: `1px solid ${tone.border}`,
+                      borderRadius: "12px",
+                      padding: "10px 12px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center"
+                    }}
+                  >
+                    <span style={{ fontWeight: 800, color: "#0f172a" }}>{zoneLabels[z]}</span>
+                    <span style={{ padding: "3px 10px", borderRadius: "9999px", background: tone.bg, color: tone.fg, fontWeight: 900 }}>
+                      {zoneCounts[z]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
         <div className="section-heading compact-heading">
           <p className="eyebrow">Results</p>
-          <h2>Students</h2>
+          <h2>Ученики</h2>
         </div>
         <div className="student-list">
           {!hasSearched ? (
