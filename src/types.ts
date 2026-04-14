@@ -8,6 +8,8 @@ export type AuthResponse = {
   studentId?: number;  // Added for students
   teacherFullName?: string;
   className?: string;
+  schoolName?: string;
+  homeroomClass?: string;
 };
 
 export type LoginRequest = {

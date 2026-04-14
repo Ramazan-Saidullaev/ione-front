@@ -9,6 +9,8 @@ import { StudentPage } from "./pages/StudentPage";
 import { SituationTestPage } from "./pages/SituationTestPage";
 import { AdminPage } from "./pages/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { StudentProfilePage } from "./pages/StudentProfilePage";
+import { TeacherProfilePage } from "./pages/TeacherProfilePage";
 
 function App() {
   return (
@@ -19,8 +21,10 @@ function App() {
         <Route path="/auth/register" element={<RegisterTypePage />} />
         <Route path="/auth/register/teacher" element={<TeacherRegisterPage />} />
         <Route path="/auth/register/student" element={<StudentRegisterPage />} />
+        <Route path="/teachers/profile" element={<TeacherProfilePage />} />
         <Route path="/teachers/*" element={<TeacherPage />} />
         <Route path="/students/course/:courseId/lesson/:lessonId/situation-test" element={<SituationTestPage />} />
+        <Route path="/students/profile" element={<StudentProfilePage />} />
         <Route path="/students/*" element={<StudentPage />} />
         <Route path="/admin/*" element={<AdminPage />} />
         <Route path="*" element={<NotFoundPage />} />

@@ -18,7 +18,6 @@ import type {
 } from "../types";
 import { getErrorMessage, formatDateTime } from "../utils/helpers";
 import { useRoleSession, handleRoleLogin } from "../hooks/authHooks";
-import { InfoBox } from "../components/InfoBox";
 import { parseMediaUrl } from "../utils/mediaUrl";
 
 export function StudentPage() {
@@ -412,16 +411,6 @@ export function StudentPage() {
           <h1>Добро пожаловать, {session.fullName || "Ученик"}</h1>
         </div>
         <div className="topbar-actions">
-          <div className="identity-card">
-            <span>Роль: Ученик</span>
-            <strong>{session.fullName || "Ученик"}</strong>
-            <span style={{ marginTop: "6px", color: "#6b7280", fontSize: "0.9rem" }}>
-              Ваш учитель: <strong style={{ color: "#111827" }}>{session.teacherFullName || "—"}</strong>
-            </span>
-            <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>
-              Ваш класс: <strong style={{ color: "#111827" }}>{session.className || "—"}</strong>
-            </span>
-          </div>
           <button className="ghost-button" onClick={handleLogout} type="button">
             Выйти
           </button>

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { loadSession } from "../storage";
+import type { AuthResponse } from "../types";
 
 function ChevronDown() {
   return (
@@ -21,6 +23,8 @@ function UserIcon() {
 export function GlobalHeader() {
   const [showAuthMenu, setShowAuthMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [student, setStudent] = useState<AuthResponse | null>(() => loadSession("student"));
+  const [teacher, setTeacher] = useState<AuthResponse | null>(() => loadSession("teacher"));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -34,6 +38,17 @@ export function GlobalHeader() {
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showAuthMenu]);
+
+  useEffect(() => {
+    function handleStorage() {
+      setStudent(loadSession("student"));
+      setTeacher(loadSession("teacher"));
+    }
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const profileLink = student ? "/students/profile" : teacher ? "/teachers/profile" : null;
 
   return (
     <header className="global-header">
@@ -69,20 +84,20 @@ export function GlobalHeader() {
           
           {showAuthMenu && (
             <div className="auth-dropdown-menu">
-              <Link 
-                to="/auth" 
-                className="auth-menu-item"
-                onClick={() => setShowAuthMenu(false)}
-              >
-                Войти
-              </Link>
-              <Link 
-                to="/auth/register" 
-                className="auth-menu-item"
-                onClick={() => setShowAuthMenu(false)}
-              >
-                Регистрация
-              </Link>
+              {profileLink ? (
+                <Link to={profileLink} className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
+                  Профиль
+                </Link>
+              ) : (
+                <>
+                  <Link to="/auth" className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
+                    Войти
+                  </Link>
+                  <Link to="/auth/register" className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
+                    Регистрация
+                  </Link>
+                </>
+              )}
             </div>
           )}
         </div>
