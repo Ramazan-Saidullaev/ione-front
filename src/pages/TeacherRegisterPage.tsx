@@ -10,6 +10,7 @@ export function TeacherRegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [homeroomClass, setHomeroomClass] = useState("");
   const [schoolId, setSchoolId] = useState<number | "">("");
   const [schools, setSchools] = useState<PublicSchoolDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,10 @@ export function TeacherRegisterPage() {
       setError("Пожалуйста, выберите школу");
       return;
     }
+    if (!homeroomClass.trim()) {
+      setError("Пожалуйста, укажите класс (классный руководитель), например 7A");
+      return;
+    }
 
     setRegistering(true);
     setError(null);
@@ -48,6 +53,7 @@ export function TeacherRegisterPage() {
         fullName: fullName.trim(),
         email: email.trim(),
         password,
+        homeroomClass: homeroomClass.trim().toUpperCase().replace(/\s+/g, ""),
         schoolId: typeof schoolId === "number" ? schoolId : parseInt(schoolId)
       });
       saveSession("teacher", result);
@@ -92,6 +98,17 @@ export function TeacherRegisterPage() {
           <label className="field">
             <span>Password</span>
             <PasswordToggleField value={password} onChange={setPassword} required />
+          </label>
+
+          <label className="field">
+            <span>Homeroom class (e.g., 7A, 8B)</span>
+            <input
+              type="text"
+              value={homeroomClass}
+              onChange={(e) => setHomeroomClass(e.target.value)}
+              placeholder="e.g., 7A"
+              required
+            />
           </label>
 
           <label className="field">

@@ -17,6 +17,7 @@ export type RegisterTeacherRequest = {
   fullName: string;
   email: string;
   password: string;
+  homeroomClass: string;
   schoolId: number;
 };
 
@@ -272,6 +273,7 @@ export type AdminStudentDto = {
 export type AdminTeacherDto = {
   id: number;
   fullName: string;
+  homeroomClass: string | null;
   students: AdminStudentDto[];
 };
 
@@ -359,7 +361,7 @@ export type AdminDashboardDto = {
 
 export type CreateSchoolRequest = { name: string; address?: string };
 export type UpdateSchoolRequest = { name?: string; address?: string };
-export type UpdateTeacherRequest = { fullName?: string };
+export type UpdateTeacherRequest = { fullName?: string; homeroomClass?: string };
 export type UpdateStudentRequest = { fullName?: string; className?: string };
 
 export type CreateCourseRequest = {

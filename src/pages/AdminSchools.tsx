@@ -25,6 +25,7 @@ export function AdminSchools() {
   const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
   const [editingTeacherId, setEditingTeacherId] = useState<number | null>(null);
   const [teacherName, setTeacherName] = useState("");
+  const [teacherHomeroomClass, setTeacherHomeroomClass] = useState("");
   const [teacherEmail, setTeacherEmail] = useState("");
   const [teacherPassword, setTeacherPassword] = useState("");
 
@@ -60,10 +61,23 @@ export function AdminSchools() {
     setBusy(true);
     try {
       if (editingTeacherId) {
-        await api.updateTeacher(session.accessToken, editingTeacherId, { fullName: teacherName.trim() });
+        await api.updateTeacher(session.accessToken, editingTeacherId, {
+          fullName: teacherName.trim(),
+          homeroomClass: teacherHomeroomClass.trim() ? teacherHomeroomClass.trim().toUpperCase().replace(/\s+/g, "") : undefined
+        });
       } else {
         if (!selectedSchoolId) return;
-        await api.registerTeacher({ fullName: teacherName.trim(), email: teacherEmail.trim(), password: teacherPassword, schoolId: selectedSchoolId });
+        if (!teacherHomeroomClass.trim()) {
+          alert("Укажите класс (классный руководитель), например 7A");
+          return;
+        }
+        await api.registerTeacher({
+          fullName: teacherName.trim(),
+          email: teacherEmail.trim(),
+          password: teacherPassword,
+          homeroomClass: teacherHomeroomClass.trim().toUpperCase().replace(/\s+/g, ""),
+          schoolId: selectedSchoolId
+        });
       }
       await refetch();
       setIsTeacherModalOpen(false);
@@ -147,14 +161,14 @@ export function AdminSchools() {
             ← Back to Schools
           </button>
           <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Teachers in {selectedSchool.name}</h1>
-          <button onClick={() => { setEditingTeacherId(null); setTeacherName(""); setTeacherEmail(""); setTeacherPassword(""); setIsTeacherModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", marginLeft: "auto" }}>
+          <button onClick={() => { setEditingTeacherId(null); setTeacherName(""); setTeacherHomeroomClass(""); setTeacherEmail(""); setTeacherPassword(""); setIsTeacherModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", marginLeft: "auto" }}>
             + Add Teacher
           </button>
         </div>
         {selectedSchool.teachers.length === 0 ? (
           <div style={{ padding: "40px", textAlign: "center", color: "#6b7280", background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
             <p style={{ marginBottom: "16px" }}>No teachers registered in this school.</p>
-            <button onClick={() => { setEditingTeacherId(null); setTeacherName(""); setTeacherEmail(""); setTeacherPassword(""); setIsTeacherModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>+ Создать учителя</button>
+            <button onClick={() => { setEditingTeacherId(null); setTeacherName(""); setTeacherHomeroomClass(""); setTeacherEmail(""); setTeacherPassword(""); setIsTeacherModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>+ Создать учителя</button>
           </div>
         ) : (
           <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
@@ -163,10 +177,13 @@ export function AdminSchools() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <h3 style={{ margin: "0 0 4px 0", color: "#111827", fontSize: "1.1rem" }}>{teacher.fullName}</h3>
+                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280" }}>
+                      Homeroom: <span style={{ fontWeight: 600, color: "#374151" }}>{teacher.homeroomClass || "Not set"}</span>
+                    </p>
                     <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280" }}>{teacher.students.length} students</p>
                   </div>
                   <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                    <button onClick={(e) => { e.stopPropagation(); setEditingTeacherId(teacher.id); setTeacherName(teacher.fullName); setIsTeacherModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Edit</button>
+                    <button onClick={(e) => { e.stopPropagation(); setEditingTeacherId(teacher.id); setTeacherName(teacher.fullName); setTeacherHomeroomClass(teacher.homeroomClass || ""); setIsTeacherModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Edit</button>
                     <button onClick={(e) => { e.stopPropagation(); handleTeacherDelete(teacher.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Delete</button>
                     <div style={{ color: "#9ca3af", fontSize: "1.2rem", marginLeft: "8px" }}>→</div>
                   </div>
@@ -225,6 +242,7 @@ export function AdminSchools() {
       <Modal isOpen={isTeacherModalOpen} onClose={() => setIsTeacherModalOpen(false)} title={editingTeacherId ? "Редактировать учителя" : "Добавить учителя"}>
         <form onSubmit={handleTeacherSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>ФИО Учителя</span><input type="text" value={teacherName} onChange={e => setTeacherName(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
+          <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Классный руководитель (например, 7A)</span><input type="text" value={teacherHomeroomClass} onChange={e => setTeacherHomeroomClass(e.target.value)} required={!editingTeacherId} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
           {!editingTeacherId && (
             <>
               <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={teacherEmail} onChange={e => setTeacherEmail(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
