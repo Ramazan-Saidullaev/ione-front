@@ -181,6 +181,7 @@ export type Lesson = {
   title: string;
   orderNumber: number;
   videoUrl: string | null;
+  videoPath?: string | null;
   textContent: string | null;
 };
 
