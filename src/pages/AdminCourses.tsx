@@ -69,6 +69,13 @@ export function AdminCourses() {
   // Функция для правильного отображения картинок (локальных и по ссылке)
   function getMediaUrl(path: string | undefined | null) {
     if (!path) return "";
+
+    // Если бэкенд ошибочно склеил свой путь и внешнюю ссылку
+    const externalMatch = path.match(/\/media\/(https?:\/\/.*)/);
+    if (externalMatch) {
+      return externalMatch[1];
+    }
+
     if (path.startsWith("http")) return path;
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
     return baseUrl + (path.startsWith("/") ? path : `/${path}`);

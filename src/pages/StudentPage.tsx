@@ -419,18 +419,18 @@ export function StudentPage() {
 
       {/* Вкладки навигации */}
       <div style={{ padding: "0 32px", marginBottom: "24px", display: "flex", gap: "24px", borderBottom: "1px solid #e5e7eb" }}>
-        <button
-          onClick={() => setActiveTab("courses")}
-          style={{ padding: "12px 16px", fontSize: "1.1rem", fontWeight: 600, background: "none", border: "none", borderBottom: activeTab === "courses" ? "3px solid #2563eb" : "3px solid transparent", color: activeTab === "courses" ? "#2563eb" : "#6b7280", cursor: "pointer", transition: "color 0.2s" }}
-        >
-          📚 Учебные курсы
-        </button>
-        <button
-          onClick={() => setActiveTab("tests")}
-          style={{ padding: "12px 16px", fontSize: "1.1rem", fontWeight: 600, background: "none", border: "none", borderBottom: activeTab === "tests" ? "3px solid #2563eb" : "3px solid transparent", color: activeTab === "tests" ? "#2563eb" : "#6b7280", cursor: "pointer", transition: "color 0.2s" }}
-        >
-          🧠 Психологические тесты
-        </button>
+        {[
+          { id: "courses", label: "📚 Учебные курсы" },
+          { id: "tests", label: "🧠 Психологические тесты" }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as "courses" | "tests")}
+            style={{ padding: "12px 16px", fontSize: "1.1rem", fontWeight: 600, background: "none", border: "none", borderBottom: activeTab === tab.id ? "3px solid #2563eb" : "3px solid transparent", color: activeTab === tab.id ? "#2563eb" : "#6b7280", cursor: "pointer", transition: "color 0.2s" }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {activeTab === "courses" && (
@@ -564,7 +564,7 @@ export function StudentPage() {
                     ) : null}
                     {lessonDetails.videoUrl ? (
                       <div style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}>
-                        <a className="primary-link-button" href={parseMediaUrl(lessonDetails.videoUrl)} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                      <a className="primary-link-button" href={parseMediaUrl(lessonDetails.videoUrl).replace(/^.*\/media\/(https?:\/\/.*)/, "$1")} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
                           ▶ Открыть видеоурок
                         </a>
                       </div>

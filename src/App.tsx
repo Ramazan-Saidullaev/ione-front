@@ -11,6 +11,7 @@ import { AdminPage } from "./pages/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { StudentProfilePage } from "./pages/StudentProfilePage";
 import { TeacherProfilePage } from "./pages/TeacherProfilePage";
+import { PublicCoursesPage } from "./pages/PublicCoursesPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeLandingPage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/public-courses" element={<PublicCoursesPage />} />
         <Route path="/auth/register" element={<RegisterTypePage />} />
         <Route path="/auth/register/teacher" element={<TeacherRegisterPage />} />
         <Route path="/auth/register/student" element={<StudentRegisterPage />} />

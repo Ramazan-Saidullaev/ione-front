@@ -17,6 +17,9 @@ export function HomeLandingPage() {
             <a className="primary-link-button" href="/auth">
               Начать бесплатно
             </a>
+            <a className="secondary-link-button" href="/public-courses">
+              Каталог курсов
+            </a>
             <a className="secondary-link-button" href="#about">
               О платформе
             </a>
