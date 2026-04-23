@@ -66,8 +66,7 @@ import type {
 } from "./types";
 
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "https://diploma.romasai.club";
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "");
 
 type RequestOptions = {
   method?: "GET" | "POST";
