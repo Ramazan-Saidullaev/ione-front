@@ -67,7 +67,7 @@ import type {
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "http://localhost:8081";
+  "https://diploma.romasai.club";
 
 type RequestOptions = {
   method?: "GET" | "POST";
