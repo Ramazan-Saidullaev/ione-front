@@ -49,7 +49,7 @@ function optionsGridStyle(total: number): CSSProperties {
   return {
     display: "grid",
     gap: "12px",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
     maxWidth: "640px"
   };
 }
@@ -185,7 +185,7 @@ export function SituationTestPage() {
     return (
       <main className="dashboard-shell">
         <GlobalHeader />
-        <section className="card" style={{ margin: "24px 32px", padding: "24px" }}>
+        <section className="card" style={{ padding: "24px" }}>
           <p>{loadError || "Некорректная ссылка."}</p>
           <Link to={backHref}>Вернуться в кабинет</Link>
         </section>
@@ -197,7 +197,7 @@ export function SituationTestPage() {
     return (
       <main className="dashboard-shell">
         <GlobalHeader />
-        <section className="card" style={{ margin: "24px 32px", padding: "24px", maxWidth: "520px" }}>
+        <section className="card" style={{ padding: "24px", maxWidth: "520px" }}>
           <h1 style={{ marginTop: 0 }}>Ситуационный тест</h1>
           <p>Чтобы пройти тест, войдите как ученик. Прямая ссылка для других пользователей не даёт доступа к вашему прогрессу.</p>
           <Link className="primary-link-button" to="/auth" style={{ display: "inline-block", marginTop: "12px" }}>
@@ -212,7 +212,7 @@ export function SituationTestPage() {
     return (
       <main className="shell loading-shell">
         <GlobalHeader />
-        <p style={{ padding: "24px 32px" }}>Загрузка ситуационного теста…</p>
+        <p style={{ padding: "24px" }}>Загрузка ситуационного теста…</p>
       </main>
     );
   }
@@ -221,7 +221,7 @@ export function SituationTestPage() {
     return (
       <main className="dashboard-shell">
         <GlobalHeader />
-        <section className="card" style={{ margin: "24px 32px", padding: "24px" }}>
+        <section className="card" style={{ padding: "24px" }}>
           <p className="banner error" style={{ marginBottom: "16px" }}>
             {loadError || "Не удалось загрузить тест."}
           </p>
@@ -235,7 +235,7 @@ export function SituationTestPage() {
     return (
       <main className="dashboard-shell">
         <GlobalHeader />
-        <section className="card" style={{ margin: "24px 32px", padding: "24px" }}>
+        <section className="card" style={{ padding: "24px" }}>
           <h1 style={{ marginTop: 0 }}>Ситуационный тест</h1>
           <p>Для этого урока ситуационный тест не настроен.</p>
           <Link to={backHref}>Вернуться в кабинет</Link>

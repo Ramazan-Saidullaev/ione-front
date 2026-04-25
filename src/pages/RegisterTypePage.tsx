@@ -15,11 +15,10 @@ export function RegisterTypePage() {
             <p style={{ color: "#666", marginTop: "8px" }}>Choose your role to create an account</p>
           </div>
 
-          <div style={{ display: "flex", gap: "20px", marginTop: "30px" }}>
+          <div className="register-type-actions">
             <button
               className="primary-button"
               onClick={() => navigate("/auth/register/teacher")}
-              style={{ flex: 1 }}
             >
               <div style={{ marginBottom: "8px", fontSize: "24px" }}>👨‍🏫</div>
               I am a Teacher
@@ -28,7 +27,6 @@ export function RegisterTypePage() {
             <button
               className="primary-button"
               onClick={() => navigate("/auth/register/student")}
-              style={{ flex: 1 }}
             >
               <div style={{ marginBottom: "8px", fontSize: "24px" }}>👨‍🎓</div>
               I am a Student

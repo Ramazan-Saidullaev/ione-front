@@ -56,7 +56,7 @@ export function TeacherProfilePage() {
         </div>
       </section>
 
-      <section style={{ padding: "0 32px 24px" }}>
+      <section style={{ padding: "0 0 24px" }}>
         <div style={{ display: "grid", gap: "14px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
           <InfoBox label="Роль" value="Учитель" />
           <InfoBox label="Школа" value={session.schoolName || "—"} />
@@ -65,7 +65,7 @@ export function TeacherProfilePage() {
         </div>
       </section>
 
-      <section style={{ padding: "0 32px 32px" }}>
+      <section style={{ padding: "0 0 32px" }}>
         <div className="card" style={{ padding: "18px 18px" }}>
           <div className="section-heading" style={{ marginBottom: "12px" }}>
             <p className="eyebrow">Список</p>

@@ -40,7 +40,7 @@ export function StudentProfilePage() {
         </div>
       </section>
 
-      <section style={{ padding: "0 32px 32px" }}>
+      <section style={{ padding: "0 0 32px" }}>
         <div style={{ display: "grid", gap: "14px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
           <InfoBox label="Роль" value="Ученик" />
           <InfoBox label="Школа" value={session.schoolName || "—"} />

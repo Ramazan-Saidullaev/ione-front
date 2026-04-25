@@ -418,7 +418,7 @@ export function StudentPage() {
       </section>
 
       {/* Вкладки навигации */}
-      <div style={{ padding: "0 32px", marginBottom: "24px", display: "flex", gap: "24px", borderBottom: "1px solid #e5e7eb" }}>
+      <div className="student-tabs">
         {[
           { id: "courses", label: "📚 Учебные курсы" },
           { id: "tests", label: "🧠 Психологические тесты" }
@@ -426,7 +426,8 @@ export function StudentPage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as "courses" | "tests")}
-            style={{ padding: "12px 16px", fontSize: "1.1rem", fontWeight: 600, background: "none", border: "none", borderBottom: activeTab === tab.id ? "3px solid #2563eb" : "3px solid transparent", color: activeTab === tab.id ? "#2563eb" : "#6b7280", cursor: "pointer", transition: "color 0.2s" }}
+            className={`student-tab ${activeTab === tab.id ? "selected" : ""}`}
+            type="button"
           >
             {tab.label}
           </button>
@@ -737,7 +738,7 @@ export function StudentPage() {
 
                 {attemptId && !finishResult ? (
                   <div>
-                    <div style={{ marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="student-test-head">
                       <h2 style={{ margin: 0, color: '#111827' }}>Прохождение теста</h2>
                       <span style={{ background: '#e0e7ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '99px', fontWeight: 600, fontSize: '0.9rem' }}>В процессе</span>
                     </div>
