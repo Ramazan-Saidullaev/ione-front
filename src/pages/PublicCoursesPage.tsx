@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { GlobalHeader } from "../components/GlobalHeader";
+import { VideoLessonPlayer } from "../components/VideoLessonPlayer";
 import type { Course, Lesson } from "../types";
 
 function getMediaUrl(path: string | undefined | null) {
@@ -30,6 +31,8 @@ export function PublicCoursesPage() {
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [lessonDetails, setLessonDetails] = useState<Lesson | null>(null);
   const [lessonDetailsLoading, setLessonDetailsLoading] = useState(false);
+  const [isLessonVideoOpen, setIsLessonVideoOpen] = useState(false);
+  const [resolvedLessonVideoUrl, setResolvedLessonVideoUrl] = useState<string>("");
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 
@@ -74,6 +77,7 @@ export function PublicCoursesPage() {
   useEffect(() => {
     if (!selectedLessonId) {
       setLessonDetails(null);
+      setIsLessonVideoOpen(false);
       return;
     }
     setLessonDetailsLoading(true);
@@ -175,15 +179,25 @@ export function PublicCoursesPage() {
                   {/* Иногда API возвращает videoUrl, а иногда videoPath */}
                   {(lessonDetails.videoUrl || lessonDetails.videoPath) ? (
                     <div style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}>
-                      <a
+                      <button
+                        type="button"
                         className="primary-link-button"
-                        href={getMediaUrl(lessonDetails.videoUrl || lessonDetails.videoPath)}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ display: "inline-block" }}
+                        onClick={() => {
+                          const resolved = getMediaUrl(lessonDetails.videoUrl || lessonDetails.videoPath);
+                          setResolvedLessonVideoUrl(resolved);
+                          setIsLessonVideoOpen((prev) => !prev);
+                        }}
+                        style={{ display: "inline-block", border: "none", cursor: "pointer" }}
                       >
-                        ▶ Открыть видеоурок
-                      </a>
+                        {isLessonVideoOpen ? "Скрыть видеоурок" : "▶ Открыть видеоурок"}
+                      </button>
+
+                      {isLessonVideoOpen ? (
+                        <VideoLessonPlayer
+                          title={lessonDetails?.title ? `Видеоурок: ${lessonDetails.title}` : "Видеоурок"}
+                          videoUrl={resolvedLessonVideoUrl}
+                        />
+                      ) : null}
                     </div>
                   ) : (
                     <p

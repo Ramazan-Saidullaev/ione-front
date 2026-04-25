@@ -4,6 +4,7 @@ import { api } from "../api";
 import { loadSession, clearSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
 import { LessonCompletedModal } from "../components/LessonCompletedModal";
+import { VideoLessonPlayer } from "../components/VideoLessonPlayer";
 import type {
   AuthResponse,
   CategoryResult,
@@ -44,6 +45,8 @@ export function StudentPage() {
   const [lessonDetailsLoading, setLessonDetailsLoading] = useState(false);
   const [lessonActionMessage, setLessonActionMessage] = useState<string | null>(null);
   const [lessonActionBusy, setLessonActionBusy] = useState(false);
+  const [isLessonVideoOpen, setIsLessonVideoOpen] = useState(false);
+  const [resolvedLessonVideoUrl, setResolvedLessonVideoUrl] = useState<string>("");
   const [tests, setTests] = useState<TestListItem[]>([]);
   const [testsError, setTestsError] = useState<string | null>(null);
   const [selectedTestId, setSelectedTestId] = useState<number | null>(null);
@@ -130,6 +133,7 @@ export function StudentPage() {
       setLessonScenarios(null);
       setLessonCompletedLocally(false);
       setLessonActionMessage(null);
+      setIsLessonVideoOpen(false);
       return;
     }
     setLessonCompletedLocally(lessonProgress[selectedLessonId]?.status === "COMPLETED");
@@ -565,9 +569,28 @@ export function StudentPage() {
                     ) : null}
                     {lessonDetails.videoUrl ? (
                       <div style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}>
-                      <a className="primary-link-button" href={parseMediaUrl(lessonDetails.videoUrl).replace(/^.*\/media\/(https?:\/\/.*)/, "$1")} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
-                          ▶ Открыть видеоурок
-                        </a>
+                        <button
+                          type="button"
+                          className="primary-link-button"
+                          onClick={() => {
+                            const resolved = parseMediaUrl(lessonDetails.videoUrl!).replace(
+                              /^.*\/media\/(https?:\/\/.*)/,
+                              "$1"
+                            );
+                            setResolvedLessonVideoUrl(resolved);
+                            setIsLessonVideoOpen((prev) => !prev);
+                          }}
+                          style={{ display: "inline-block", border: "none", cursor: "pointer" }}
+                        >
+                          {isLessonVideoOpen ? "Скрыть видеоурок" : "▶ Открыть видеоурок"}
+                        </button>
+
+                        {isLessonVideoOpen ? (
+                          <VideoLessonPlayer
+                            title={lessonDetails?.title ? `Видеоурок: ${lessonDetails.title}` : "Видеоурок"}
+                            videoUrl={resolvedLessonVideoUrl}
+                          />
+                        ) : null}
                       </div>
                     ) : (
                       <p className="muted-text" style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}>
