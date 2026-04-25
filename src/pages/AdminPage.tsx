@@ -40,7 +40,7 @@ export function AdminPage() {
       <aside style={{ width: "260px", backgroundColor: "#ffffff", borderRight: "1px solid #e5e7eb", display: "flex", flexDirection: "column" }}>
         <div style={{ padding: "24px 20px", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px" }}>
           <div style={{ width: "32px", height: "32px", backgroundColor: "#2563eb", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: "bold" }}>S</div>
-          <span style={{ fontSize: "1.2rem", fontWeight: 700, color: "#111827" }}>SafeSchool</span>
+          <span style={{ fontSize: "1.2rem", fontWeight: 700, color: "#111827" }}>SanaU</span>
         </div>
         <nav style={{ flex: 1, padding: "20px 12px", display: "flex", flexDirection: "column", gap: "4px" }}>
           {navItems.map(item => {

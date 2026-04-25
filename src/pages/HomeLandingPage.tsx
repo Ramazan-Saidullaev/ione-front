@@ -202,11 +202,11 @@ export function HomeLandingPage() {
 
       <footer className="site-footer" id="privacy">
         <div className="footer-brand">
-          <strong>Safe School Platform</strong>
+          <strong>SanaU</strong>
           <p>Современная платформа для обучения, диагностики и поддержки школьников.</p>
         </div>
         <div className="footer-links">
-          <a href="mailto:support@safeschool.local">support@safeschool.local</a>
+          <a href="mailto:support@sanau.local">support@sanau.local</a>
           <a href="https://t.me/" target="_blank" rel="noreferrer">
             Telegram
           </a>

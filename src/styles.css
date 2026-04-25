@@ -1056,9 +1056,9 @@ select {
 }
 
 .brand-logo-card {
-  width: 36px;
-  height: 36px;
-  background: #7000ff;
+  width: 62px;
+  height: 62px;
+  background: transparent;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -1066,11 +1066,18 @@ select {
   transform: skewX(-10deg);
 }
 
+.brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: skewX(10deg);
+}
+
 .brand-text {
   display: flex;
   flex-direction: column;
   line-height: 1;
-  color: #7000ff;
+  color: #0f4c5c;
   transform: skewX(-10deg);
 }
 

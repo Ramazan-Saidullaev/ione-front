@@ -55,14 +55,7 @@ export function GlobalHeader() {
       <div className="global-header-left">
         <Link to="/" className="global-brand">
           <div className="brand-logo-card">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-            </svg>
-          </div>
-          <div className="brand-text">
-            <strong>SAFE</strong>
-            <span>SCHOOL</span>
+            <img className="brand-logo-img" src="/sanau-logo.png" alt="SanaU" />
           </div>
         </Link>
         <nav className="global-nav">
