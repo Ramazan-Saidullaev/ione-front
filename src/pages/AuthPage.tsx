@@ -31,8 +31,30 @@ export function AuthPage() {
   }
 
   return (
-    <main className="shell route-shell">
-      <GlobalHeader />
+    <main className="shell">
+      <div style={{ gridColumn: "1 / -1" }}>
+        <GlobalHeader />
+      </div>
+
+      <section className="card" style={{ alignSelf: "stretch" }}>
+        <div className="section-heading">
+          <p className="eyebrow">Welcome to SanaU</p>
+          <h2 style={{ marginTop: 0 }}>Practical learning for real life.</h2>
+        </div>
+        <p className="lead" style={{ marginTop: 0 }}>
+          2–3 minute lessons, quizzes, and decision tasks for students (6–16) — with progress tracking for teachers.
+        </p>
+        <ul className="clean-list" style={{ margin: 0 }}>
+          <li>Mobile-first micro-learning</li>
+          <li>Financial literacy and real-world thinking</li>
+          <li>Teacher dashboard and insights</li>
+        </ul>
+        <div className="highlight-box" style={{ marginTop: "18px" }}>
+          <strong>Start in minutes</strong>
+          <p style={{ marginBottom: 0 }}>Sign in to open your dashboard and continue learning.</p>
+        </div>
+      </section>
+
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleLogin}>
           <div className="section-heading">
