@@ -202,7 +202,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
             <strong>{selectedTestId ? "Выберите попытку" : "Выберите тест"}</strong>
             <p>
               {selectedTestId
-                ? "Выберите попытку слева, чтобы посмотреть зоны по категориям и таблицу ответов."
+                ? "Выберите попытку слева, чтобы посмотреть зоны по категориям."
                 : "Выберите тест слева, чтобы увидеть все попытки, затем откройте одну попытку для деталей."}
             </p>
           </div>
@@ -266,46 +266,6 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                     </div>
                   </div>
 
-                  <div className="panel-block">
-                    <div className="panel-heading">
-                      <h3>Ответы</h3>
-                      <span className="mini-pill">
-                        {details ? `${details.answers.length} ответов` : "Откройте попытку"}
-                      </span>
-                    </div>
-
-                    {!details ? (
-                      <div className="empty-state">
-                        <strong>Ответы загружаются</strong>
-                        <p>Полную таблицу мы загружаем только при открытии конкретной попытки.</p>
-                      </div>
-                    ) : (
-                      <div className="answers-table-wrapper">
-                        <table className="answers-table">
-                          <thead>
-                            <tr>
-                              <th>#</th>
-                              <th>Категория</th>
-                              <th>Вопрос</th>
-                              <th>Ответ</th>
-                              <th>Баллы</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {details.answers.map((answer) => (
-                              <tr key={answer.questionId}>
-                                <td>{answer.orderNumber}</td>
-                                <td>{answer.categoryName}</td>
-                                <td>{answer.questionText}</td>
-                                <td>{answer.selectedOptionText}</td>
-                                <td>{answer.score}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
                 </div>
               );
             })()}

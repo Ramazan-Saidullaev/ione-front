@@ -231,6 +231,10 @@ export const api = {
     return request<TestListItem[]>("/api/student/tests", { token });
   },
 
+  getTests(token: string) {
+    return request<TestListItem[]>("/api/teacher/tests", { token });
+  },
+
   getStudentTest(token: string, testId: number) {
     return request<TestQuestion[]>(`/api/student/tests/${testId}`, { token });
   },

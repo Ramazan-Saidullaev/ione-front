@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../api";
-import type { AuthResponse, RiskStudent, RiskZone, TeacherAttemptDetails, TeacherStudent } from "../../types";
+import type { AuthResponse, RiskStudent, RiskZone, TeacherAttemptDetails, TeacherStudent, TestListItem } from "../../types";
 import { getErrorMessage, formatDateTime } from "../../utils/helpers";
 import { InfoBox } from "../../components/InfoBox";
 import { zoneLabels, zoneOptions } from "../../utils/riskZones";
@@ -30,7 +30,9 @@ function zoneToneStyles(zone: RiskZone): { bg: string; fg: string; border: strin
 }
 
 export function TeacherRiskDashboardPage({ session }: Props) {
-  const [testIdInput, setTestIdInput] = useState("1");
+  const [testIdInput, setTestIdInput] = useState<number | null>(null);
+  const [tests, setTests] = useState<TestListItem[]>([]);
+  const [testsLoading, setTestsLoading] = useState(false);
   const [minZone, setMinZone] = useState<RiskZone>("GREEN");
   const [riskStudents, setRiskStudents] = useState<RiskStudent[]>([]);
   const [listLoading, setListLoading] = useState(false);
@@ -52,6 +54,19 @@ export function TeacherRiskDashboardPage({ session }: Props) {
   }, [session.accessToken]);
 
   useEffect(() => {
+    setTestsLoading(true);
+    api.getTests(session.accessToken)
+      .then((data) => {
+        setTests(data);
+        if (data.length > 0 && !testIdInput) {
+          setTestIdInput(data[0].id);
+        }
+      })
+      .catch((error) => console.error("Не удалось загрузить тесты", error))
+      .finally(() => setTestsLoading(false));
+  }, [session.accessToken]);
+
+  useEffect(() => {
     if (!selectedAttemptId) return;
     setDetailsLoading(true);
     setDetailsError(null);
@@ -66,8 +81,8 @@ export function TeacherRiskDashboardPage({ session }: Props) {
 
   // Auto-load on first open (so teacher immediately sees the "state of students")
   useEffect(() => {
-    const testId = Number(testIdInput);
-    if (!Number.isInteger(testId) || testId <= 0) return;
+    const testId = testIdInput;
+    if (!testId) return;
     setListLoading(true);
     setListError(null);
     setHasSearched(true);
@@ -90,9 +105,9 @@ export function TeacherRiskDashboardPage({ session }: Props) {
 
   async function handleLoadRiskStudents(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const testId = Number(testIdInput);
-    if (!Number.isInteger(testId) || testId <= 0) {
-      setListError("Введите корректный ID теста.");
+    const testId = testIdInput;
+    if (!testId) {
+      setListError("Выберите тест.");
       return;
     }
     setListLoading(true);
@@ -198,9 +213,6 @@ export function TeacherRiskDashboardPage({ session }: Props) {
                       </span>
                     </div>
                     <p style={{ marginBottom: "6px" }}>{student.className || "Класс не указан"}</p>
-                    <small style={{ color: "#64748b" }}>
-                      attemptId: {student.attemptId}
-                    </small>
                   </button>
                 ))}
               </div>
@@ -220,15 +232,25 @@ export function TeacherRiskDashboardPage({ session }: Props) {
         </div>
         <form className="stack" onSubmit={handleLoadRiskStudents}>
           <label className="field">
-            <span>ID психологического теста</span>
-            <input
-              type="number"
-              min="1"
-              step="1"
-              value={testIdInput}
-              onChange={(e) => setTestIdInput(e.target.value)}
+            <span>Психологический тест</span>
+            <select
+              value={testIdInput ?? ""}
+              onChange={(e) => setTestIdInput(Number(e.target.value) || null)}
               required
-            />
+              disabled={testsLoading}
+            >
+              {testsLoading ? (
+                <option value="">Загрузка...</option>
+              ) : tests.length === 0 ? (
+                <option value="">Нет доступных тестов</option>
+              ) : (
+                tests.map((test) => (
+                  <option key={test.id} value={test.id}>
+                    {test.title}
+                  </option>
+                ))
+              )}
+            </select>
           </label>
           <label className="field">
             <span>Показывать зоны начиная с</span>
@@ -240,7 +262,6 @@ export function TeacherRiskDashboardPage({ session }: Props) {
               ))}
             </select>
           </label>
-          <div className="banner info">Список тестов тут пока не выбирается из каталога — ID вводится вручную.</div>
           {listError ? <div className="banner error">{listError}</div> : null}
           <button className="primary-button" type="submit" disabled={listLoading}>
             {listLoading ? "Загрузка..." : "Обновить"}
