@@ -130,12 +130,13 @@ export function StudentPage() {
   }, [selectedCourseId, session]);
 
   useEffect(() => {
+    setIsLessonVideoOpen(false);
+    setResolvedLessonVideoUrl("");
     if (!selectedLessonId) {
       setLessonDetails(null);
       setLessonScenarios(null);
       setLessonCompletedLocally(false);
       setLessonActionMessage(null);
-      setIsLessonVideoOpen(false);
       return;
     }
     setLessonCompletedLocally(lessonProgress[selectedLessonId]?.status === "COMPLETED");
