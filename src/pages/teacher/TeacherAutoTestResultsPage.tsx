@@ -37,16 +37,6 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
     return counts;
   }, [completed]);
 
-  const recentFinished = useMemo(() => {
-    const copy = [...completed];
-    copy.sort((a, b) => {
-      const da = a.latestAttempt?.finishedAt ? new Date(a.latestAttempt.finishedAt).getTime() : 0;
-      const db = b.latestAttempt?.finishedAt ? new Date(b.latestAttempt.finishedAt).getTime() : 0;
-      return db - da;
-    });
-    return copy.slice(0, 6);
-  }, [completed]);
-
   return (
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
@@ -127,40 +117,6 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
               { label: "BLACK", value: zoneCounts.BLACK, color: "#0f172a" }
             ]}
           />
-
-          <section className="card compact-card" aria-label="Последние действия">
-            <div className="section-heading" style={{ marginBottom: 12 }}>
-              <p className="eyebrow">Активность</p>
-              <h2 style={{ fontSize: "1.15rem" }}>Последние завершения</h2>
-            </div>
-
-            {recentFinished.length === 0 ? (
-              <div className="empty-state">
-                <strong>Пока нет завершённых тестов</strong>
-                <p>Как только ученик пройдет тест, здесь появится история последних попыток.</p>
-              </div>
-            ) : (
-              <div style={{ display: "grid", gap: "10px" }}>
-                {recentFinished.map((row) => (
-                  <div key={row.studentId} className="content-card" style={{ background: "rgba(255,255,255,0.72)" }}>
-                    <div className="progress-card-top">
-                      <strong>{row.studentName}</strong>
-                      <span className={`zone-pill zone-${row.latestAttempt!.maxZone.toLowerCase()}`}>{row.latestAttempt!.maxZone}</span>
-                    </div>
-                    <p style={{ marginTop: 8 }}>
-                      {row.latestAttempt!.testTitle}
-                      {row.latestAttempt!.finishedAt ? ` · ${formatDateTime(row.latestAttempt!.finishedAt)}` : ""}
-                    </p>
-                    <div style={{ marginTop: 10 }}>
-                      <Link className="inline-link" to={`/teachers/tests/${row.studentId}/results`}>
-                        Открыть результаты
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
 
           <QuickActionsCard
             title="Быстрые действия"

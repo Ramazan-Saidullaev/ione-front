@@ -1387,6 +1387,20 @@ select {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.62);
   border: 1px solid rgba(16, 32, 51, 0.08);
+  transition: all 0.2s ease;
+}
+
+.page-nav a:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.page-nav a.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  font-weight: 600;
 }
 
 .dashboard-grid {

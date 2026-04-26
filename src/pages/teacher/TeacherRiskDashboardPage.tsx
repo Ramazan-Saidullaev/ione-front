@@ -352,35 +352,6 @@ export function TeacherRiskDashboardPage({ session }: Props) {
                 ))}
               </div>
             </div>
-            <div className="panel-block">
-              <div className="panel-heading">
-                <h3>Ответы</h3>
-              </div>
-              <div className="answers-table-wrapper">
-                <table className="answers-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Категория</th>
-                      <th>Вопрос</th>
-                      <th>Ответ</th>
-                      <th>Баллы</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attemptDetails.answers.map((answer) => (
-                      <tr key={answer.questionId}>
-                        <td>{answer.orderNumber}</td>
-                        <td>{answer.categoryName}</td>
-                        <td>{answer.questionText}</td>
-                        <td>{answer.selectedOptionText}</td>
-                        <td>{answer.score}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         ) : null}
       </section>
