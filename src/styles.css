@@ -1539,6 +1539,19 @@ select {
   border: 1px solid rgba(16, 32, 51, 0.1);
   background: rgba(248, 250, 252, 0.92);
   padding: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.content-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(39, 64, 89, 0.12);
+}
+
+.content-card.selected {
+  background: linear-gradient(135deg, rgba(31, 111, 120, 0.13), rgba(36, 77, 124, 0.12));
+  border-color: rgba(31, 111, 120, 0.5);
+  box-shadow: 0 12px 32px rgba(31, 111, 120, 0.15);
+  transform: translateY(-1px);
 }
 
 .progress-grid {

@@ -64,7 +64,7 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
           </div>
         ) : null}
 
-        <div className="student-list">
+        <div className="student-list list-animate">
           {completed.map((row) => (
             <Link key={row.studentId} className="student-card" to={`/teachers/tests/${row.studentId}/results`}>
               <div className="student-card-top">

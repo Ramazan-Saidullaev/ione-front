@@ -115,13 +115,13 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
           </div>
         ) : null}
 
-        <div className="student-list">
+        <div className="student-list list-animate">
           {!selectedTestId ? (
             summaries.map((test) => (
               <button
                 key={test.testId}
                 type="button"
-                className="student-card"
+                className={`student-card ${selectedTestId === test.testId ? "selected" : ""}`}
                 onClick={() => setSelectedTestId(test.testId)}
               >
                 <div className="student-card-top">
@@ -136,7 +136,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
             <>
               <button
                 type="button"
-                className="student-card"
+                className={`student-card ${selectedTestId === null ? "selected" : ""}`}
                 onClick={() => {
                   setSelectedTestId(null);
                   setAttempts([]);
@@ -162,6 +162,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                 </div>
               ) : null}
 
+              <div className="list-animate">
               {attempts.map((a, idx) => (
                 <button
                   key={a.attemptId}
@@ -184,12 +185,13 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                   <small>attemptId: {a.attemptId}</small>
                 </button>
               ))}
+              </div>
             </>
           )}
         </div>
       </aside>
 
-      <section className="card details-card">
+      <section className="card details-card panel-animate" key={`attempt-${expandedAttemptId ?? 'none'}`}>
         <div className="section-heading">
           <p className="eyebrow">Панель</p>
           <h2>Категории и зоны риска</h2>
@@ -231,7 +233,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
               if (!summary) return null;
 
               return (
-                <div className="details-layout">
+                <div className="details-layout results-animate">
                   <div className="summary-grid">
                     <div className="info-box">
                       <span>Тест</span>

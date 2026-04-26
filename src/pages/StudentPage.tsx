@@ -434,7 +434,7 @@ export function StudentPage() {
       <div className="student-tabs">
         {[
           { id: "courses", label: "📚 Учебные курсы" },
-          { id: "tests", label: "🧠 Психологические тесты" }
+          { id: "tests", label: "🧠 Тесты" }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -493,11 +493,6 @@ export function StudentPage() {
                   label: "Перейти к тестам",
                   onClick: () => setActiveTab("tests"),
                   tone: "ghost"
-                },
-                {
-                  label: "Посмотреть публичные курсы",
-                  href: "/public-courses",
-                  tone: "ghost"
                 }
               ]
             : [
@@ -527,7 +522,7 @@ export function StudentPage() {
             </div>
             {coursesLoading ? <div className="empty-state">Загрузка курсов...</div> : null}
             {coursesError ? <div className="banner error">{coursesError}</div> : null}
-            <div className="stack">
+            <div className="stack list-animate">
               {courses.length === 0 && !coursesLoading && <p className="muted-text">Нет доступных курсов</p>}
               {courses.map((course) => (
                 <button
@@ -566,7 +561,7 @@ export function StudentPage() {
             </div>
             {lessonsLoading ? <div className="empty-state">Загрузка уроков...</div> : null}
             {lessonsError ? <div className="banner error">{lessonsError}</div> : null}
-            <div className="stack">
+            <div className="stack list-animate">
               {lessons.length === 0 && selectedCourseId && !lessonsLoading && <p className="muted-text">В этом курсе пока нет уроков.</p>}
               {lessons.map((lesson) => (
                 <button
@@ -599,7 +594,7 @@ export function StudentPage() {
             </div>
           </aside>
 
-          <section className="card details-card">
+          <section className="card details-card panel-animate">
             {selectedCourseProgress ? (
               <div
                 style={{
@@ -623,7 +618,7 @@ export function StudentPage() {
             </div>
             {lessonDetailsLoading ? <div className="empty-state">Загрузка урока...</div> : null}
             {!lessonDetailsLoading && lessonDetails ? (
-              <div className="details-layout">
+              <div className="details-layout animate-fade-in" key={`lesson-${selectedLessonId}`}>
                 {programFullyCompleted ? (
                   <div
                     className="panel-block"
@@ -804,7 +799,7 @@ export function StudentPage() {
               <h2>Тесты</h2>
             </div>
             {testsError ? <div className="banner error">{testsError}</div> : null}
-            <div className="stack">
+            <div className="stack list-animate">
               {tests.length === 0 && <p className="muted-text">Доступных тестов пока нет.</p>}
               {tests.map((test) => (
                 <button
@@ -822,14 +817,14 @@ export function StudentPage() {
             </div>
           </aside>
 
-          <section className="card details-card">
+          <section className="card details-card panel-animate">
             {questionsLoading ? <div className="empty-state">Загрузка вопросов...</div> : null}
             {questionsError ? <div className="banner error">{questionsError}</div> : null}
 
             {!questionsLoading && selectedTestId && questions.length > 0 ? (
               <div className="details-layout">
                 {!attemptId && !finishResult ? (
-                  <div className="empty-state" style={{ padding: '60px 20px' }}>
+                  <div className="empty-state animate-fade-in" key="test-intro" style={{ padding: '60px 20px' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📝</div>
                     <h3 style={{ fontSize: '1.4rem', color: '#111827', marginBottom: '12px' }}>Готовы начать тест?</h3>
                     <p style={{ color: '#4b5563', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>Вам будет предложено несколько вопросов. Пожалуйста, отвечайте на них честно. После завершения теста результаты будут отправлены вашему учителю.</p>
@@ -840,13 +835,13 @@ export function StudentPage() {
                 ) : null}
 
                 {attemptId && !finishResult ? (
-                  <div>
+                  <div className="animate-fade-in" key={`test-attempt-${attemptId}`}>
                     <div className="student-test-head">
                       <h2 style={{ margin: 0, color: '#111827' }}>Прохождение теста</h2>
                       <span style={{ background: '#e0e7ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '99px', fontWeight: 600, fontSize: '0.9rem' }}>В процессе</span>
                     </div>
                     
-                    <div className="question-list" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div className="question-list list-animate" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                       {questions.map((question, index) => {
                         const isUnanswered = unansweredQuestions.includes(question.id);
                         return (
@@ -895,7 +890,7 @@ export function StudentPage() {
                 ) : null}
 
                 {finishResult ? (
-                  <div className="panel-block" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                  <div className="panel-block result-success-animate" key="test-result" style={{ textAlign: 'center', padding: '40px 20px' }}>
                     <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🎉</div>
                     <h2 style={{ color: '#111827', marginBottom: '12px' }}>Тест успешно завершен!</h2>
                     <p style={{ color: '#4b5563', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 24px' }}>Ваши ответы сохранены и отправлены вашему учителю для ознакомления. Спасибо за прохождение.</p>

@@ -1,0 +1,311 @@
+/* Micro-animations for SanaU dashboard */
+
+/* Card hover and selection animations */
+.student-card,
+.course-card,
+.lesson-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.student-card:hover,
+.course-card:hover,
+.lesson-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(39, 64, 89, 0.15);
+}
+
+.student-card.selected,
+.course-card.selected,
+.lesson-card.selected {
+  transform: translateY(-1px);
+  border-color: #4a7fa0;
+  box-shadow: 0 4px 16px rgba(74, 127, 160, 0.2);
+}
+
+/* Content fade-in animation */
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: contentFadeIn 0.3s ease-out;
+}
+
+/* Staggered list item animations */
+@keyframes listItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.list-animate > * {
+  animation: listItemFadeIn 0.25s ease-out;
+  animation-fill-mode: both;
+}
+
+.list-animate > *:nth-child(1) { animation-delay: 0ms; }
+.list-animate > *:nth-child(2) { animation-delay: 40ms; }
+.list-animate > *:nth-child(3) { animation-delay: 80ms; }
+.list-animate > *:nth-child(4) { animation-delay: 120ms; }
+.list-animate > *:nth-child(5) { animation-delay: 160ms; }
+.list-animate > *:nth-child(6) { animation-delay: 200ms; }
+.list-animate > *:nth-child(7) { animation-delay: 240ms; }
+.list-animate > *:nth-child(8) { animation-delay: 280ms; }
+
+/* Modal animations */
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalContentFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-overlay {
+  animation: modalBackdropFadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  animation: modalContentFadeIn 0.25s ease-out;
+}
+
+/* Tab switching animation */
+@keyframes tabContentSwitch {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tab-content-animate {
+  animation: tabContentSwitch 0.2s ease-out;
+}
+
+/* Button press animation */
+@keyframes buttonPress {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.btn-animate:active {
+  animation: buttonPress 0.15s ease-out;
+}
+
+/* Loading skeleton shimmer */
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.8) 25%,
+    rgba(241, 245, 249, 0.9) 50%,
+    rgba(226, 232, 240, 0.8) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* Info box appearance */
+@keyframes infoBoxFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.info-box-animate {
+  animation: infoBoxFadeIn 0.2s ease-out;
+}
+
+/* Progress bar fill animation */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+}
+
+.progress-bar-fill-animate {
+  animation: progressFill 0.6s ease-out;
+}
+
+/* Scenario option selection */
+@keyframes optionSelected {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(74, 127, 160, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 4px rgba(74, 127, 160, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 2px rgba(74, 127, 160, 0.3);
+  }
+}
+
+.option-btn-selected {
+  animation: optionSelected 0.3s ease-out;
+  border-color: #4a7fa0;
+  background: rgba(74, 127, 160, 0.08);
+}
+
+/* Panel slide animation for teacher dashboard */
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.panel-animate {
+  animation: panelSlideIn 0.25s ease-out;
+}
+
+/* Empty state fade */
+@keyframes emptyStateFade {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.empty-state-animate {
+  animation: emptyStateFade 0.3s ease-out;
+}
+
+/* Slide left-right animation for attempt/student selection */
+@keyframes slideFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-right {
+  animation: slideFromRight 0.3s ease-out;
+}
+
+.animate-slide-left {
+  animation: slideFromLeft 0.3s ease-out;
+}
+
+/* Staggered content animation for results */
+.results-animate > * {
+  animation: slideFromRight 0.25s ease-out;
+  animation-fill-mode: both;
+}
+
+.results-animate > *:nth-child(1) { animation-delay: 0ms; }
+.results-animate > *:nth-child(2) { animation-delay: 50ms; }
+.results-animate > *:nth-child(3) { animation-delay: 100ms; }
+.results-animate > *:nth-child(4) { animation-delay: 150ms; }
+.results-animate > *:nth-child(5) { animation-delay: 200ms; }
+.results-animate > *:nth-child(6) { animation-delay: 250ms; }
+.results-animate > *:nth-child(7) { animation-delay: 300ms; }
+.results-animate > *:nth-child(8) { animation-delay: 350ms; }
+
+/* Banner/notification animations */
+@keyframes bannerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.banner-animate {
+  animation: bannerSlideDown 0.3s ease-out;
+}
+
+/* Success result animation */
+@keyframes resultPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  70% {
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.result-success-animate {
+  animation: resultPopIn 0.5s ease-out;
+}

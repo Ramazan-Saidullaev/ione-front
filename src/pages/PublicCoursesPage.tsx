@@ -115,7 +115,7 @@ export function PublicCoursesPage() {
           </div>
           {coursesLoading && <div className="empty-state">Загрузка курсов...</div>}
           {coursesError && <div className="banner error">{coursesError}</div>}
-          <div className="stack">
+          <div className="stack list-animate">
             {courses.length === 0 && !coursesLoading && <p className="muted-text">Курсы пока не добавлены.</p>}
             {courses.map((course) => (
               <button
@@ -139,7 +139,7 @@ export function PublicCoursesPage() {
           </div>
           {lessonsLoading && <div className="empty-state">Загрузка уроков...</div>}
           {lessonsError && <div className="banner error">{lessonsError}</div>}
-          <div className="stack">
+          <div className="stack list-animate">
             {lessons.length === 0 && selectedCourseId && !lessonsLoading && (
               <p className="muted-text">В этом курсе пока нет уроков.</p>
             )}
@@ -161,14 +161,14 @@ export function PublicCoursesPage() {
         </aside>
 
         {/* Основная зона с контентом урока */}
-        <section className="card details-card">
+        <section className="card details-card panel-animate">
           <div className="section-heading">
             <p className="eyebrow">Содержимое</p>
             <h2>Просмотр урока</h2>
           </div>
           {lessonDetailsLoading && <div className="empty-state">Загрузка урока...</div>}
           {!lessonDetailsLoading && lessonDetails && (
-            <div className="details-layout">
+            <div className="details-layout animate-fade-in" key={`lesson-${selectedLessonId}`}>
               <div className="panel-block">
                 <div className="content-card" style={{ fontSize: "1.05rem", lineHeight: 1.6 }}>
                   <h3 style={{ marginTop: 0 }}>{lessonDetails.title}</h3>

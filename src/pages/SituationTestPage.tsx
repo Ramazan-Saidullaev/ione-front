@@ -283,11 +283,11 @@ export function SituationTestPage() {
         </p>
 
         {step === "list" ? (
-          <div className="content-card" style={{ padding: "20px", marginBottom: "20px" }}>
+          <div className="content-card animate-fade-in" key="step-list" style={{ padding: "20px", marginBottom: "20px" }}>
             <p style={{ marginTop: 0, color: "#334155", lineHeight: 1.6 }}>
               Выберите один из ситуационных тестов для этого урока. Каждый тест можно пройти <strong>один раз</strong>.
             </p>
-            <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
+            <div className="list-animate" style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
               {list.map((s) => {
                 const isActive = (s.scenarioId ?? null) === activeScenarioId;
                 const statusLabel = s.completed ? "Пройден" : s.available ? "Доступен" : "Недоступен";
@@ -348,11 +348,6 @@ export function SituationTestPage() {
                       >
                         {s.completed ? "Открыть результат" : s.available ? "Начать" : "Открыть"}
                       </button>
-                      {isActive ? (
-                        <button type="button" className="ghost-button" onClick={() => setStep("intro")} style={{ padding: "10px 16px" }}>
-                          Подробнее
-                        </button>
-                      ) : null}
                     </div>
                   </div>
                 );
@@ -362,7 +357,7 @@ export function SituationTestPage() {
         ) : null}
 
         {showUnavailable ? (
-          <div className="content-card" style={{ padding: "20px", marginBottom: "20px" }}>
+          <div className="content-card animate-fade-in" key="step-unavailable" style={{ padding: "20px", marginBottom: "20px" }}>
             <p style={{ margin: 0, color: "#334155", lineHeight: 1.6 }}>
               {scenario?.message || "Ситуационный тест сейчас недоступен."}
             </p>
@@ -370,7 +365,7 @@ export function SituationTestPage() {
         ) : null}
 
         {step === "intro" && scenario?.available && !scenario.completed ? (
-          <div className="content-card" style={{ padding: "24px", marginBottom: "20px", lineHeight: 1.65 }}>
+          <div className="content-card animate-fade-in" key="step-intro" style={{ padding: "24px", marginBottom: "20px", lineHeight: 1.65 }}>
             <p style={{ marginTop: 0, color: "#334155" }}>
               Вы завершили урок «{lessonTitle}». Вам доступен ситуационный тест: короткая ситуация и выбор действия. Его можно
               пройти <strong>один раз</strong>; после отправки ответа повторно пройти тот же тест будет нельзя.
@@ -385,7 +380,7 @@ export function SituationTestPage() {
         ) : null}
 
         {step === "test" && scenario?.available && !scenario.completed ? (
-          <div className="content-card" style={{ padding: "24px", marginBottom: "20px" }}>
+          <div className="content-card animate-fade-in" key={`step-test-${scenario?.scenarioId}`} style={{ padding: "24px", marginBottom: "20px" }}>
             {scenario.baseImageUrl ? (
               <img
                 src={resolveStudentMediaSrc(api.baseUrl, scenario.baseImageUrl)}
@@ -434,7 +429,8 @@ export function SituationTestPage() {
 
         {step === "result" && displayOutcome ? (
           <div
-            className="content-card"
+            className="content-card animate-fade-in"
+            key={`step-result-${scenario?.scenarioId}`}
             style={{
               padding: "24px",
               background: "#f8fafc",

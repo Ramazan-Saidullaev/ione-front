@@ -170,7 +170,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
                   {zone}
                 </span>
               </div>
-              <div className="student-list" style={{ gap: "10px" }}>
+              <div className="student-list list-animate" style={{ gap: "10px" }}>
                 {items.map((student) => (
                   <button
                     key={student.attemptId}
@@ -310,7 +310,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
         </div>
       </aside>
 
-      <section className="card details-card">
+      <section className="card details-card panel-animate" key={`attempt-${selectedAttemptId ?? 'none'}`}>
         <div className="section-heading">
           <p className="eyebrow">Детали</p>
           <h2>Отчёт по попытке</h2>
@@ -324,7 +324,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
           </div>
         ) : null}
         {!detailsLoading && !detailsError && attemptDetails ? (
-          <div className="details-layout">
+          <div className="details-layout results-animate">
             <div className="summary-grid">
               <InfoBox label="Ученик" value={attemptDetails.studentName} />
               <InfoBox label="Тест" value={attemptDetails.testTitle} />

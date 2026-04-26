@@ -55,7 +55,7 @@ export function TeacherStudentsProgressPage({ session }: Props) {
           </div>
         ) : null}
 
-        <div className="student-list">
+        <div className="student-list list-animate">
           {rows.map((student) => (
             <button
               key={student.studentId}
@@ -77,7 +77,7 @@ export function TeacherStudentsProgressPage({ session }: Props) {
         </div>
       </aside>
 
-      <section className="card details-card">
+      <section className="card details-card panel-animate" key={`student-${expandedStudentId ?? 'none'}`}>
         <div className="section-heading">
           <p className="eyebrow">Курсы</p>
           <h2>Панель прогресса</h2>
@@ -89,7 +89,7 @@ export function TeacherStudentsProgressPage({ session }: Props) {
             <p>Выберите ученика слева, чтобы увидеть прогресс по курсам.</p>
           </div>
         ) : (
-          <div className="details-layout">
+          <div className="details-layout results-animate">
             <div className="summary-grid">
               <div className="info-box">
                 <span>Ученик</span>
@@ -126,10 +126,9 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                   return (
                     <article
                       key={course.courseId}
-                      className="content-card"
+                      className={`content-card ${expandedCourseId === course.courseId ? "selected" : ""}`}
                       style={{
-                        cursor: "pointer",
-                        border: expandedCourseId === course.courseId ? "2px solid #2563eb" : undefined
+                        cursor: "pointer"
                       }}
                       onClick={() => setExpandedCourseId(course.courseId)}
                     >
