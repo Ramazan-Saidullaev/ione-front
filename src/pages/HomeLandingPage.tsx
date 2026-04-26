@@ -94,7 +94,7 @@ export function HomeLandingPage() {
         <div className="byjus-section-head">
           <p className="byjus-kicker">Каталог</p>
           <h2 className="byjus-h2">Популярные курсы</h2>
-          <p className="byjus-text">Показываем реальные курсы из вашего сервера: /api/public/courses.</p>
+          <p className="byjus-text">Показываем реальные курсы:</p>
         </div>
 
         {coursesLoading ? (
