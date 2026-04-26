@@ -1,205 +1,261 @@
+import { useEffect, useMemo, useState } from "react";
+import { api } from "../api";
 import { GlobalHeader } from "../components/GlobalHeader";
+import type { Course } from "../types";
 
 export function HomeLandingPage() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [coursesError, setCoursesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCoursesLoading(true);
+    setCoursesError(null);
+    api
+      .getCourses()
+      .then(setCourses)
+      .catch((e: unknown) => {
+        setCourses([]);
+        setCoursesError(e instanceof Error ? e.message : "Не удалось загрузить курсы");
+      })
+      .finally(() => setCoursesLoading(false));
+  }, []);
+
+  const ageGroups = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of courses) {
+      const v = c.ageGroup?.trim();
+      if (v) set.add(v);
+    }
+    return Array.from(set);
+  }, [courses]);
+
+  const featuredCourses = useMemo(() => courses.slice(0, 6), [courses]);
+
   return (
-    <main className="landing-shell">
+    <main className="landing-shell byjus-landing">
       <GlobalHeader />
 
-      <section className="landing-hero">
-        <div className="hero-panel landing-panel">
-          <p className="eyebrow">Қазақстандағы оқушылар, ата-аналар және мұғалімдер үшін</p>
-          <h1>Өмірге қажет дағдылар — күніне бірнеше минутта.</h1>
-          <p className="lead">Қысқа видеолар, жылдам тесттер және шешім қабылдау тапсырмалары 6–16 жас аралығындағы оқушыларға қаржылық сауаттылық пен өмірлік ойлауды дамытуға көмектеседі — мұғалімдер үшін түсінікті прогресс бақылауымен.</p>
-          <div className="landing-actions">
-            <a className="primary-link-button" href="/auth">
-              Тегін бастау
-            </a>
-            <a className="secondary-link-button" href="/public-courses">
-              Курстарды қарау
-            </a>
-            <a className="secondary-link-button" href="#about">
-              Қалай жұмыс істейді
-            </a>
-          </div>
-          <div className="trust-strip">
-            <span>Смартфонға бейімделген микрооқу</span>
-            <span>2–3 минуттық сабақтар</span>
-            <span>Теория емес — практика</span>
-          </div>
-        </div>
+      <section className="byjus-hero" id="product">
+        <div className="byjus-hero-inner">
+          <div className="byjus-hero-copy">
+            <div className="byjus-badges">
+              <span className="byjus-badge">6–16 лет</span>
+              <span className="byjus-badge">микро‑уроки</span>
+              <span className="byjus-badge">практика</span>
+            </div>
 
-        <div className="landing-feature-grid hero-side-grid">
-          <article className="card signal-card">
-            <p className="eyebrow">Сіз не аласыз</p>
-            <h2>Оқу прогресі анық көрінеді — пайдалы дағдылар тез бекітіледі.</h2>
-            <ul className="clean-list">
-              <li>Смартфонға арналған микро-сабақтар</li>
-              <li>Әр сабақтан кейін тест және шешім тапсырмасы</li>
-              <li>Мұғалімдерге арналған панель және жеңіл аналитика</li>
-            </ul>
-          </article>
+            <h1 className="byjus-h1">Жизненные навыки, которые действительно закрепляются.</h1>
+            <p className="byjus-lead">
+              Короткие уроки по 2–3 минуты + квиз + сценарий. Формируем финансовую грамотность, кибербезопасность,
+              основы права и коммуникацию — в удобном мобильном формате.
+            </p>
 
-          <div className="stats-grid">
-            <article className="stat-card">
-              <strong>Дағдылар</strong>
-              <span>Ақша, таңдау, күнделікті ойлау</span>
-            </article>
-            <article className="stat-card">
-              <strong>Тексеру</strong>
-              <span>Бекітуге арналған жылдам тесттер</span>
-            </article>
-            <article className="stat-card">
-              <strong>Түсінік</strong>
-              <span>Оңай қадағаланатын прогресс</span>
-            </article>
-            <article className="stat-card">
-              <strong>Бағыт</strong>
-              <span>Ережеге негізделген оқу жолдары</span>
-            </article>
+            <div className="byjus-cta">
+              <a className="byjus-btn byjus-btn-primary" href="/auth">Начать бесплатно</a>
+              <a className="byjus-btn byjus-btn-ghost" href="/public-courses">Смотреть курсы</a>
+            </div>
+
+            <div className="byjus-trust">
+              <div className="byjus-trust-item">
+                <strong>{coursesLoading ? "…" : courses.length}</strong>
+                <span>курсов в каталоге</span>
+              </div>
+              <div className="byjus-trust-item">
+                <strong>{coursesLoading ? "…" : ageGroups.length || "—"}</strong>
+                <span>возрастных групп</span>
+              </div>
+              <div className="byjus-trust-item">
+                <strong>2–3 минуты</strong>
+                <span>на урок</span>
+              </div>
+            </div>
+
+            {coursesError ? <div className="byjus-inline-error">{coursesError}</div> : null}
+          </div>
+
+          <div className="byjus-hero-media" aria-hidden="true">
+            <div className="byjus-media-card">
+              <img className="byjus-hero-img" src="/landing-hero.svg" alt="" />
+            </div>
+            <div className="byjus-float byjus-float-1">
+              <strong>Прогресс</strong>
+              <span>видно учителю</span>
+            </div>
+            <div className="byjus-float byjus-float-2">
+              <strong>Обратная связь</strong>
+              <span>без перегруза</span>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="landing-sections two-column" id="about">
-        <div className="card feature-card">
-          <div className="section-heading">
-            <p className="eyebrow">Мәселе</p>
-            <h2>Оқушыларға өмірлік дағдылар керек — бірақ оқу әлі де тым теориялық.</h2>
+      <section className="byjus-section" id="catalog">
+        <div className="byjus-section-head">
+          <p className="byjus-kicker">Каталог</p>
+          <h2 className="byjus-h2">Популярные курсы</h2>
+          <p className="byjus-text">Показываем реальные курсы из вашего сервера: /api/public/courses.</p>
+        </div>
+
+        {coursesLoading ? (
+          <div className="byjus-course-grid" aria-busy="true">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="byjus-course-skeleton" />
+            ))}
           </div>
-          <p className="lead compact-lead">
-            Көптеген оқушылардың қаржылық сауаттылығы мен шешім қабылдау дағдылары жеткіліксіз. 
+        ) : featuredCourses.length === 0 ? (
+          <div className="byjus-empty">
+            <strong>Пока нет курсов</strong>
+            <span>Добавь курсы в админке — и они появятся на лендинге автоматически.</span>
+          </div>
+        ) : (
+          <div className="byjus-course-grid">
+            {featuredCourses.map((course) => (
+              <a key={course.id} className="byjus-course-card" href="/public-courses">
+                <div className="byjus-course-top">
+                  <strong>{course.title}</strong>
+                  <span className="byjus-pill">{course.ageGroup || "Для всех"}</span>
+                </div>
+                <p>{course.description || "Короткие уроки + квиз + сценарии для закрепления навыков."}</p>
+                <div className="byjus-course-cta">
+                  <span>Открыть</span>
+                  <span className="byjus-arrow">→</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="byjus-section" id="features">
+        <div className="byjus-section-head">
+          <p className="byjus-kicker">Как работает</p>
+          <h2 className="byjus-h2">Смотрим. Проверяем. Применяем.</h2>
+          <p className="byjus-text">
+            Мы сделали простой цикл обучения: микро‑урок → квиз → сценарий. Он помогает превратить знания в
+            действие и удерживать регулярность.
           </p>
-          <div className="bullet-grid">
-            <div className="mini-feature">
-              <strong>Қызығушылық төмен</strong>
-              <p>Ұзақ, теорияға негізделген сабақтар қазіргі оқу әдетіне сай емес.</p>
+        </div>
+
+        <div className="byjus-split">
+          <div className="byjus-split-copy">
+            <div className="byjus-step">
+              <div className="byjus-step-dot">1</div>
+              <div>
+                <strong>Микро‑урок 2–3 минуты</strong>
+                <span>Коротко и по делу — без перегруза.</span>
+              </div>
             </div>
-            <div className="mini-feature">
-              <strong>Дағды алшақтығы</strong>
-              <p>Ақша, таңдау және нақты жағдайлар үшін практикалық ойлау керек.</p>
+            <div className="byjus-step">
+              <div className="byjus-step-dot">2</div>
+              <div>
+                <strong>Квиз с обратной связью</strong>
+                <span>Закрепляем понимание сразу после просмотра.</span>
+              </div>
             </div>
-            <div className="mini-feature">
-              <strong>Қадағалау қиын</strong>
-              <p>Қарапайым панельсіз прогресс пен әл-ауқат сигналдарын байқамай қалу оңай.</p>
+            <div className="byjus-step">
+              <div className="byjus-step-dot">3</div>
+              <div>
+                <strong>Сценарий «как в жизни»</strong>
+                <span>Выбираем вариант и видим последствия.</span>
+              </div>
             </div>
+            <div className="byjus-note">
+              Психологический модуль — ранний «сигнал» для внимания, не медицинский диагноз.
+            </div>
+          </div>
+
+          <div className="byjus-split-media" aria-hidden="true">
+            <img className="byjus-figure" src="/landing-learning.svg" alt="" />
           </div>
         </div>
 
-        <div className="card feature-card">
-          <div className="section-heading">
-            <p className="eyebrow">Шешім</p>
-            <h2>Табиғи қабылданатын микрооқу — маңызды дағдыларды қалыптастырады.</h2>
+        <div className="byjus-grid">
+          <div className="byjus-card">
+            <strong>Финансовая грамотность</strong>
+            <span>Бюджет, ценность денег, ежедневные решения.</span>
           </div>
-          <div className="bullet-grid">
-            <div className="mini-feature">
-              <strong>2–3 минуттық сабақтар</strong>
-              <p>Назарды ұстап, қарқынды сақтайтын қысқа видеолар.</p>
-            </div>
-            <div className="mini-feature">
-              <strong>Дереу практика</strong>
-              <p>Әр сабақтан кейін тест және шешім тапсырмасы.</p>
-            </div>
-            <div className="mini-feature">
-              <strong>Жекелендірілген жол</strong>
-              <p>Ережеге негізделген ұсыныстар оқуды мақсатты әрі қолжетімді етеді.</p>
-            </div>
+          <div className="byjus-card">
+            <strong>Кибербезопасность</strong>
+            <span>Пароли, фишинг, защита данных.</span>
           </div>
-          <div className="highlight-box">
-            <strong>Мұғалімге ыңғайлы</strong>
-            <p>Панельдер прогресті оңай бақылауға және дер кезінде қолдауға мүмкіндік береді.</p>
+          <div className="byjus-card">
+            <strong>Право и ответственность</strong>
+            <span>Понятные основы для онлайн и офлайн.</span>
+          </div>
+          <div className="byjus-card">
+            <strong>Коммуникация</strong>
+            <span>Этикет и здоровое общение.</span>
+          </div>
+          <div className="byjus-card">
+            <strong>Учительская панель</strong>
+            <span>Прогресс, результаты, зоны риска.</span>
+          </div>
+          <div className="byjus-card">
+            <strong>Рекомендации</strong>
+            <span>Подсказки по следующему шагу обучения.</span>
           </div>
         </div>
       </section>
 
-      <section className="landing-sections" id="features">
-        <div className="section-header-block">
-          <p className="eyebrow">Негізгі мүмкіндіктер</p>
-          <h2>Практикалық оқу үшін қажетінің бәрі — бір платформада.</h2>
+      <section className="byjus-section" id="audience">
+        <div className="byjus-section-head">
+          <p className="byjus-kicker">Для кого</p>
+          <h2 className="byjus-h2">Одна платформа — разные роли</h2>
         </div>
-        <div className="feature-grid-wide">
-          <article className="card feature-card">
-            <h3>Интерактивті микрооқу</h3>
-            <p>Аяқтауға да, қайталауға да оңай қысқа сабақтар.</p>
-          </article>
-          <article className="card feature-card">
-            <h3>Тесттер және шешім тапсырмалары</h3>
-            <p>Жылдам тексеріспен білімді әрекетке айналдырыңыз.</p>
-          </article>
-          <article className="card feature-card">
-            <h3>Әл-ауқатты скрининг (прототип)</h3>
-            <p>Оқушының жағдайын бақылап, тәуекелді ерте байқауға арналған жеңіл модуль.</p>
-          </article>
-          <article className="card feature-card">
-            <h3>Мұғалім панелі</h3>
-            <p>Прогресті бақылаңыз, аяқталғанын көріңіз, оқушыға тезірек көмектесіңіз.</p>
-          </article>
+
+        <div className="byjus-audience">
+          <div className="byjus-audience-card">
+            <strong>Школьникам</strong>
+            <span>Короткие уроки + практика, чтобы реально запомнить.</span>
+          </div>
+          <div className="byjus-audience-card">
+            <strong>Учителям</strong>
+            <span>Обзор прогресса и результатов без ручных таблиц.</span>
+          </div>
+          <div className="byjus-audience-card">
+            <strong>Родителям</strong>
+            <span>Понимание, что ребенок учится полезным навыкам.</span>
+          </div>
+        </div>
+
+        <div className="byjus-split byjus-split-tight">
+          <div className="byjus-split-media" aria-hidden="true">
+            <img className="byjus-figure" src="/landing-teacher.svg" alt="" />
+          </div>
+          <div className="byjus-split-copy">
+            <h3 className="byjus-h3">Учителю — понятная аналитика</h3>
+            <p className="byjus-text">
+              Кто учится регулярно, кто пропускает, какие темы вызывают трудности — всё в одном месте.
+            </p>
+            <div className="byjus-mini">
+              <strong>Сигналы риска</strong>
+              <span>Помогают заметить проблему раньше, чем она станет большой.</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="landing-sections" id="steps">
-        <div className="section-header-block">
-          <p className="eyebrow">Қалай жұмыс істейді</p>
-          <h2>Оқушыға түсінікті жол — мұғалімге бақыланатын процесс.</h2>
+      <section className="byjus-cta">
+        <div className="byjus-cta-inner">
+          <div>
+            <p className="byjus-kicker">Готовы начать?</p>
+            <h2 className="byjus-h2">Попробуйте бесплатно и покажите результат.</h2>
+            <p className="byjus-text" style={{ margin: 0 }}>
+              Для демонстрации диплома важно первое впечатление — этот экран делает его сильным.
+            </p>
+          </div>
+          <div className="byjus-cta-actions">
+            <a className="byjus-btn byjus-btn-primary" href="/auth">Регистрация</a>
+            <a className="byjus-btn byjus-btn-ghost" href="/public-courses">Открыть курсы</a>
+          </div>
         </div>
-        <div className="steps-grid">
-          <article className="step-card">
-            <span>01</span>
-            <h3>Бағыт таңдаңыз</h3>
-            <p>Тақырып таңдаңыз немесе ұсынылған оқу жолымен жүріңіз.</p>
-          </article>
-          <article className="step-card">
-            <span>02</span>
-            <h3>Бірнеше минутта үйреніңіз</h3>
-            <p>Смартфонға лайық 2–3 минуттық видеоны қараңыз.</p>
-          </article>
-          <article className="step-card">
-            <span>03</span>
-            <h3>Практика және тексеру</h3>
-            <p>Материалды бекіту үшін тест пен шешім тапсырмасын орындаңыз.</p>
-          </article>
-          <article className="step-card">
-            <span>04</span>
-            <h3>Прогресті бақылаңыз</h3>
-            <p>Мұғалім панельден прогресті көріп, дер кезінде қолдай алады.</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="landing-sections" id="reviews">
-        <div className="section-header-block">
-          <p className="eyebrow">Пайдасы</p>
-          <h2>Оқушыға арналған — мұғалімге де пайдалы.</h2>
-        </div>
-        <div className="feature-grid-wide">
-          <article className="card testimonial-card">
-            <p>"Балам оқуын ұнататын болды — қысқа сабақтар тұрақты оқуға көмектеседі."</p>
-            <strong>7-сынып оқушысының ата-анасы</strong>
-          </article>
-          <article className="card testimonial-card">
-            <p>"Панель кімге қолдау керек екенін болжаусыз-ақ түсінуге көмектеседі."</p>
-            <strong>Сынып жетекшісі</strong>
-          </article>
-          <article className="card testimonial-card">
-            <p>"Шешім тапсырмалары жаттаудан гөрі өмірлік ойлауды дамытады."</p>
-            <strong>Педагог</strong>
-          </article>
-        </div>
-      </section>
-
-      <section className="cta-banner">
-        <div>
-          <p className="eyebrow">Бастауға дайынсыз ба?</p>
-          <h2>Оқуды практикалық, қызықты және өмірге жақын етіңіз.</h2>
-        </div>
-        <a className="primary-link-button" href="/auth">
-          Тегін бастау
-        </a>
       </section>
 
       <footer className="site-footer" id="privacy">
         <div className="footer-brand">
           <strong>SanaU</strong>
-          <p>Оқушыларға арналған практикалық микрооқу — мұғалімдерге арналған құралдармен.</p>
+          <p>Практическое микро‑обучение жизненным навыкам — с панелью учителя.</p>
         </div>
         <div className="footer-links">
           <a href="mailto:support@sanau.local">support@sanau.local</a>
@@ -209,8 +265,8 @@ export function HomeLandingPage() {
           <a href="https://instagram.com/" target="_blank" rel="noreferrer">
             Instagram
           </a>
-          <a href="/auth">Кіру</a>
-          <a href="#privacy">Құпиялық саясаты</a>
+          <a href="/auth">Войти</a>
+          <a href="#privacy">Политика конфиденциальности</a>
         </div>
       </footer>
     </main>

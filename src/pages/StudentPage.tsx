@@ -5,6 +5,8 @@ import { loadSession, clearSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
 import { LessonCompletedModal } from "../components/LessonCompletedModal";
 import { VideoLessonPlayer } from "../components/VideoLessonPlayer";
+import { KpiGrid } from "../components/dashboard/KpiGrid";
+import { QuickActionsCard } from "../components/dashboard/QuickActionsCard";
 import type {
   AuthResponse,
   CategoryResult,
@@ -188,6 +190,13 @@ export function StudentPage() {
   const hasNextCourse = selectedCourseIndex !== -1 && selectedCourseIndex < courses.length - 1;
   const programFullyCompleted =
     courses.length > 0 && courses.every((course) => courseProgress[course.id]?.completed === true);
+
+  const completedCoursesCount = courses.filter((course) => courseProgress[course.id]?.completed).length;
+  const totalLessonsCount = Object.values(courseProgress).reduce((sum, p) => sum + (p.totalLessons ?? 0), 0);
+  const completedLessonsCount = Object.values(courseProgress).reduce((sum, p) => sum + (p.completedLessons ?? 0), 0);
+  const selectedCoursePercent = selectedCourseProgress?.totalLessons
+    ? Math.round((selectedCourseProgress.completedLessons / selectedCourseProgress.totalLessons) * 100)
+    : 0;
 
   function handleNextCourse() {
     if (!hasNextCourse || selectedCourseIndex === -1) {
@@ -437,6 +446,77 @@ export function StudentPage() {
           </button>
         ))}
       </div>
+
+      <KpiGrid
+        items={[
+          {
+            label: "Курсы",
+            value: `${completedCoursesCount} / ${courses.length}`,
+            hint: "завершено",
+            tone: completedCoursesCount > 0 ? "success" : "default"
+          },
+          {
+            label: "Уроки",
+            value: `${completedLessonsCount} / ${totalLessonsCount}`,
+            hint: "пройдено",
+            tone: completedLessonsCount > 0 ? "success" : "default"
+          },
+          {
+            label: "Текущий курс",
+            value: selectedCourseId ? `${selectedCoursePercent}%` : "—",
+            hint: selectedCourseId ? "прогресс" : "выберите курс",
+            tone: selectedCoursePercent >= 70 ? "success" : selectedCoursePercent >= 35 ? "warning" : "default"
+          },
+          {
+            label: "Тесты",
+            value: tests.length,
+            hint: "доступно",
+            tone: tests.length > 0 ? "default" : "warning"
+          }
+        ]}
+      />
+
+      <QuickActionsCard
+        title={activeTab === "courses" ? "Продолжить обучение" : "Быстрые действия"}
+        actions={
+          activeTab === "courses"
+            ? [
+                {
+                  label: selectedCourseId && selectedLessonId ? "Открыть текущий урок" : "Выбрать курс",
+                  onClick: () => {
+                    const el = document.querySelector(".details-card");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  },
+                  tone: "primary"
+                },
+                {
+                  label: "Перейти к тестам",
+                  onClick: () => setActiveTab("tests"),
+                  tone: "ghost"
+                },
+                {
+                  label: "Посмотреть публичные курсы",
+                  href: "/public-courses",
+                  tone: "ghost"
+                }
+              ]
+            : [
+                {
+                  label: "Начать выбранный тест",
+                  onClick: () => {
+                    const el = document.querySelector(".details-card");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  },
+                  tone: "primary"
+                },
+                {
+                  label: "Вернуться к курсам",
+                  onClick: () => setActiveTab("courses"),
+                  tone: "ghost"
+                }
+              ]
+        }
+      />
 
       {activeTab === "courses" && (
         <section className="student-dashboard-grid">

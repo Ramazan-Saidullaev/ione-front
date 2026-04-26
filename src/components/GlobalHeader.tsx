@@ -59,10 +59,10 @@ export function GlobalHeader() {
           </div>
         </Link>
         <nav className="global-nav">
-          <a href="/#about" className="nav-dropdown-btn">О платформе</a>
-          <a href="/#features" className="nav-dropdown-btn">Функционал</a>
-          <a href="/#steps" className="nav-dropdown-btn">Как это работает</a>
-          <a href="/#reviews" className="nav-dropdown-btn">Отзывы</a>
+          <a href="/#product" className="nav-dropdown-btn">О платформе</a>
+          <a href="/#features" className="nav-dropdown-btn">Функции</a>
+          <a href="/#audience" className="nav-dropdown-btn">Для кого</a>
+          <a href="/#privacy" className="nav-dropdown-btn">Контакты</a>
         </nav>
       </div>
       <div className="global-header-right">
