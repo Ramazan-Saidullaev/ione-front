@@ -66,8 +66,32 @@ export function TeacherRegisterPage() {
   }
 
   return (
-    <main className="shell route-shell">
-      <GlobalHeader />
+    <main className="shell">
+      <div style={{ gridColumn: "1 / -1" }}>
+        <GlobalHeader />
+      </div>
+
+      <section className="card" style={{ alignSelf: "stretch" }}>
+        <div className="section-heading">
+          <p className="eyebrow">SanaU</p>
+          <h2 style={{ marginTop: 0 }}>Панель учителя и аналитика.</h2>
+        </div>
+        <p className="lead" style={{ marginTop: 0 }}>
+          Регистрация учителя даёт доступ к мониторингу прогресса, результатам тестов и зонам риска по ученикам.
+        </p>
+        <ul className="clean-list" style={{ margin: 0 }}>
+          <li>Список учеников и результаты</li>
+          <li>Зоны риска по тестам</li>
+          <li>Прогресс по курсам и урокам</li>
+        </ul>
+        <div className="highlight-box" style={{ marginTop: "18px" }}>
+          <strong>Подсказка</strong>
+          <p style={{ marginBottom: 0 }}>
+            Укажите «классный руководитель» (например 7А), чтобы ученики могли зарегистрироваться в ваш класс.
+          </p>
+        </div>
+      </section>
+
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleRegister}>
           <div className="section-heading">

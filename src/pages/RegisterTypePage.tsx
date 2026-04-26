@@ -5,8 +5,25 @@ export function RegisterTypePage() {
   const navigate = useNavigate();
 
   return (
-    <main className="shell route-shell">
-      <GlobalHeader />
+    <main className="shell">
+      <div style={{ gridColumn: "1 / -1" }}>
+        <GlobalHeader />
+      </div>
+
+      <section className="card" style={{ alignSelf: "stretch" }}>
+        <div className="section-heading">
+          <p className="eyebrow">SanaU</p>
+          <h2 style={{ marginTop: 0 }}>Одна платформа — разные роли.</h2>
+        </div>
+        <p className="lead" style={{ marginTop: 0 }}>
+          Выберите роль, чтобы создать аккаунт и получить доступ к нужному кабинету.
+        </p>
+        <ul className="clean-list" style={{ margin: 0 }}>
+          <li>Ученикам — уроки, тесты, прогресс</li>
+          <li>Учителям — мониторинг, результаты, аналитика</li>
+        </ul>
+      </section>
+
       <section className="card auth-card auth-home-card">
         <div className="stack">
           <div className="section-heading">

@@ -91,8 +91,32 @@ export function StudentRegisterPage() {
   }
 
   return (
-    <main className="shell route-shell">
-      <GlobalHeader />
+    <main className="shell">
+      <div style={{ gridColumn: "1 / -1" }}>
+        <GlobalHeader />
+      </div>
+
+      <section className="card" style={{ alignSelf: "stretch" }}>
+        <div className="section-heading">
+          <p className="eyebrow">SanaU</p>
+          <h2 style={{ marginTop: 0 }}>Учись коротко, применяй сразу.</h2>
+        </div>
+        <p className="lead" style={{ marginTop: 0 }}>
+          Регистрация ученика открывает доступ к урокам, тестам и фиксации прогресса.
+        </p>
+        <ul className="clean-list" style={{ margin: 0 }}>
+          <li>Курсы по 2–3 минуты</li>
+          <li>Психологические тесты и зоны риска</li>
+          <li>Ситуационные задания с последствиями</li>
+        </ul>
+        <div className="highlight-box" style={{ marginTop: "18px" }}>
+          <strong>Важно</strong>
+          <p style={{ marginBottom: 0 }}>
+            Выберите школу и класс — так учитель увидит ваш прогресс.
+          </p>
+        </div>
+      </section>
+
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleRegister}>
           <div className="section-heading">
