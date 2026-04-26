@@ -272,7 +272,15 @@ export function AdminSchools() {
       <Modal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)} title={editingStudentId ? "Редактировать ученика" : "Добавить ученика"}>
         <form onSubmit={handleStudentSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>ФИО Ученика</span><input type="text" value={studentName} onChange={e => setStudentName(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
-          <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Класс (например, 8A)</span><input type="text" value={studentClass} onChange={e => setStudentClass(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
+          {editingStudentId ? (
+            <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Класс (например, 8A)</span><input type="text" value={studentClass} onChange={e => setStudentClass(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
+          ) : (
+            <div style={{ padding: "12px", backgroundColor: "#f3f4f6", borderRadius: "6px", border: "1px solid #e5e7eb" }}>
+              <span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Класс</span>
+              <span style={{ fontWeight: 600, color: "#111827" }}>{selectedTeacher?.homeroomClass || "Не указан"}</span>
+              <span style={{ display: "block", marginTop: "4px", fontSize: "0.75rem", color: "#6b7280" }}>Класс определяется автоматически по классу учителя</span>
+            </div>
+          )}
           {!editingStudentId && (
             <>
               <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
