@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../api";
 import { loadSession } from "../../storage";
@@ -36,6 +36,26 @@ export function AdminSchools() {
   const [studentClass, setStudentClass] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
+
+  // Clear teacher form fields when opening add modal
+  useEffect(() => {
+    if (isTeacherModalOpen && editingTeacherId === null) {
+      setTeacherName("");
+      setTeacherHomeroomClass("");
+      setTeacherEmail("");
+      setTeacherPassword("");
+    }
+  }, [isTeacherModalOpen, editingTeacherId]);
+
+  // Clear student form fields when opening add modal
+  useEffect(() => {
+    if (isStudentModalOpen && editingStudentId === null) {
+      setStudentName("");
+      setStudentClass("");
+      setStudentEmail("");
+      setStudentPassword("");
+    }
+  }, [isStudentModalOpen, editingStudentId]);
 
   async function handleSchoolSubmit(e: React.FormEvent) {
     e.preventDefault();
