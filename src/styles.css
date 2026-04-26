@@ -25,6 +25,10 @@ body,
   margin: 0;
 }
 
+ html {
+  scroll-behavior: smooth;
+ }
+
 body {
   min-width: 320px;
 }
@@ -223,6 +227,12 @@ select {
  .byjus-section {
   display: grid;
   gap: 18px;
+ }
+
+ .byjus-hero,
+ .byjus-section,
+ .site-footer {
+  scroll-margin-top: 96px;
  }
 
  .byjus-section-head {
