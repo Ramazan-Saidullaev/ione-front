@@ -275,13 +275,13 @@ export function AdminSchools() {
         </form>
       </Modal>
       <Modal isOpen={isTeacherModalOpen} onClose={() => setIsTeacherModalOpen(false)} title={editingTeacherId ? "Редактировать учителя" : "Добавить учителя"}>
-        <form onSubmit={handleTeacherSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <form onSubmit={handleTeacherSubmit} autoComplete="off" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>ФИО Учителя</span><input type="text" value={teacherName} onChange={e => setTeacherName(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
           <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Классный руководитель (например, 7A)</span><input type="text" value={teacherHomeroomClass} onChange={e => setTeacherHomeroomClass(e.target.value)} required={!editingTeacherId} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
           {!editingTeacherId && (
             <>
-              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={teacherEmail} onChange={e => setTeacherEmail(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><PasswordToggleField value={teacherPassword} onChange={setTeacherPassword} required placeholder="Введите пароль" /></label>
+              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={teacherEmail} onChange={e => setTeacherEmail(e.target.value)} required autoComplete="off" style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
+              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><PasswordToggleField value={teacherPassword} onChange={setTeacherPassword} required placeholder="Введите пароль" autoComplete="new-password" /></label>
             </>
           )}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
@@ -291,7 +291,7 @@ export function AdminSchools() {
         </form>
       </Modal>
       <Modal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)} title={editingStudentId ? "Редактировать ученика" : "Добавить ученика"}>
-        <form onSubmit={handleStudentSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <form onSubmit={handleStudentSubmit} autoComplete="off" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>ФИО Ученика</span><input type="text" value={studentName} onChange={e => setStudentName(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
           {editingStudentId ? (
             <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Класс (например, 8A)</span><input type="text" value={studentClass} onChange={e => setStudentClass(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
@@ -304,8 +304,8 @@ export function AdminSchools() {
           )}
           {!editingStudentId && (
             <>
-              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><PasswordToggleField value={studentPassword} onChange={setStudentPassword} required placeholder="Введите пароль" /></label>
+              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} required autoComplete="off" style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
+              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><PasswordToggleField value={studentPassword} onChange={setStudentPassword} required placeholder="Введите пароль" autoComplete="new-password" /></label>
             </>
           )}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>

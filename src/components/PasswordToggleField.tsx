@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function PasswordToggleField({ value, onChange, placeholder, required = false }: { value: string; onChange: (val: string) => void; placeholder?: string; required?: boolean }) {
+export function PasswordToggleField({ value, onChange, placeholder, required = false, autoComplete }: { value: string; onChange: (val: string) => void; placeholder?: string; required?: boolean; autoComplete?: string }) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -11,6 +11,7 @@ export function PasswordToggleField({ value, onChange, placeholder, required = f
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
+        autoComplete={autoComplete}
         className="password-input"
       />
       <button
