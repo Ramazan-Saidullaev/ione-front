@@ -4,6 +4,7 @@ import { api } from "../../api";
 import { loadSession } from "../../storage";
 import { Modal } from "../Modal";
 import { getErrorMessage } from "../../utils/helpers";
+import { PasswordToggleField } from "../../components/PasswordToggleField";
 
 export function AdminSchools() {
   const [session] = useState(() => loadSession("admin"));
@@ -260,7 +261,7 @@ export function AdminSchools() {
           {!editingTeacherId && (
             <>
               <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={teacherEmail} onChange={e => setTeacherEmail(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><input type="password" value={teacherPassword} onChange={e => setTeacherPassword(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
+              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><PasswordToggleField value={teacherPassword} onChange={setTeacherPassword} required placeholder="Введите пароль" /></label>
             </>
           )}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
@@ -284,7 +285,7 @@ export function AdminSchools() {
           {!editingStudentId && (
             <>
               <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Email (логин)</span><input type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><input type="password" value={studentPassword} onChange={e => setStudentPassword(e.target.value)} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} /></label>
+              <label><span style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>Пароль</span><PasswordToggleField value={studentPassword} onChange={setStudentPassword} required placeholder="Введите пароль" /></label>
             </>
           )}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
