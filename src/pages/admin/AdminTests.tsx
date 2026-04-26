@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../api";
-import { loadSession } from "../storage";
-import { getErrorMessage } from "../utils/helpers";
-import { Modal } from "./Modal";
-import type { AdminTestDto, AdminTestCategoryDto } from "../types";
+import { api } from "../../api";
+import { loadSession } from "../../storage";
+import { getErrorMessage } from "../../utils/helpers";
+import { Modal } from "../Modal";
+import type { AdminTestDto, AdminTestCategoryDto } from "../../types";
 
 export function AdminTests() {
   const [session] = useState(() => loadSession("admin"));

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../api";
-import { loadSession, clearSession } from "../storage";
-import { GlobalHeader } from "../components/GlobalHeader";
-import { LessonCompletedModal } from "../components/LessonCompletedModal";
-import { VideoLessonPlayer } from "../components/VideoLessonPlayer";
-import { KpiGrid } from "../components/dashboard/KpiGrid";
-import { QuickActionsCard } from "../components/dashboard/QuickActionsCard";
+import { api } from "../../api";
+import { loadSession, clearSession } from "../../storage";
+import { GlobalHeader } from "../../components/GlobalHeader";
+import { LessonCompletedModal } from "../../components/LessonCompletedModal";
+import { VideoLessonPlayer } from "../../components/VideoLessonPlayer";
+import { KpiGrid } from "../../components/dashboard/KpiGrid";
+import { QuickActionsCard } from "../../components/dashboard/QuickActionsCard";
 import type {
   AuthResponse,
   CategoryResult,
@@ -18,10 +18,10 @@ import type {
   StudentLessonScenarios,
   TestListItem,
   TestQuestion
-} from "../types";
-import { getErrorMessage, formatDateTime } from "../utils/helpers";
-import { useRoleSession, handleRoleLogin } from "../hooks/authHooks";
-import { parseMediaUrl } from "../utils/mediaUrl";
+} from "../../types";
+import { getErrorMessage, formatDateTime } from "../../utils/helpers";
+import { useRoleSession, handleRoleLogin } from "../../hooks/authHooks";
+import { parseMediaUrl } from "../../utils/mediaUrl";
 
 export function StudentPage() {
   const navigate = useNavigate();

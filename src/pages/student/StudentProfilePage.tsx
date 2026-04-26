@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { GlobalHeader } from "../components/GlobalHeader";
-import { InfoBox } from "../components/InfoBox";
-import { loadSession } from "../storage";
-import type { AuthResponse } from "../types";
+import { GlobalHeader } from "../../components/GlobalHeader";
+import { InfoBox } from "../../components/InfoBox";
+import { loadSession } from "../../storage";
+import type { AuthResponse } from "../../types";
 
 export function StudentProfilePage() {
   const [session] = useState<AuthResponse | null>(() => loadSession("student"));

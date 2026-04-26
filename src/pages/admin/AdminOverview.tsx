@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../api";
-import { loadSession } from "../storage";
+import { api } from "../../api";
+import { loadSession } from "../../storage";
 
 export function AdminOverview() {
   const [session] = useState(() => loadSession("admin"));

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { NavLink, Route, Routes, Navigate } from "react-router-dom";
-import { loadSession, clearSession } from "../storage";
-import { GlobalHeader } from "../components/GlobalHeader";
-import type { AuthResponse } from "../types";
-import { useRoleSession } from "../hooks/authHooks";
-import { TeacherRiskDashboardPage } from "./teacher/TeacherRiskDashboardPage";
-import { TeacherAutoTestResultsPage } from "./teacher/TeacherAutoTestResultsPage";
-import { TeacherStudentTestResultsPage } from "./teacher/TeacherStudentTestResultsPage";
-import { TeacherStudentsProgressPage } from "./teacher/TeacherStudentsProgressPage";
+import { loadSession, clearSession } from "../../storage";
+import { GlobalHeader } from "../../components/GlobalHeader";
+import type { AuthResponse } from "../../types";
+import { useRoleSession } from "../../hooks/authHooks";
+import { TeacherRiskDashboardPage } from "./TeacherRiskDashboardPage";
+import { TeacherAutoTestResultsPage } from "./TeacherAutoTestResultsPage";
+import { TeacherStudentTestResultsPage } from "./TeacherStudentTestResultsPage";
+import { TeacherStudentsProgressPage } from "./TeacherStudentsProgressPage";
 
 export function TeacherPage() {
   const [session, setSession] = useState<AuthResponse | null>(() => loadSession("teacher"));

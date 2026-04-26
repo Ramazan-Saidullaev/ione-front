@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../api";
-import { loadSession } from "../storage";
-import { Modal } from "./Modal";
-import { getErrorMessage } from "../utils/helpers";
+import { api } from "../../api";
+import { loadSession } from "../../storage";
+import { Modal } from "../Modal";
+import { getErrorMessage } from "../../utils/helpers";
 
 export function AdminSchools() {
   const [session] = useState(() => loadSession("admin"));

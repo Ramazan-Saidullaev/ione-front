@@ -2,15 +2,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HomeLandingPage } from "./pages/HomeLandingPage";
 import { AuthPage } from "./pages/AuthPage";
 import { RegisterTypePage } from "./pages/RegisterTypePage";
-import { TeacherRegisterPage } from "./pages/TeacherRegisterPage";
-import { StudentRegisterPage } from "./pages/StudentRegisterPage";
-import { TeacherPage } from "./pages/TeacherPage";
-import { StudentPage } from "./pages/StudentPage";
+import { TeacherRegisterPage } from "./pages/teacher/TeacherRegisterPage";
+import { StudentRegisterPage } from "./pages/student/StudentRegisterPage";
+import { TeacherPage } from "./pages/teacher/TeacherPage";
+import { StudentPage } from "./pages/student/StudentPage";
 import { SituationTestPage } from "./pages/SituationTestPage";
-import { AdminPage } from "./pages/AdminPage";
+import { AdminPage } from "./pages/admin/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { StudentProfilePage } from "./pages/StudentProfilePage";
-import { TeacherProfilePage } from "./pages/TeacherProfilePage";
+import { StudentProfilePage } from "./pages/student/StudentProfilePage";
+import { TeacherProfilePage } from "./pages/teacher/TeacherProfilePage";
 import { PublicCoursesPage } from "./pages/PublicCoursesPage";
 
 function App() {

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../api";
-import { GlobalHeader } from "../components/GlobalHeader";
-import { InfoBox } from "../components/InfoBox";
-import { loadSession } from "../storage";
-import type { AuthResponse, TeacherStudent } from "../types";
-import { getErrorMessage } from "../utils/helpers";
+import { api } from "../../api";
+import { GlobalHeader } from "../../components/GlobalHeader";
+import { InfoBox } from "../../components/InfoBox";
+import { loadSession } from "../../storage";
+import type { AuthResponse, TeacherStudent } from "../../types";
+import { getErrorMessage } from "../../utils/helpers";
 
 export function TeacherProfilePage() {
   const [session] = useState<AuthResponse | null>(() => loadSession("teacher"));

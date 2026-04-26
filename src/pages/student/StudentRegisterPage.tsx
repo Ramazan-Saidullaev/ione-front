@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
-import { saveSession } from "../storage";
-import { GlobalHeader } from "../components/GlobalHeader";
-import { PasswordToggleField } from "../components/PasswordToggleField";
-import { getErrorMessage, redirectToRole } from "../utils/helpers";
-import type { PublicClassDto, PublicSchoolDto } from "../types";
+import { api } from "../../api";
+import { saveSession } from "../../storage";
+import { GlobalHeader } from "../../components/GlobalHeader";
+import { PasswordToggleField } from "../../components/PasswordToggleField";
+import { getErrorMessage, redirectToRole } from "../../utils/helpers";
+import type { PublicClassDto, PublicSchoolDto } from "../../types";
 
 export function StudentRegisterPage() {
   const [fullName, setFullName] = useState("");
