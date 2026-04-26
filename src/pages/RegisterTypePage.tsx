@@ -10,9 +10,9 @@ export function RegisterTypePage() {
       <section className="card auth-card auth-home-card">
         <div className="stack">
           <div className="section-heading">
-            <p className="eyebrow">Registration</p>
-            <h2>Who are you?</h2>
-            <p style={{ color: "#666", marginTop: "8px" }}>Choose your role to create an account</p>
+            <p className="eyebrow">Регистрация</p>
+            <h2>Кто вы?</h2>
+            <p style={{ color: "#666", marginTop: "8px" }}>Выберите роль, чтобы создать аккаунт</p>
           </div>
 
           <div className="register-type-actions">
@@ -21,7 +21,7 @@ export function RegisterTypePage() {
               onClick={() => navigate("/auth/register/teacher")}
             >
               <div style={{ marginBottom: "8px", fontSize: "24px" }}>👨‍🏫</div>
-              I am a Teacher
+              Я учитель
             </button>
 
             <button
@@ -29,14 +29,14 @@ export function RegisterTypePage() {
               onClick={() => navigate("/auth/register/student")}
             >
               <div style={{ marginBottom: "8px", fontSize: "24px" }}>👨‍🎓</div>
-              I am a Student
+              Я ученик
             </button>
           </div>
 
           <p style={{ textAlign: "center", color: "#999", marginTop: "20px", fontSize: "14px" }}>
-            Already have an account?{" "}
+            Уже есть аккаунт?{" "}
             <a href="/auth" style={{ color: "#5b21b6", textDecoration: "none", fontWeight: "500" }}>
-              Sign in
+              Войти
             </a>
           </p>
         </div>

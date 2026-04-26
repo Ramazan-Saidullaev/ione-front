@@ -42,16 +42,16 @@ export function TeacherStudentsProgressPage({ session }: Props) {
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
         <div className="section-heading">
-          <p className="eyebrow">Learning</p>
-          <h2>Student progress</h2>
+          <p className="eyebrow">Обучение</p>
+          <h2>Прогресс учеников</h2>
         </div>
 
-        {loading ? <div className="empty-state">Loading progress...</div> : null}
+        {loading ? <div className="empty-state">Загрузка прогресса...</div> : null}
         {error ? <div className="banner error">{error}</div> : null}
         {!loading && !error && rows.length === 0 ? (
           <div className="empty-state">
-            <strong>No students</strong>
-            <p>You don't have any students registered under your account yet.</p>
+            <strong>Нет учеников</strong>
+            <p>Пока что за вашим аккаунтом не закреплено ни одного ученика.</p>
           </div>
         ) : null}
 
@@ -68,9 +68,9 @@ export function TeacherStudentsProgressPage({ session }: Props) {
             >
               <div className="student-card-top">
                 <strong>{student.studentName}</strong>
-                <span className="mini-pill">{student.courses.filter((c) => c.completed).length} done</span>
+                <span className="mini-pill">{student.courses.filter((c) => c.completed).length} завершено</span>
               </div>
-              <p>{student.className || "Class is not set"}</p>
+              <p>{student.className || "Класс не указан"}</p>
               <small>studentId: {student.studentId}</small>
             </button>
           ))}
@@ -79,34 +79,34 @@ export function TeacherStudentsProgressPage({ session }: Props) {
 
       <section className="card details-card">
         <div className="section-heading">
-          <p className="eyebrow">Courses</p>
-          <h2>Progress dashboard</h2>
+          <p className="eyebrow">Курсы</p>
+          <h2>Панель прогресса</h2>
         </div>
 
         {!selected ? (
           <div className="empty-state">
-            <strong>Select a student</strong>
-            <p>Pick a student on the left to see progress per course.</p>
+            <strong>Выберите ученика</strong>
+            <p>Выберите ученика слева, чтобы увидеть прогресс по курсам.</p>
           </div>
         ) : (
           <div className="details-layout">
             <div className="summary-grid">
               <div className="info-box">
-                <span>Student</span>
+                <span>Ученик</span>
                 <strong>{selected.studentName}</strong>
               </div>
               <div className="info-box">
-                <span>Class</span>
-                <strong>{selected.className || "Not set"}</strong>
+                <span>Класс</span>
+                <strong>{selected.className || "Не указан"}</strong>
               </div>
               <div className="info-box">
-                <span>Completed courses</span>
+                <span>Завершено курсов</span>
                 <strong>
                   {selected.courses.filter((c) => c.completed).length} / {selected.courses.length}
                 </strong>
               </div>
               <div className="info-box">
-                <span>Situational tests</span>
+                <span>Ситуационные тесты</span>
                 <strong>
                   {selected.courses.reduce((sum, c) => sum + c.completedScenarios, 0)} / {selected.courses.reduce((sum, c) => sum + c.totalScenarios, 0)}
                 </strong>
@@ -115,7 +115,7 @@ export function TeacherStudentsProgressPage({ session }: Props) {
 
             <div className="panel-block">
               <div className="panel-heading">
-                <h3>Course breakdown</h3>
+                <h3>Разбивка по курсам</h3>
               </div>
               <div className="progress-grid">
                 {selected.courses.map((course) => {
@@ -139,15 +139,15 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                           {course.completedLessons}/{course.totalLessons}
                         </span>
                       </div>
-                      <div className="progress-bar" aria-label={`Progress ${percent}%`}>
+                      <div className="progress-bar" aria-label={`Прогресс ${percent}%`}>
                         <div className="progress-bar-fill" style={{ width: `${percent}%` }} />
                       </div>
-                      <p className="muted-text">{course.completed ? "Completed" : `In progress · ${percent}%`}</p>
+                      <p className="muted-text">{course.completed ? "Завершён" : `В процессе · ${percent}%`}</p>
                       <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <small style={{ color: "#64748b", fontWeight: 600 }}>Situational tests</small>
+                        <small style={{ color: "#64748b", fontWeight: 600 }}>Ситуационные тесты</small>
                         <span className="mini-pill">{course.completedScenarios}/{course.totalScenarios}</span>
                       </div>
-                      <div className="progress-bar" aria-label={`Scenarios progress ${scenarioPercent}%`}>
+                      <div className="progress-bar" aria-label={`Прогресс сценариев ${scenarioPercent}%`}>
                         <div className="progress-bar-fill" style={{ width: `${scenarioPercent}%`, background: "#8b5cf6" }} />
                       </div>
                     </article>
@@ -158,12 +158,12 @@ export function TeacherStudentsProgressPage({ session }: Props) {
 
             <div className="panel-block">
               <div className="panel-heading">
-                <h3>Situational tests details</h3>
+                <h3>Детали по ситуационным тестам</h3>
               </div>
               {!selectedCourse ? (
-                <p className="muted-text">Select a course card above to view scenario results.</p>
+                <p className="muted-text">Выберите карточку курса выше, чтобы посмотреть результаты по сценариям.</p>
               ) : selectedCourse.totalScenarios === 0 ? (
-                <p className="muted-text">No situational tests configured for this course yet.</p>
+                <p className="muted-text">Для этого курса ситуационные тесты пока не настроены.</p>
               ) : (
                 <div style={{ display: "grid", gap: "12px" }}>
                   {selectedCourse.lessonScenarioProgress.map((lesson) => (
@@ -173,7 +173,7 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                         <span className="mini-pill">{lesson.completedScenarios}/{lesson.totalScenarios}</span>
                       </div>
                       {lesson.totalScenarios === 0 ? (
-                        <p className="muted-text">No situational tests in this lesson.</p>
+                        <p className="muted-text">В этом уроке нет ситуационных тестов.</p>
                       ) : (
                         <div style={{ display: "grid", gap: "8px" }}>
                           {lesson.scenarios.map((sc) => (
@@ -187,20 +187,20 @@ export function TeacherStudentsProgressPage({ session }: Props) {
                                     color: sc.completed ? "#166534" : "#4b5563"
                                   }}
                                 >
-                                  {sc.completed ? "Completed" : "Not completed"}
+                                  {sc.completed ? "Пройден" : "Не пройден"}
                                 </span>
                               </div>
                               {sc.completed ? (
                                 <div style={{ marginTop: "8px", color: "#374151" }}>
                                   <div>
-                                    <strong>Selected:</strong> {sc.selectedOptionText || "—"}
+                                    <strong>Выбран ответ:</strong> {sc.selectedOptionText || "—"}
                                     {typeof sc.selectedOptionScore === "number" ? (
                                       <span style={{ marginLeft: "8px", fontWeight: 700, color: "#166534" }}>
                                         (+{sc.selectedOptionScore})
                                       </span>
                                     ) : null}
                                   </div>
-                                  {sc.resultText ? <div style={{ marginTop: "4px" }}><strong>Result:</strong> {sc.resultText}</div> : null}
+                                  {sc.resultText ? <div style={{ marginTop: "4px" }}><strong>Результат:</strong> {sc.resultText}</div> : null}
                                 </div>
                               ) : null}
                             </div>

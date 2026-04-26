@@ -96,12 +96,12 @@ export function StudentRegisterPage() {
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleRegister}>
           <div className="section-heading">
-            <p className="eyebrow">Registration</p>
-            <h2>Sign up as a student</h2>
+            <p className="eyebrow">Регистрация</p>
+            <h2>Регистрация ученика</h2>
           </div>
 
           <label className="field">
-            <span>Full Name</span>
+            <span>ФИО</span>
             <input
               type="text"
               value={fullName}
@@ -121,21 +121,21 @@ export function StudentRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Password</span>
+            <span>Пароль</span>
             <PasswordToggleField value={password} onChange={setPassword} required />
           </label>
 
           <label className="field">
-            <span>School</span>
+            <span>Школа</span>
             {loading ? (
-              <p style={{ color: "#666", margin: 0 }}>Loading schools...</p>
+              <p style={{ color: "#666", margin: 0 }}>Загрузка школ...</p>
             ) : (
               <select
                 value={schoolId}
                 onChange={(e) => handleSchoolChange(e.target.value ? parseInt(e.target.value) : "")}
                 required
               >
-                <option value="">Select a school</option>
+                <option value="">Выберите школу</option>
                 {schools.map((school) => (
                   <option key={school.id} value={school.id}>
                     {school.name}
@@ -146,20 +146,20 @@ export function StudentRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Class</span>
+            <span>Класс</span>
             {schoolId === "" ? (
-              <p style={{ color: "#999", margin: 0 }}>Please select a school first</p>
+              <p style={{ color: "#999", margin: 0 }}>Сначала выберите школу</p>
             ) : loadingClasses ? (
-              <p style={{ color: "#666", margin: 0 }}>Loading classes...</p>
+              <p style={{ color: "#666", margin: 0 }}>Загрузка классов...</p>
             ) : classes.length === 0 ? (
-              <p style={{ color: "#999", margin: 0 }}>No classes found for this school</p>
+              <p style={{ color: "#999", margin: 0 }}>Для этой школы классы не найдены</p>
             ) : (
               <select
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
                 required
               >
-                <option value="">Select a class</option>
+                <option value="">Выберите класс</option>
                 {classes.map((c) => (
                   <option key={c.className} value={c.className}>
                     {c.className}
@@ -172,7 +172,7 @@ export function StudentRegisterPage() {
           {error ? <div className="banner error">{error}</div> : null}
 
           <button className="primary-button" type="submit" disabled={registering || loading}>
-            {registering ? "Creating account..." : "Register"}
+            {registering ? "Создание аккаунта..." : "Зарегистрироваться"}
           </button>
         </form>
       </section>

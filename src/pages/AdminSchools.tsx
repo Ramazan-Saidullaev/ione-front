@@ -122,7 +122,7 @@ export function AdminSchools() {
     try { await api.deleteStudent(session.accessToken, id); await refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
 
-  if (isLoading) return <div style={{ color: "#6b7280" }}>Loading schools...</div>;
+  if (isLoading) return <div style={{ color: "#6b7280" }}>Загрузка школ...</div>;
   if (!data) return null;
 
   const selectedSchool = data.schools.find(s => s.id === selectedSchoolId);
@@ -130,22 +130,22 @@ export function AdminSchools() {
 
   let content;
 
-  // Уровень 3: Студенты выбранного учителя
+  // Уровень 3: Ученики выбранного учителя
   if (selectedTeacher && selectedSchool) {
     content = (
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
           <button onClick={() => setSelectedTeacherId(null)} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500, transition: "background-color 0.2s" }} onMouseOver={e => e.currentTarget.style.backgroundColor = "#f9fafb"} onMouseOut={e => e.currentTarget.style.backgroundColor = "#fff"}>
-            ← Back to Teachers
+            ← Назад к учителям
           </button>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Students of {selectedTeacher.fullName}</h1>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Ученики учителя: {selectedTeacher.fullName}</h1>
           <button onClick={() => { setEditingStudentId(null); setStudentName(""); setStudentClass(""); setStudentEmail(""); setStudentPassword(""); setIsStudentModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", marginLeft: "auto" }}>
-            + Add Student
+            + Добавить ученика
           </button>
         </div>
         {selectedTeacher.students.length === 0 ? (
           <div style={{ padding: "40px", textAlign: "center", color: "#6b7280", background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
-            <p style={{ marginBottom: "16px" }}>No students registered under this teacher.</p>
+            <p style={{ marginBottom: "16px" }}>У этого учителя пока нет учеников.</p>
             <button onClick={() => { setEditingStudentId(null); setStudentName(""); setStudentClass(""); setStudentEmail(""); setStudentPassword(""); setIsStudentModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>+ Создать ученика</button>
           </div>
         ) : (
@@ -153,10 +153,10 @@ export function AdminSchools() {
             {selectedTeacher.students.map(student => (
               <div key={student.id} style={{ background: "#fff", padding: "20px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
                 <div style={{ fontWeight: 600, color: "#111827", fontSize: "1.1rem", marginBottom: "4px" }}>{student.fullName}</div>
-                <div style={{ color: "#6b7280", fontSize: "0.85rem" }}>Class: <span style={{ fontWeight: 500, color: "#374151" }}>{student.className || "Not set"}</span></div>
+                <div style={{ color: "#6b7280", fontSize: "0.85rem" }}>Класс: <span style={{ fontWeight: 500, color: "#374151" }}>{student.className || "Не указан"}</span></div>
             <div style={{ display: "flex", gap: "12px", marginTop: "16px", borderTop: "1px solid #f3f4f6", paddingTop: "12px" }}>
-              <button onClick={(e) => { e.stopPropagation(); setEditingStudentId(student.id); setStudentName(student.fullName); setStudentClass(student.className || ""); setIsStudentModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Edit</button>
-              <button onClick={(e) => { e.stopPropagation(); handleStudentDelete(student.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Delete</button>
+              <button onClick={(e) => { e.stopPropagation(); setEditingStudentId(student.id); setStudentName(student.fullName); setStudentClass(student.className || ""); setIsStudentModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Изменить</button>
+              <button onClick={(e) => { e.stopPropagation(); handleStudentDelete(student.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Удалить</button>
             </div>
               </div>
             ))}
@@ -172,16 +172,16 @@ export function AdminSchools() {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
           <button onClick={() => setSelectedSchoolId(null)} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500, transition: "background-color 0.2s" }} onMouseOver={e => e.currentTarget.style.backgroundColor = "#f9fafb"} onMouseOut={e => e.currentTarget.style.backgroundColor = "#fff"}>
-            ← Back to Schools
+            ← Назад к школам
           </button>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Teachers in {selectedSchool.name}</h1>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Учителя школы: {selectedSchool.name}</h1>
           <button onClick={() => { setEditingTeacherId(null); setTeacherName(""); setTeacherHomeroomClass(""); setTeacherEmail(""); setTeacherPassword(""); setIsTeacherModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", marginLeft: "auto" }}>
-            + Add Teacher
+            + Добавить учителя
           </button>
         </div>
         {selectedSchool.teachers.length === 0 ? (
           <div style={{ padding: "40px", textAlign: "center", color: "#6b7280", background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
-            <p style={{ marginBottom: "16px" }}>No teachers registered in this school.</p>
+            <p style={{ marginBottom: "16px" }}>В этой школе пока нет учителей.</p>
             <button onClick={() => { setEditingTeacherId(null); setTeacherName(""); setTeacherHomeroomClass(""); setTeacherEmail(""); setTeacherPassword(""); setIsTeacherModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>+ Создать учителя</button>
           </div>
         ) : (
@@ -192,13 +192,13 @@ export function AdminSchools() {
                   <div>
                     <h3 style={{ margin: "0 0 4px 0", color: "#111827", fontSize: "1.1rem" }}>{teacher.fullName}</h3>
                     <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280" }}>
-                      Homeroom: <span style={{ fontWeight: 600, color: "#374151" }}>{teacher.homeroomClass || "Not set"}</span>
+                      Класс: <span style={{ fontWeight: 600, color: "#374151" }}>{teacher.homeroomClass || "Не указан"}</span>
                     </p>
-                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280" }}>{teacher.students.length} students</p>
+                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280" }}>{teacher.students.length} учеников</p>
                   </div>
                   <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                    <button onClick={(e) => { e.stopPropagation(); setEditingTeacherId(teacher.id); setTeacherName(teacher.fullName); setTeacherHomeroomClass(teacher.homeroomClass || ""); setIsTeacherModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Edit</button>
-                    <button onClick={(e) => { e.stopPropagation(); handleTeacherDelete(teacher.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Delete</button>
+                    <button onClick={(e) => { e.stopPropagation(); setEditingTeacherId(teacher.id); setTeacherName(teacher.fullName); setTeacherHomeroomClass(teacher.homeroomClass || ""); setIsTeacherModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Изменить</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleTeacherDelete(teacher.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Удалить</button>
                     <div style={{ color: "#9ca3af", fontSize: "1.2rem", marginLeft: "8px" }}>→</div>
                   </div>
                 </div>
@@ -215,9 +215,9 @@ export function AdminSchools() {
     content = (
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Schools & Users</h1>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Школы и пользователи</h1>
           <button onClick={() => { setEditingSchoolId(null); setSchoolName(""); setIsSchoolModalOpen(true); }} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>
-            + Add School
+            + Добавить школу
           </button>
         </div>
         <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
@@ -226,11 +226,11 @@ export function AdminSchools() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <h3 style={{ margin: "0 0 8px 0", color: "#111827", fontSize: "1.2rem" }}>{school.name}</h3>
-                <p style={{ margin: 0, fontSize: "0.85rem", color: "#2563eb", fontWeight: 500 }}>{school.teachers.length} Teachers</p>
+                <p style={{ margin: 0, fontSize: "0.85rem", color: "#2563eb", fontWeight: 500 }}>{school.teachers.length} учителей</p>
               </div>
               <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <button onClick={(e) => { e.stopPropagation(); setEditingSchoolId(school.id); setSchoolName(school.name); setIsSchoolModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Edit</button>
-                <button onClick={(e) => { e.stopPropagation(); handleSchoolDelete(school.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Delete</button>
+                <button onClick={(e) => { e.stopPropagation(); setEditingSchoolId(school.id); setSchoolName(school.name); setIsSchoolModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Изменить</button>
+                <button onClick={(e) => { e.stopPropagation(); handleSchoolDelete(school.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, fontSize: "0.85rem" }}>Удалить</button>
                 <div style={{ color: "#9ca3af", fontSize: "1.2rem", marginLeft: "8px" }}>→</div>
               </div>
             </div>

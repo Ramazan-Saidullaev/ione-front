@@ -20,17 +20,17 @@ export function TeacherPage() {
     setSession(null);
   }
 
-  if (authLoading) return <div className="shell loading-shell">Checking saved teacher session...</div>;
+  if (authLoading) return <div className="shell loading-shell">Проверка сохранённой сессии учителя...</div>;
 
   if (!session) {
     return (
       <main className="shell route-shell">
         <GlobalHeader />
         <section className="hero-panel">
-          <p className="eyebrow">Teacher Console</p>
-          <h1>You need to sign in from the main page first.</h1>
-          <p className="lead">Use the unified login on `/auth`, then the site will redirect teachers here automatically.</p>
-          <a className="route-card compact-route-card" href="/auth"><h2>Go to login</h2><p>Open the shared login and registration page.</p></a>
+          <p className="eyebrow">Раздел учителя</p>
+          <h1>Сначала нужно войти через общую страницу входа.</h1>
+          <p className="lead">Используйте вход на странице `/auth` — после авторизации сайт автоматически перенаправит учителя сюда.</p>
+          <a className="route-card compact-route-card" href="/auth"><h2>Перейти ко входу</h2><p>Открыть общую страницу входа и регистрации.</p></a>
         </section>
       </main>
     );
@@ -41,21 +41,21 @@ export function TeacherPage() {
       <GlobalHeader />
       <section className="topbar">
         <div>
-          <p className="eyebrow">Teacher Console</p>
-          <h1>Teacher dashboard</h1>
+          <p className="eyebrow">Раздел учителя</p>
+          <h1>Панель учителя</h1>
         </div>
         <div className="topbar-actions">
           <div className="identity-card">
-            <span>{session.fullName ? "Teacher" : "Teacher ID"}</span>
+            <span>{session.fullName ? "Учитель" : "ID учителя"}</span>
             <strong>{session.fullName || session.userId}</strong>
           </div>
-          <button className="ghost-button" onClick={handleLogout} type="button">Log out</button>
+          <button className="ghost-button" onClick={handleLogout} type="button">Выйти</button>
         </div>
       </section>
 
-      <nav className="page-nav" aria-label="Teacher pages">
+      <nav className="page-nav" aria-label="Страницы учителя">
         <NavLink to="/teachers" end>
-          Risk dashboard
+          Панель рисков
         </NavLink>
         <NavLink to="/teachers/tests">Авто‑результаты психологических тестов</NavLink>
         <NavLink to="/teachers/progress">Прогресс курсов</NavLink>

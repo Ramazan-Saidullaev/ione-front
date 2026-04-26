@@ -59,7 +59,7 @@ export function AdminTests() {
   const [editAText, setEditAText] = useState("");
   const [editAScore, setEditAScore] = useState("0");
 
-  if (isLoading) return <div style={{ color: "#6b7280" }}>Loading tests...</div>;
+  if (isLoading) return <div style={{ color: "#6b7280" }}>Загрузка тестов...</div>;
   if (!data) return null;
 
   const tests = data.tests;
@@ -89,7 +89,7 @@ export function AdminTests() {
     } catch (err) { alert(getErrorMessage(err)); } finally { setTestBusy(false); }
   }
   async function handleDeleteTest(id: number) {
-    if (!session || !confirm("Delete this test?")) return;
+    if (!session || !confirm("Удалить этот тест?")) return;
     try { await api.deleteTest(session.accessToken, id); } catch (err) { alert(getErrorMessage(err)); } finally { refetch(); }
   }
 
@@ -116,7 +116,7 @@ export function AdminTests() {
     } catch (err) { alert(getErrorMessage(err)); } finally { setCatBusy(false); }
   }
   async function handleDeleteCategory(testId: number, catId: number) {
-    if (!session || !confirm("Delete this category?")) return;
+    if (!session || !confirm("Удалить эту категорию?")) return;
     try { await api.deleteTestCategory(session.accessToken, catId); } catch (err) { alert(getErrorMessage(err)); } finally { refetch(); }
   }
 
@@ -132,7 +132,7 @@ export function AdminTests() {
     try { await api.updateCategoryZone(session.accessToken, editingZoneId, { zone: editZoneType, minScore: Number(editZoneMin), maxScore: Number(editZoneMax), priority: Number(editZonePriority) }); setEditingZoneId(null); refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
   async function handleDeleteZone(zoneId: number) {
-    if (!session || !confirm("Delete zone?")) return;
+    if (!session || !confirm("Удалить зону?")) return;
     try { await api.deleteCategoryZone(session.accessToken, zoneId); } catch (err) { alert(getErrorMessage(err)); } finally { refetch(); }
   }
 
@@ -148,7 +148,7 @@ export function AdminTests() {
     try { await api.updateTestQuestion(session.accessToken, editingQId, { text: editQText.trim(), orderNumber: Number(editQOrder) }); setEditingQId(null); refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
   async function handleDeleteQuestion(qId: number) {
-    if (!session || !confirm("Delete question?")) return;
+    if (!session || !confirm("Удалить вопрос?")) return;
     try { await api.deleteTestQuestion(session.accessToken, qId); } catch (err) { alert(getErrorMessage(err)); } finally { refetch(); }
   }
   async function handleCreateAnswer(e: React.FormEvent, qId: number) {
@@ -162,7 +162,7 @@ export function AdminTests() {
     try { await api.updateTestAnswer(session.accessToken, editingAId, { text: editAText.trim(), score: Number(editAScore) }); setEditingAId(null); refetch(); } catch (err) { alert(getErrorMessage(err)); }
   }
   async function handleDeleteAnswer(aId: number) {
-    if (!session || !confirm("Delete answer?")) return;
+    if (!session || !confirm("Удалить вариант ответа?")) return;
     try { await api.deleteTestAnswer(session.accessToken, aId); } catch (err) { alert(getErrorMessage(err)); } finally { refetch(); }
   }
 
@@ -172,17 +172,17 @@ export function AdminTests() {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
           <button onClick={() => setSelectedCategoryId(null)} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500 }}>
-            ← Back to Categories
+            ← Назад к категориям
           </button>
           <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>{selectedCategory.name}</h1>
         </div>
 
         <div style={{ display: "grid", gap: "24px", alignItems: "start", gridTemplateColumns: "1fr" }}>
-          
+
           {/* PANELS: ZONES */}
           <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#111827" }}>Risk Zones</h3>
+              <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#111827" }}>Зоны риска</h3>
               <button onClick={() => {
                 if (newZoneCatId === selectedCategory.id) {
                   setNewZoneCatId(null);
@@ -191,24 +191,24 @@ export function AdminTests() {
                   const maxPriority = selectedCategory.zones.reduce((max, z) => Math.max(max, z.priority || 0), -1);
                   setNewZonePriority(String(maxPriority + 1));
                 }
-              }} style={{ padding: "6px 12px", fontSize: "0.8rem", border: "1px solid #d1d5db", borderRadius: "6px", background: "#fff", cursor: "pointer", fontWeight: 500 }}>+ Add Zone</button>
+              }} style={{ padding: "6px 12px", fontSize: "0.8rem", border: "1px solid #d1d5db", borderRadius: "6px", background: "#fff", cursor: "pointer", fontWeight: 500 }}>+ Добавить зону</button>
             </div>
-            
+
             {newZoneCatId === selectedCategory.id && (
               <form onSubmit={handleCreateZone} style={{ display: "flex", gap: "8px", marginBottom: "16px", padding: "12px", background: "#f9fafb", borderRadius: "8px", border: "1px dashed #d1d5db", flexWrap: "wrap" }}>
                 <select value={newZoneType} onChange={e => setNewZoneType(e.target.value)} style={{ padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }}>
                   <option value="GREEN">GREEN</option><option value="YELLOW">YELLOW</option><option value="RED">RED</option><option value="BLACK">BLACK</option>
                 </select>
-                <input type="number" placeholder="Min score" value={newZoneMin} onChange={e => setNewZoneMin(e.target.value)} required style={{ width: "90px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                <input type="number" placeholder="Max score" value={newZoneMax} onChange={e => setNewZoneMax(e.target.value)} required style={{ width: "90px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                <input type="number" placeholder="Priority" value={newZonePriority} onChange={e => setNewZonePriority(e.target.value)} style={{ width: "80px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                <button type="submit" style={{ padding: "6px 12px", background: "#111827", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Save</button>
-                <button type="button" onClick={() => setNewZoneCatId(null)} style={{ padding: "6px 12px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
+                <input type="number" placeholder="Мин. балл" value={newZoneMin} onChange={e => setNewZoneMin(e.target.value)} required style={{ width: "90px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                <input type="number" placeholder="Макс. балл" value={newZoneMax} onChange={e => setNewZoneMax(e.target.value)} required style={{ width: "90px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                <input type="number" placeholder="Приоритет" value={newZonePriority} onChange={e => setNewZonePriority(e.target.value)} style={{ width: "90px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                <button type="submit" style={{ padding: "6px 12px", background: "#111827", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>Сохранить</button>
+                <button type="button" onClick={() => setNewZoneCatId(null)} style={{ padding: "6px 12px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer" }}>Отмена</button>
               </form>
             )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {selectedCategory.zones.length === 0 ? <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>No risk zones configured.</div> : null}
+              {selectedCategory.zones.length === 0 ? <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>Зоны риска не настроены.</div> : null}
               {selectedCategory.zones.map(z => (
                 <div key={z.id}>
                   {editingZoneId === z.id ? (
@@ -216,20 +216,20 @@ export function AdminTests() {
                       <select value={editZoneType} onChange={e => setEditZoneType(e.target.value)} style={{ padding: "4px", borderRadius: "4px", border: "1px solid #d1d5db" }}>
                         <option value="GREEN">GREEN</option><option value="YELLOW">YELLOW</option><option value="RED">RED</option><option value="BLACK">BLACK</option>
                       </select>
-                      <input type="number" placeholder="Min" value={editZoneMin} onChange={e => setEditZoneMin(e.target.value)} required style={{ width: "70px", padding: "4px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                      <input type="number" placeholder="Max" value={editZoneMax} onChange={e => setEditZoneMax(e.target.value)} required style={{ width: "70px", padding: "4px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                      <input type="number" placeholder="Priority" value={editZonePriority} onChange={e => setEditZonePriority(e.target.value)} style={{ width: "70px", padding: "4px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                      <button type="submit" style={{ padding: "4px 12px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Save</button>
-                      <button type="button" onClick={() => setEditingZoneId(null)} style={{ padding: "4px 12px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Cancel</button>
+                      <input type="number" placeholder="Мин." value={editZoneMin} onChange={e => setEditZoneMin(e.target.value)} required style={{ width: "70px", padding: "4px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                      <input type="number" placeholder="Макс." value={editZoneMax} onChange={e => setEditZoneMax(e.target.value)} required style={{ width: "70px", padding: "4px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                      <input type="number" placeholder="Приор." value={editZonePriority} onChange={e => setEditZonePriority(e.target.value)} style={{ width: "80px", padding: "4px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                      <button type="submit" style={{ padding: "4px 12px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Сохранить</button>
+                      <button type="button" onClick={() => setEditingZoneId(null)} style={{ padding: "4px 12px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Отмена</button>
                     </form>
                   ) : (
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "8px", background: z.zone === "GREEN" ? "#f0fdf4" : z.zone === "YELLOW" ? "#fefce8" : z.zone === "RED" ? "#fef2f2" : "#f3f4f6", border: "1px solid " + (z.zone === "GREEN" ? "#bbf7d0" : z.zone === "YELLOW" ? "#fef08a" : z.zone === "RED" ? "#fecaca" : "#e5e7eb") }}>
                       <span style={{ fontWeight: 500, color: z.zone === "GREEN" ? "#166534" : z.zone === "YELLOW" ? "#854d0e" : z.zone === "RED" ? "#991b1b" : "#1f2937" }}>
-                        {z.zone} Zone ({z.minScore} - {z.maxScore} pts) <span style={{ opacity: 0.7, fontSize: "0.85rem", marginLeft: "8px" }}>Priority: {z.priority || 0}</span>
+                        {z.zone} ({z.minScore} - {z.maxScore} баллов) <span style={{ opacity: 0.7, fontSize: "0.85rem", marginLeft: "8px" }}>Приоритет: {z.priority || 0}</span>
                       </span>
                       <div>
-                        <button onClick={() => { setEditingZoneId(z.id); setEditZoneType(z.zone); setEditZoneMin(String(z.minScore)); setEditZoneMax(String(z.maxScore)); setEditZonePriority(String(z.priority || 0)); }} style={{ color: "#2563eb", border: "none", background: "none", cursor: "pointer", marginRight: "12px", fontSize: "0.85rem", fontWeight: 500 }}>Edit</button>
-                        <button onClick={() => handleDeleteZone(z.id)} style={{ color: "#dc2626", border: "none", background: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Delete</button>
+                        <button onClick={() => { setEditingZoneId(z.id); setEditZoneType(z.zone); setEditZoneMin(String(z.minScore)); setEditZoneMax(String(z.maxScore)); setEditZonePriority(String(z.priority || 0)); }} style={{ color: "#2563eb", border: "none", background: "none", cursor: "pointer", marginRight: "12px", fontSize: "0.85rem", fontWeight: 500 }}>Изменить</button>
+                        <button onClick={() => handleDeleteZone(z.id)} style={{ color: "#dc2626", border: "none", background: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Удалить</button>
                       </div>
                     </div>
                   )}
@@ -241,7 +241,7 @@ export function AdminTests() {
           {/* PANELS: QUESTIONS */}
           <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#111827" }}>Questions & Answers</h3>
+              <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#111827" }}>Вопросы и ответы</h3>
               <button onClick={() => { 
                 if (newQCatId === selectedCategory.id) {
                   setNewQCatId(null);
@@ -250,28 +250,28 @@ export function AdminTests() {
                   const maxOrder = selectedCategory.questions.reduce((max, q) => Math.max(max, q.orderNumber || 0), 0);
                   setNewQOrder(String(maxOrder + 1)); 
                 }
-              }} style={{ padding: "6px 12px", fontSize: "0.8rem", border: "1px solid #d1d5db", borderRadius: "6px", background: "#fff", cursor: "pointer", fontWeight: 500 }}>+ Add Question</button>
+              }} style={{ padding: "6px 12px", fontSize: "0.8rem", border: "1px solid #d1d5db", borderRadius: "6px", background: "#fff", cursor: "pointer", fontWeight: 500 }}>+ Добавить вопрос</button>
             </div>
 
             {newQCatId === selectedCategory.id && (
               <form onSubmit={handleCreateQuestion} style={{ display: "flex", gap: "8px", marginBottom: "20px", padding: "16px", background: "#f9fafb", borderRadius: "8px", border: "1px dashed #d1d5db" }}>
-                <input type="number" placeholder="Order" value={newQOrder} onChange={e => setNewQOrder(e.target.value)} style={{ width: "70px", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} />
-                <input type="text" placeholder="Question text..." value={newQText} onChange={e => setNewQText(e.target.value)} required style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} />
-                <button type="submit" style={{ padding: "8px 16px", background: "#111827", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>Save</button>
-                <button type="button" onClick={() => setNewQCatId(null)} style={{ padding: "8px 16px", background: "none", border: "1px solid #d1d5db", borderRadius: "6px", cursor: "pointer" }}>Cancel</button>
+                <input type="number" placeholder="Порядок" value={newQOrder} onChange={e => setNewQOrder(e.target.value)} style={{ width: "90px", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} />
+                <input type="text" placeholder="Текст вопроса..." value={newQText} onChange={e => setNewQText(e.target.value)} required style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }} />
+                <button type="submit" style={{ padding: "8px 16px", background: "#111827", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>Сохранить</button>
+                <button type="button" onClick={() => setNewQCatId(null)} style={{ padding: "8px 16px", background: "none", border: "1px solid #d1d5db", borderRadius: "6px", cursor: "pointer" }}>Отмена</button>
               </form>
             )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {selectedCategory.questions.length === 0 ? <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>No questions added yet.</div> : null}
+              {selectedCategory.questions.length === 0 ? <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>Вопросы ещё не добавлены.</div> : null}
               {selectedCategory.questions.map(q => (
                 <div key={q.id} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>
                   {editingQId === q.id ? (
                     <form onSubmit={handleUpdateQuestion} style={{ display: "flex", gap: "8px", padding: "12px", background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
-                      <input type="number" placeholder="Order" value={editQOrder} onChange={e => setEditQOrder(e.target.value)} required style={{ width: "70px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                      <input type="number" placeholder="Порядок" value={editQOrder} onChange={e => setEditQOrder(e.target.value)} required style={{ width: "90px", padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
                       <input type="text" value={editQText} onChange={e => setEditQText(e.target.value)} required style={{ flex: 1, padding: "6px", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                      <button type="submit" style={{ padding: "6px 12px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.85rem" }}>Save</button>
-                      <button type="button" onClick={() => setEditingQId(null)} style={{ padding: "6px 12px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer", fontSize: "0.85rem" }}>Cancel</button>
+                      <button type="submit" style={{ padding: "6px 12px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.85rem" }}>Сохранить</button>
+                      <button type="button" onClick={() => setEditingQId(null)} style={{ padding: "6px 12px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer", fontSize: "0.85rem" }}>Отмена</button>
                     </form>
                   ) : (
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "12px 16px", backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb", cursor: "pointer" }} onClick={() => setExpandedQuestionId(expandedQuestionId === q.id ? null : q.id)}>
@@ -280,9 +280,9 @@ export function AdminTests() {
                         <span>{q.text}</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
-                         <span style={{ fontSize: "0.8rem", color: "#6b7280", marginRight: "8px" }}>{q.answers.length} answers</span>
-                         <button onClick={(e) => { e.stopPropagation(); setEditingQId(q.id); setEditQText(q.text); setEditQOrder(String(q.orderNumber || 1)); }} style={{ color: "#2563eb", border: "none", background: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Edit</button>
-                         <button onClick={(e) => { e.stopPropagation(); handleDeleteQuestion(q.id); }} style={{ color: "#dc2626", border: "none", background: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Delete</button>
+                         <span style={{ fontSize: "0.8rem", color: "#6b7280", marginRight: "8px" }}>{q.answers.length} вариантов</span>
+                         <button onClick={(e) => { e.stopPropagation(); setEditingQId(q.id); setEditQText(q.text); setEditQOrder(String(q.orderNumber || 1)); }} style={{ color: "#2563eb", border: "none", background: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Изменить</button>
+                         <button onClick={(e) => { e.stopPropagation(); handleDeleteQuestion(q.id); }} style={{ color: "#dc2626", border: "none", background: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>Удалить</button>
                       </div>
                     </div>
                   )}
@@ -291,7 +291,7 @@ export function AdminTests() {
                   {(expandedQuestionId === q.id || editingQId === q.id) && (
                     <div style={{ padding: "16px", backgroundColor: "#fff" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px", alignItems: "center" }}>
-                        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Answer Options</span>
+                        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#6b7280", textTransform: "uppercase" }}>Варианты ответов</span>
                         <button onClick={() => {
                           if (newAQId === q.id) {
                             setNewAQId(null);
@@ -299,34 +299,34 @@ export function AdminTests() {
                             setNewAQId(q.id);
                             setNewAScore("");
                           }
-                        }} style={{ padding: "4px 8px", fontSize: "0.75rem", border: "1px solid #d1d5db", borderRadius: "4px", background: "#fff", cursor: "pointer" }}>+ Add Answer</button>
+                        }} style={{ padding: "4px 8px", fontSize: "0.75rem", border: "1px solid #d1d5db", borderRadius: "4px", background: "#fff", cursor: "pointer" }}>+ Добавить ответ</button>
                       </div>
-                      
+
                       {newAQId === q.id && (
                         <form onSubmit={e => handleCreateAnswer(e, q.id)} style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
-                          <input type="text" placeholder="Answer text..." value={newAText} onChange={e => setNewAText(e.target.value)} required style={{ flex: 1, padding: "6px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                          <input type="number" placeholder="Score" value={newAScore} onChange={e => setNewAScore(e.target.value)} required style={{ width: "80px", padding: "6px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                          <button type="submit" style={{ padding: "6px 12px", background: "#111827", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Save</button>
+                          <input type="text" placeholder="Текст ответа..." value={newAText} onChange={e => setNewAText(e.target.value)} required style={{ flex: 1, padding: "6px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                          <input type="number" placeholder="Баллы" value={newAScore} onChange={e => setNewAScore(e.target.value)} required style={{ width: "90px", padding: "6px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid #d1d5db" }} />
+                          <button type="submit" style={{ padding: "6px 12px", background: "#111827", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Сохранить</button>
                         </form>
                       )}
 
                       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                        {q.answers.length === 0 ? <div style={{ fontSize: "0.85rem", color: "#9ca3af" }}>No answers yet.</div> : null}
+                        {q.answers.length === 0 ? <div style={{ fontSize: "0.85rem", color: "#9ca3af" }}>Ответов пока нет.</div> : null}
                         {q.answers.map(a => (
                           <div key={a.id}>
                             {editingAId === a.id ? (
                               <form onSubmit={handleUpdateAnswer} style={{ display: "flex", gap: "8px" }}>
                                 <input type="text" value={editAText} onChange={e => setEditAText(e.target.value)} required style={{ flex: 1, padding: "4px 8px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid #d1d5db" }} />
                                 <input type="number" value={editAScore} onChange={e => setEditAScore(e.target.value)} required style={{ width: "70px", padding: "4px 8px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid #d1d5db" }} />
-                                <button type="submit" style={{ padding: "4px 10px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Save</button>
-                                <button type="button" onClick={() => setEditingAId(null)} style={{ padding: "4px 10px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Cancel</button>
+                                <button type="submit" style={{ padding: "4px 10px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Сохранить</button>
+                                <button type="button" onClick={() => setEditingAId(null)} style={{ padding: "4px 10px", background: "none", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>Отмена</button>
                               </form>
                             ) : (
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", backgroundColor: "#f9fafb", borderRadius: "6px", border: "1px solid #e5e7eb" }}>
-                                <span style={{ fontSize: "0.9rem", color: "#374151" }}>{a.text} <span style={{ fontWeight: 600, color: "#10b981", marginLeft: "8px", padding: "2px 6px", background: "#d1fae5", borderRadius: "99px", fontSize: "0.75rem" }}>+{a.score} pts</span></span>
+                                <span style={{ fontSize: "0.9rem", color: "#374151" }}>{a.text} <span style={{ fontWeight: 600, color: "#10b981", marginLeft: "8px", padding: "2px 6px", background: "#d1fae5", borderRadius: "99px", fontSize: "0.75rem" }}>+{a.score} баллов</span></span>
                                 <div style={{ display: "flex", gap: "8px" }}>
-                                  <button onClick={() => { setEditingAId(a.id); setEditAText(a.text); setEditAScore(String(a.score)); }} style={{ color: "#2563eb", border: "none", background: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 500 }}>Edit</button>
-                                  <button onClick={() => handleDeleteAnswer(a.id)} style={{ color: "#dc2626", border: "none", background: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 500 }}>Delete</button>
+                                  <button onClick={() => { setEditingAId(a.id); setEditAText(a.text); setEditAScore(String(a.score)); }} style={{ color: "#2563eb", border: "none", background: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 500 }}>Изменить</button>
+                                  <button onClick={() => handleDeleteAnswer(a.id)} style={{ color: "#dc2626", border: "none", background: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 500 }}>Удалить</button>
                                 </div>
                               </div>
                             )}
@@ -350,27 +350,28 @@ export function AdminTests() {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
           <button onClick={() => setSelectedTestId(null)} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500 }}>
-            ← Back to Tests
+            ← Назад к тестам
           </button>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Categories in {selectedTest.title}</h1>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Категории теста «{selectedTest.title}»</h1>
           <button onClick={() => openCatModal()} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", marginLeft: "auto" }}>
-            + Add Category
+            + Добавить категорию
           </button>
         </div>
 
         <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
           {selectedTest.categories.length === 0 ? (
-             <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>No categories available. Click "Add Category" to create one.</div>
+             <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>Категорий пока нет. Нажмите «Добавить категорию», чтобы создать первую.</div>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
                 <tr>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Category Name</th>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Zones</th>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Questions</th>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Actions</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Название категории</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Зоны</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Вопросы</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Действия</th>
                 </tr>
               </thead>
+
               <tbody>
                 {selectedTest.categories.map(cat => (
                   <tr key={cat.id} onClick={() => setSelectedCategoryId(cat.id)} style={{ borderBottom: "1px solid #e5e7eb", transition: "background-color 0.2s", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
@@ -378,12 +379,12 @@ export function AdminTests() {
                       {cat.name}
                       {cat.description && <div style={{ fontSize: "0.8rem", color: "#6b7280", marginTop: "4px", fontWeight: 400 }}>{cat.description}</div>}
                     </td>
-                    <td style={{ padding: "16px 24px", color: "#4b5563" }}><span style={{ fontWeight: 600 }}>{cat.zones.length}</span> zones</td>
-                    <td style={{ padding: "16px 24px", color: "#4b5563" }}><span style={{ fontWeight: 600 }}>{cat.questions.length}</span> questions</td>
+                    <td style={{ padding: "16px 24px", color: "#4b5563" }}><span style={{ fontWeight: 600 }}>{cat.zones.length}</span> шт.</td>
+                    <td style={{ padding: "16px 24px", color: "#4b5563" }}><span style={{ fontWeight: 600 }}>{cat.questions.length}</span> шт.</td>
                     <td style={{ padding: "16px 24px", textAlign: "right" }}>
-                      <span style={{ color: "#6b7280", marginRight: "16px", fontSize: "0.85rem" }}>View Contents →</span>
-                      <button onClick={(e) => { e.stopPropagation(); openCatModal(cat); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Edit</button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDeleteCategory(selectedTest.id, cat.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Delete</button>
+                      <span style={{ color: "#6b7280", marginRight: "16px", fontSize: "0.85rem" }}>Открыть →</span>
+                      <button onClick={(e) => { e.stopPropagation(); openCatModal(cat); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Изменить</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDeleteCategory(selectedTest.id, cat.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Удалить</button>
                     </td>
                   </tr>
                 ))}
@@ -392,19 +393,19 @@ export function AdminTests() {
           )}
         </div>
 
-        <Modal isOpen={isCatModalOpen} onClose={() => setIsCatModalOpen(false)} title={editingCatId ? "Edit Category" : "Create New Category"}>
+        <Modal isOpen={isCatModalOpen} onClose={() => setIsCatModalOpen(false)} title={editingCatId ? "Редактировать категорию" : "Новая категория"}>
           <form onSubmit={handleCatSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div>
-              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Category Name *</label>
-              <input type="text" value={catName} onChange={e => setCatName(e.target.value)} required style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="e.g. Anxiety" />
+              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Название категории *</label>
+              <input type="text" value={catName} onChange={e => setCatName(e.target.value)} required style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="Напр: Тревожность" />
             </div>
             <div>
-              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Description</label>
-              <textarea value={catDesc} onChange={e => setCatDesc(e.target.value)} rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Brief description..." />
+              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Описание</label>
+              <textarea value={catDesc} onChange={e => setCatDesc(e.target.value)} rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Краткое описание..." />
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
-              <button type="button" onClick={() => setIsCatModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontWeight: 500 }}>Cancel</button>
-              <button type="submit" disabled={catBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", opacity: catBusy ? 0.7 : 1 }}>{catBusy ? "Saving..." : "Save Category"}</button>
+              <button type="button" onClick={() => setIsCatModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontWeight: 500 }}>Отмена</button>
+              <button type="submit" disabled={catBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", opacity: catBusy ? 0.7 : 1 }}>{catBusy ? "Сохранение..." : "Сохранить"}</button>
             </div>
           </form>
         </Modal>
@@ -416,24 +417,25 @@ export function AdminTests() {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Tests & Questionnaires</h1>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Тесты и опросники</h1>
         <button onClick={() => openTestModal()} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>
-          + Add Test
+          + Добавить тест
         </button>
       </div>
 
       <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
         {tests.length === 0 ? (
-           <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>No tests available. Click "Add Test" to create one.</div>
+           <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>Тестов пока нет. Нажмите «Добавить тест», чтобы создать первый.</div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
               <tr>
-                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Title</th>
-                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Categories</th>
-                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Actions</th>
+                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Название</th>
+                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Категории</th>
+                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Действия</th>
               </tr>
             </thead>
+
             <tbody>
               {tests.map(test => (
                 <tr key={test.id} onClick={() => setSelectedTestId(test.id)} style={{ borderBottom: "1px solid #e5e7eb", transition: "background-color 0.2s", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
@@ -441,11 +443,11 @@ export function AdminTests() {
                     {test.title}
                     {test.description && <div style={{ fontSize: "0.8rem", color: "#6b7280", marginTop: "4px", fontWeight: 400 }}>{test.description}</div>}
                   </td>
-                  <td style={{ padding: "16px 24px", color: "#4b5563" }}><span style={{ fontWeight: 600 }}>{test.categories.length}</span> categories</td>
+                  <td style={{ padding: "16px 24px", color: "#4b5563" }}><span style={{ fontWeight: 600 }}>{test.categories.length}</span> шт.</td>
                   <td style={{ padding: "16px 24px", textAlign: "right" }}>
-                    <span style={{ color: "#6b7280", marginRight: "16px", fontSize: "0.85rem" }}>View Categories →</span>
-                    <button onClick={(e) => { e.stopPropagation(); openTestModal(test); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Edit</button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDeleteTest(test.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Delete</button>
+                    <span style={{ color: "#6b7280", marginRight: "16px", fontSize: "0.85rem" }}>Открыть категории →</span>
+                    <button onClick={(e) => { e.stopPropagation(); openTestModal(test); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Изменить</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDeleteTest(test.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Удалить</button>
                   </td>
                 </tr>
               ))}
@@ -454,19 +456,19 @@ export function AdminTests() {
         )}
       </div>
 
-      <Modal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} title={editingTestId ? "Edit Test" : "Create New Test"}>
+      <Modal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} title={editingTestId ? "Редактировать тест" : "Новый тест"}>
         <form onSubmit={handleTestSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div>
-            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Test Title *</label>
-            <input type="text" value={testTitle} onChange={e => setTestTitle(e.target.value)} required style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="e.g. Stress Level Assessment" />
+            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Название теста *</label>
+            <input type="text" value={testTitle} onChange={e => setTestTitle(e.target.value)} required style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="Напр: Оценка уровня стресса" />
           </div>
           <div>
-            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Description</label>
-            <textarea value={testDesc} onChange={e => setTestDesc(e.target.value)} rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Brief description..." />
+            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Описание</label>
+            <textarea value={testDesc} onChange={e => setTestDesc(e.target.value)} rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Краткое описание..." />
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
-            <button type="button" onClick={() => setIsTestModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontWeight: 500 }}>Cancel</button>
-            <button type="submit" disabled={testBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", opacity: testBusy ? 0.7 : 1 }}>{testBusy ? "Saving..." : "Save Test"}</button>
+            <button type="button" onClick={() => setIsTestModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontWeight: 500 }}>Отмена</button>
+            <button type="submit" disabled={testBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", opacity: testBusy ? 0.7 : 1 }}>{testBusy ? "Сохранение..." : "Сохранить"}</button>
           </div>
         </form>
       </Modal>

@@ -51,16 +51,16 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
         <div className="section-heading">
-          <p className="eyebrow">Auto results</p>
-          <h2>Students</h2>
+          <p className="eyebrow">Авто‑результаты</p>
+          <h2>Ученики</h2>
         </div>
 
-        {loading ? <div className="empty-state">Loading latest results...</div> : null}
+        {loading ? <div className="empty-state">Загрузка последних результатов...</div> : null}
         {error ? <div className="banner error">{error}</div> : null}
         {!loading && !error && completed.length === 0 ? (
           <div className="empty-state">
-            <strong>No completed tests yet</strong>
-            <p>Your students haven't finished any psychological tests.</p>
+            <strong>Пока нет завершённых тестов</strong>
+            <p>Ваши ученики ещё не завершили психологические тесты.</p>
           </div>
         ) : null}
 
@@ -73,9 +73,9 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
                   {row.latestAttempt!.maxZone}
                 </span>
               </div>
-              <p>{row.className || "Class is not set"}</p>
+              <p>{row.className || "Класс не указан"}</p>
               <small>
-                Last test: {row.latestAttempt!.testTitle}
+                Последний тест: {row.latestAttempt!.testTitle}
                 {row.latestAttempt!.finishedAt ? ` · ${formatDateTime(row.latestAttempt!.finishedAt)}` : ""}
               </small>
             </Link>
@@ -85,7 +85,7 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
 
       <section className="card details-card">
         <div className="section-heading">
-          <p className="eyebrow">Overview</p>
+          <p className="eyebrow">Обзор</p>
           <h2>Панель по психологическим тестам</h2>
         </div>
 
@@ -165,7 +165,7 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
           <QuickActionsCard
             title="Быстрые действия"
             actions={[
-              { label: "Открыть риск‑дашборд", href: "/teachers", tone: "ghost" },
+              { label: "Открыть панель рисков", href: "/teachers", tone: "ghost" },
               { label: "Прогресс по курсам", href: "/teachers/progress", tone: "ghost" }
             ]}
           />

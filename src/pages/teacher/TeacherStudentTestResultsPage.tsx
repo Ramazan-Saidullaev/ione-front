@@ -36,7 +36,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
   useEffect(() => {
     if (!Number.isFinite(studentId) || studentId <= 0) {
-      setError("Invalid studentId.");
+      setError("Некорректный studentId.");
       setLoading(false);
       return;
     }
@@ -86,7 +86,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
   const title = useMemo(() => {
     if (student?.fullName) return student.fullName;
-    return `Student ${studentId}`;
+    return `Ученик ${studentId}`;
   }, [student?.fullName, studentId]);
 
   const selectedTestSummary = useMemo(() => {
@@ -98,20 +98,20 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
         <div className="section-heading">
-          <p className="eyebrow">Psych tests</p>
+          <p className="eyebrow">Психологические тесты</p>
           <h2>{title}</h2>
         </div>
 
         <div className="page-nav">
-          <Link to="/teachers/tests">← Back to students</Link>
+          <Link to="/teachers/tests">← Назад к ученикам</Link>
         </div>
 
-        {loading ? <div className="empty-state">Loading results...</div> : null}
+        {loading ? <div className="empty-state">Загрузка результатов...</div> : null}
         {error ? <div className="banner error">{error}</div> : null}
         {!loading && !error && summaries.length === 0 ? (
           <div className="empty-state">
-            <strong>No results</strong>
-            <p>This student hasn't finished any psychological tests yet.</p>
+            <strong>Нет результатов</strong>
+            <p>Этот ученик ещё не завершил психологические тесты.</p>
           </div>
         ) : null}
 
@@ -128,7 +128,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                   <strong>{test.testTitle}</strong>
                   <span className={`zone-pill zone-${test.maxZone.toLowerCase()}`}>{test.maxZone}</span>
                 </div>
-                <p>Last finished: {test.finishedAt ? formatDateTime(test.finishedAt) : "—"}</p>
+                <p>Последнее завершение: {test.finishedAt ? formatDateTime(test.finishedAt) : "—"}</p>
                 <small>testId: {test.testId}</small>
               </button>
             ))
@@ -144,21 +144,21 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                   setAttemptsError(null);
                 }}
               >
-                ← Back to tests
+                ← Назад к тестам
               </button>
 
               <div className="empty-state" style={{ marginTop: 8 }}>
-                <strong>{selectedTestSummary?.testTitle ?? `Test ${selectedTestId}`}</strong>
-                <p>Attempts (latest first)</p>
+                <strong>{selectedTestSummary?.testTitle ?? `Тест ${selectedTestId}`}</strong>
+                <p>Попытки (сначала последние)</p>
               </div>
 
               {attemptsError ? <div className="banner error">{attemptsError}</div> : null}
-              {attemptsLoading ? <div className="empty-state">Loading attempts...</div> : null}
+              {attemptsLoading ? <div className="empty-state">Загрузка попыток...</div> : null}
 
               {!attemptsLoading && !attemptsError && attempts.length === 0 ? (
                 <div className="empty-state">
-                  <strong>No attempts</strong>
-                  <p>No finished attempts found for this test.</p>
+                  <strong>Нет попыток</strong>
+                  <p>Для этого теста не найдено завершённых попыток.</p>
                 </div>
               ) : null}
 
@@ -175,12 +175,12 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                    */}
                   <div className="student-card-top">
                     <strong>
-                      Attempt #{attempts.length - idx} of {attempts.length}
+                      Попытка #{attempts.length - idx} из {attempts.length}
                     </strong>
                     <span className={`zone-pill zone-${a.maxZone.toLowerCase()}`}>{a.maxZone}</span>
                   </div>
-                  <p>Started: {formatDateTime(a.startedAt)}</p>
-                  <p>Finished: {a.finishedAt ? formatDateTime(a.finishedAt) : "—"}</p>
+                  <p>Начало: {formatDateTime(a.startedAt)}</p>
+                  <p>Завершение: {a.finishedAt ? formatDateTime(a.finishedAt) : "—"}</p>
                   <small>attemptId: {a.attemptId}</small>
                 </button>
               ))}
@@ -191,17 +191,17 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
       <section className="card details-card">
         <div className="section-heading">
-          <p className="eyebrow">Dashboard</p>
-          <h2>Categories & risk zones</h2>
+          <p className="eyebrow">Панель</p>
+          <h2>Категории и зоны риска</h2>
         </div>
 
         {!expandedAttemptId ? (
           <div className="empty-state">
-            <strong>{selectedTestId ? "Select an attempt" : "Select a test"}</strong>
+            <strong>{selectedTestId ? "Выберите попытку" : "Выберите тест"}</strong>
             <p>
               {selectedTestId
-                ? "Pick an attempt on the left to view category-level zones and the full answer table."
-                : "Pick a test on the left to see all attempts, then open one attempt to see details."}
+                ? "Выберите попытку слева, чтобы посмотреть зоны по категориям и таблицу ответов."
+                : "Выберите тест слева, чтобы увидеть все попытки, затем откройте одну попытку для деталей."}
             </p>
           </div>
         ) : null}
@@ -210,7 +210,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
           <>
             {detailsError ? <div className="banner error">{detailsError}</div> : null}
             {detailsLoading && !detailsByAttemptId[expandedAttemptId] ? (
-              <div className="empty-state">Loading attempt details...</div>
+              <div className="empty-state">Загрузка деталей попытки...</div>
             ) : null}
 
             {(() => {
@@ -234,22 +234,22 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                 <div className="details-layout">
                   <div className="summary-grid">
                     <div className="info-box">
-                      <span>Test</span>
+                      <span>Тест</span>
                       <strong>{summary.testTitle}</strong>
                     </div>
                     <div className="info-box">
-                      <span>Finished</span>
+                      <span>Завершение</span>
                       <strong>{summary.finishedAt ? formatDateTime(summary.finishedAt) : "—"}</strong>
                     </div>
                     <div className={`info-box tone-${summary.maxZone.toLowerCase()}`}>
-                      <span>Max zone</span>
+                      <span>Макс. зона</span>
                       <strong>{summary.maxZone}</strong>
                     </div>
                   </div>
 
                   <div className="panel-block">
                     <div className="panel-heading">
-                      <h3>Category results</h3>
+                      <h3>Результаты по категориям</h3>
                     </div>
                     <div className="category-grid">
                       {summary.categoryResults.map((result) => (
@@ -258,7 +258,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                             <strong>{result.categoryName}</strong>
                             <span className={`zone-pill zone-${result.zone.toLowerCase()}`}>{result.zone}</span>
                           </div>
-                          <p>Total score: {result.totalScore}</p>
+                          <p>Сумма баллов: {result.totalScore}</p>
                         </article>
                       ))}
                     </div>
@@ -266,16 +266,16 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
                   <div className="panel-block">
                     <div className="panel-heading">
-                      <h3>Answers</h3>
+                      <h3>Ответы</h3>
                       <span className="mini-pill">
-                        {details ? `${details.answers.length} answers` : "Expand to load"}
+                        {details ? `${details.answers.length} ответов` : "Откройте попытку"}
                       </span>
                     </div>
 
                     {!details ? (
                       <div className="empty-state">
-                        <strong>Answers are loading</strong>
-                        <p>We fetch the full table only when you open a specific attempt.</p>
+                        <strong>Ответы загружаются</strong>
+                        <p>Полную таблицу мы загружаем только при открытии конкретной попытки.</p>
                       </div>
                     ) : (
                       <div className="answers-table-wrapper">
@@ -283,10 +283,10 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                           <thead>
                             <tr>
                               <th>#</th>
-                              <th>Category</th>
-                              <th>Question</th>
-                              <th>Answer</th>
-                              <th>Score</th>
+                              <th>Категория</th>
+                              <th>Вопрос</th>
+                              <th>Ответ</th>
+                              <th>Баллы</th>
                             </tr>
                           </thead>
                           <tbody>

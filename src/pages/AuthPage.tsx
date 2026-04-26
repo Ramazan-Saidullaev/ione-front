@@ -38,41 +38,42 @@ export function AuthPage() {
 
       <section className="card" style={{ alignSelf: "stretch" }}>
         <div className="section-heading">
-          <p className="eyebrow">Welcome to SanaU</p>
-          <h2 style={{ marginTop: 0 }}>Practical learning for real life.</h2>
+          <p className="eyebrow">Добро пожаловать в SanaU</p>
+          <h2 style={{ marginTop: 0 }}>Практическое обучение для реальной жизни.</h2>
         </div>
         <p className="lead" style={{ marginTop: 0 }}>
-          2–3 minute lessons, quizzes, and decision tasks for students (6–16) — with progress tracking for teachers.
+          Уроки по 2–3 минуты, квизы и ситуационные задания для учеников (6–16) — с отслеживанием прогресса для учителей.
         </p>
         <ul className="clean-list" style={{ margin: 0 }}>
-          <li>Mobile-first micro-learning</li>
-          <li>Financial literacy and real-world thinking</li>
-          <li>Teacher dashboard and insights</li>
+          <li>Микрообучение, удобное на телефоне</li>
+          <li>Финансовая грамотность и практическое мышление</li>
+          <li>Панель учителя и аналитика</li>
         </ul>
         <div className="highlight-box" style={{ marginTop: "18px" }}>
-          <strong>Start in minutes</strong>
-          <p style={{ marginBottom: 0 }}>Sign in to open your dashboard and continue learning.</p>
+          <strong>Начните за пару минут</strong>
+          <p style={{ marginBottom: 0 }}>Войдите, чтобы открыть личный кабинет и продолжить обучение.</p>
         </div>
       </section>
 
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleLogin}>
           <div className="section-heading">
-            <p className="eyebrow">Login</p>
-            <h2>Open your dashboard</h2>
+            <p className="eyebrow">Вход</p>
+            <h2>Откройте личный кабинет</h2>
           </div>
           <label className="field">
             <span>Email</span>
             <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
           </label>
           <label className="field">
-            <span>Password</span>
+            <span>Пароль</span>
             <PasswordToggleField value={loginPassword} onChange={setLoginPassword} required />
           </label>
           {authError ? <div className="banner error">{authError}</div> : null}
-          <button className="primary-button" type="submit" disabled={authBusy}>{authBusy ? "Signing in..." : "Sign in"}</button>
+          <button className="primary-button" type="submit" disabled={authBusy}>{authBusy ? "Выполняется вход..." : "Войти"}</button>
         </form>
       </section>
+
     </main>
   );
 }

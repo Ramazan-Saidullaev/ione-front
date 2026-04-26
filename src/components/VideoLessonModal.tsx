@@ -106,7 +106,7 @@ export function VideoLessonModal({ isOpen, onClose, title, videoUrl }: VideoLess
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close"
+              aria-label="Закрыть"
               style={{
                 background: "none",
                 border: "none",

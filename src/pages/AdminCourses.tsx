@@ -54,7 +54,7 @@ export function AdminCourses() {
   const [optScore, setOptScore] = useState("");
   const [optBusy, setOptBusy] = useState(false);
 
-  if (isLoading) return <div style={{ color: "#6b7280" }}>Loading courses...</div>;
+  if (isLoading) return <div style={{ color: "#6b7280" }}>Загрузка курсов...</div>;
   const courses = data?.courses || [];
   const selectedCourse = courses.find(c => c.id === selectedCourseId);
   const selectedLesson = selectedCourse?.lessons.find(l => l.id === selectedLessonId);
@@ -110,7 +110,7 @@ export function AdminCourses() {
   }
 
   async function handleDelete(id: number) {
-    if (!session || !confirm("Are you sure you want to delete this course?")) return;
+    if (!session || !confirm("Вы уверены, что хотите удалить этот курс?")) return;
     try {
       await api.deleteCourse(session.accessToken, id);
     } catch (err) { alert(getErrorMessage(err)); } 
@@ -163,7 +163,7 @@ export function AdminCourses() {
   }
 
   async function handleDeleteLesson(id: number) {
-    if (!session || !confirm("Are you sure you want to delete this lesson?")) return;
+    if (!session || !confirm("Вы уверены, что хотите удалить этот урок?")) return;
     try {
       await api.deleteLesson(session.accessToken, id);
     } catch (err) { alert(getErrorMessage(err)); }
@@ -242,9 +242,9 @@ export function AdminCourses() {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
           <button onClick={() => { setSelectedLessonId(null); setSelectedScenarioId(null); }} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500 }}>
-            ← Back to Lessons
+            ← Назад к урокам
           </button>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Scenario: {selectedLesson.title}</h1>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Сценарий: {selectedLesson.title}</h1>
         </div>
 
         {lessonScenarios.length === 0 ? (
@@ -365,8 +365,8 @@ export function AdminCourses() {
                         <p style={{ margin: "8px 0 0 0", color: "#374151" }}>{opt.resultText}</p>
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <button onClick={() => { setEditingOptId(opt.id); setOptText(opt.optionText); setOptResultText(opt.resultText); setOptScore(String(opt.score)); setOptImageUrl(opt.resultImagePath || ""); setIsOptModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, textAlign: "right" }}>Edit</button>
-                        <button onClick={() => handleDeleteOption(opt.id)} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, textAlign: "right" }}>Delete</button>
+                        <button onClick={() => { setEditingOptId(opt.id); setOptText(opt.optionText); setOptResultText(opt.resultText); setOptScore(String(opt.score)); setOptImageUrl(opt.resultImagePath || ""); setIsOptModalOpen(true); }} style={{ color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500, textAlign: "right" }}>Изменить</button>
+                        <button onClick={() => handleDeleteOption(opt.id)} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500, textAlign: "right" }}>Удалить</button>
                       </div>
                     </div>
                   </div>
@@ -439,25 +439,25 @@ export function AdminCourses() {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
           <button onClick={() => setSelectedCourseId(null)} style={{ background: "none", border: "1px solid #e5e7eb", color: "#4b5563", cursor: "pointer", display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: "6px", backgroundColor: "#fff", fontWeight: 500, transition: "background-color 0.2s" }} onMouseOver={e => e.currentTarget.style.backgroundColor = "#f9fafb"} onMouseOut={e => e.currentTarget.style.backgroundColor = "#fff"}>
-            ← Back to Courses
+            ← Назад к курсам
           </button>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Lessons for {selectedCourse.title}</h1>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Уроки курса «{selectedCourse.title}»</h1>
           <button onClick={openCreateLessonModal} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", marginLeft: "auto" }}>
-            + Add Lesson
+            + Добавить урок
           </button>
         </div>
 
         <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
           {selectedCourse.lessons.length === 0 ? (
-             <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>No lessons available. Click "Add Lesson" to create one.</div>
+             <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>Уроков пока нет. Нажмите «Добавить урок», чтобы создать первый.</div>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
                 <tr>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", width: "80px" }}>Order</th>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Title</th>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Content</th>
-                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Actions</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", width: "80px" }}>Порядок</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Название</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Материалы</th>
+                  <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -467,15 +467,15 @@ export function AdminCourses() {
                     <td style={{ padding: "16px 24px", fontWeight: 500, color: "#111827" }}>{lesson.title}</td>
                     <td style={{ padding: "16px 24px", color: "#4b5563" }}>
                       <div style={{ display: "flex", gap: "8px" }}>
-                        {lesson.videoPath && <span style={{ background: "#e0e7ff", color: "#1e40af", padding: "2px 8px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500 }}>🎥 Video</span>}
-                        {lesson.textContent && <span style={{ background: "#dcfce7", color: "#065f46", padding: "2px 8px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500 }}>📝 Text</span>}
-                        {!lesson.videoPath && !lesson.textContent && <span style={{ color: "#9ca3af", fontSize: "0.85rem" }}>Empty</span>}
+                        {lesson.videoPath && <span style={{ background: "#e0e7ff", color: "#1e40af", padding: "2px 8px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500 }}>🎥 Видео</span>}
+                        {lesson.textContent && <span style={{ background: "#dcfce7", color: "#065f46", padding: "2px 8px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500 }}>📝 Текст</span>}
+                        {!lesson.videoPath && !lesson.textContent && <span style={{ color: "#9ca3af", fontSize: "0.85rem" }}>Пусто</span>}
                       </div>
                     </td>
                     <td style={{ padding: "16px 24px", textAlign: "right" }}>
                       <button onClick={(e) => { e.stopPropagation(); setSelectedLessonId(lesson.id); }} style={{ color: "#8b5cf6", background: "none", border: "none", cursor: "pointer", fontWeight: 600, marginRight: "16px", padding: "6px 12px", borderRadius: "6px", backgroundColor: "#f5f3ff" }}>🎭 Сценарий</button>
-                      <button onClick={(e) => { e.stopPropagation(); openEditLessonModal(lesson); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Edit</button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDeleteLesson(lesson.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Delete</button>
+                      <button onClick={(e) => { e.stopPropagation(); openEditLessonModal(lesson); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Изменить</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDeleteLesson(lesson.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Удалить</button>
                     </td>
                   </tr>
                 ))}
@@ -484,30 +484,30 @@ export function AdminCourses() {
           )}
         </div>
 
-        <Modal isOpen={isLessonModalOpen} onClose={() => setIsLessonModalOpen(false)} title={editingLesson ? "Edit Lesson" : "Create New Lesson"}>
+        <Modal isOpen={isLessonModalOpen} onClose={() => setIsLessonModalOpen(false)} title={editingLesson ? "Редактировать урок" : "Новый урок"}>
           <form onSubmit={handleLessonSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div>
-              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Lesson Title *</label>
-              <input type="text" value={lessonTitle} onChange={e => setLessonTitle(e.target.value)} required style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="e.g. Introduction" />
+              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Название урока *</label>
+              <input type="text" value={lessonTitle} onChange={e => setLessonTitle(e.target.value)} required style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="Напр: Введение" />
             </div>
             <div>
-              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Order Number *</label>
+              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Порядковый номер *</label>
               <input type="number" value={lessonOrder} onChange={e => setLessonOrder(e.target.value)} required style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} />
             </div>
             <div>
-              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Video Path (optional)</label>
-              <input type="text" value={lessonVideo} onChange={e => setLessonVideo(e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="e.g. https://..." />
+              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Ссылка на видео (опционально)</label>
+              <input type="text" value={lessonVideo} onChange={e => setLessonVideo(e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} placeholder="Напр: https://..." />
             </div>
             <div>
-              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Text Content (optional)</label>
-              <textarea value={lessonText} onChange={e => setLessonText(e.target.value)} rows={4} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Write lesson content here..." />
+              <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Текст урока (опционально)</label>
+              <textarea value={lessonText} onChange={e => setLessonText(e.target.value)} rows={4} style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Введите текст урока..." />
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
               <button type="button" onClick={() => setIsLessonModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontWeight: 500 }}>
-                Cancel
+                Отмена
               </button>
               <button type="submit" disabled={lessonBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", opacity: lessonBusy ? 0.7 : 1 }}>
-                {lessonBusy ? "Saving..." : "Save Lesson"}
+                {lessonBusy ? "Сохранение..." : "Сохранить урок"}
               </button>
             </div>
           </form>
@@ -521,23 +521,23 @@ export function AdminCourses() {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Courses</h1>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#111827", margin: 0 }}>Курсы</h1>
         <button onClick={openCreateModal} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer" }}>
-          + Add Course
+          + Добавить курс
         </button>
       </div>
 
       <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
         {courses.length === 0 ? (
-           <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>No courses available. Click "Add Course" to create one.</div>
+           <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>Курсов пока нет. Нажмите «Добавить курс», чтобы создать первый.</div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
               <tr>
-                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Title</th>
-                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Age Group</th>
-                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Lessons</th>
-                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Actions</th>
+                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Название</th>
+                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Возрастная группа</th>
+                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem" }}>Уроки</th>
+                <th style={{ padding: "12px 24px", color: "#6b7280", fontWeight: 500, fontSize: "0.85rem", textAlign: "right" }}>Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -551,12 +551,12 @@ export function AdminCourses() {
                     {course.ageGroup ? <span style={{ background: "#e0e7ff", color: "#1e40af", padding: "2px 8px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 500 }}>{course.ageGroup}</span> : <span style={{ color: "#9ca3af" }}>—</span>}
                   </td>
                   <td style={{ padding: "16px 24px", color: "#4b5563" }}>
-                    <span style={{ fontWeight: 600 }}>{course.lessons.length}</span> items
+                    <span style={{ fontWeight: 600 }}>{course.lessons.length}</span> шт.
                   </td>
                   <td style={{ padding: "16px 24px", textAlign: "right" }}>
-                    <span style={{ color: "#6b7280", marginRight: "16px", fontSize: "0.85rem" }}>View Lessons →</span>
-                    <button onClick={(e) => { e.stopPropagation(); openEditModal(course); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Edit</button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(course.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Delete</button>
+                    <span style={{ color: "#6b7280", marginRight: "16px", fontSize: "0.85rem" }}>Открыть уроки →</span>
+                    <button onClick={(e) => { e.stopPropagation(); openEditModal(course); }} style={{ marginRight: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Изменить</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(course.id); }} style={{ color: "#dc2626", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Удалить</button>
                   </td>
                 </tr>
               ))}
@@ -565,38 +565,38 @@ export function AdminCourses() {
         )}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCourse ? "Edit Course" : "Create New Course"}>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCourse ? "Редактировать курс" : "Новый курс"}>
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div>
-            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Course Title *</label>
+            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Название курса *</label>
             <input 
               type="text" value={title} onChange={e => setTitle(e.target.value)} required 
               style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} 
-              placeholder="e.g. Online Safety Basics" 
+              placeholder="Напр: Основы безопасности в интернете" 
             />
           </div>
           <div>
-            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Description</label>
+            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Описание</label>
             <textarea 
               value={desc} onChange={e => setDesc(e.target.value)} rows={3}
               style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box", fontFamily: "inherit" }} 
-              placeholder="Brief course overview..." 
+              placeholder="Краткое описание курса..." 
             />
           </div>
           <div>
-            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Age Group</label>
+            <label style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>Возрастная группа</label>
             <input 
               type="text" value={age} onChange={e => setAge(e.target.value)} 
               style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }} 
-              placeholder="e.g. 12-14" 
+              placeholder="Напр: 12-14" 
             />
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
             <button type="button" onClick={() => setIsModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontWeight: 500 }}>
-              Cancel
+              Отмена
             </button>
             <button type="submit" disabled={busy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", opacity: busy ? 0.7 : 1 }}>
-              {busy ? "Saving..." : "Save Course"}
+              {busy ? "Сохранение..." : "Сохранить курс"}
             </button>
           </div>
         </form>

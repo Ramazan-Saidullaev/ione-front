@@ -12,19 +12,19 @@ export function AdminOverview() {
     enabled: !!session,
   });
 
-  if (isLoading) return <div style={{ color: "#6b7280" }}>Loading metrics...</div>;
-  if (!data) return <div style={{ color: "red" }}>Error loading data</div>;
+  if (isLoading) return <div style={{ color: "#6b7280" }}>Загрузка...</div>;
+  if (!data) return <div style={{ color: "red" }}>Ошибка загрузки данных</div>;
 
   const stats = [
-    { label: "Total Schools", value: data.schools.length, color: "#3b82f6" },
-    { label: "Total Courses", value: data.courses.length, color: "#10b981" },
-    { label: "Total Tests", value: data.tests.length, color: "#8b5cf6" },
-    { label: "Scenarios", value: data.scenarios.length, color: "#f59e0b" }
+    { label: "Всего школ", value: data.schools.length, color: "#3b82f6" },
+    { label: "Всего курсов", value: data.courses.length, color: "#10b981" },
+    { label: "Всего тестов", value: data.tests.length, color: "#8b5cf6" },
+    { label: "Сценариев", value: data.scenarios.length, color: "#f59e0b" }
   ];
 
   return (
     <div>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "24px", color: "#111827" }}>Overview</h1>
+      <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "24px", color: "#111827" }}>Обзор</h1>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
         {stats.map((stat, idx) => (
           <div key={idx} style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>

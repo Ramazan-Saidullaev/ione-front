@@ -47,7 +47,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
     setLoadingAllStudents(true);
     api.getTeacherStudents(session.accessToken)
       .then(setAllStudents)
-      .catch((error) => console.error("Failed to load students", error))
+      .catch((error) => console.error("Не удалось загрузить учеников", error))
       .finally(() => setLoadingAllStudents(false));
   }, [session.accessToken]);
 
@@ -92,7 +92,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
     event.preventDefault();
     const testId = Number(testIdInput);
     if (!Number.isInteger(testId) || testId <= 0) {
-      setListError("Enter a valid testId.");
+      setListError("Введите корректный ID теста.");
       return;
     }
     setListLoading(true);
@@ -142,8 +142,8 @@ export function TeacherRiskDashboardPage({ session }: Props) {
     if (riskStudents.length === 0) {
       return (
         <div className="empty-state">
-          <strong>No results yet</strong>
-          <p>No students matched the selected test and risk criteria.</p>
+          <strong>Пока нет результатов</strong>
+          <p>Нет учеников, подходящих под выбранный тест и критерии риска.</p>
         </div>
       );
     }
@@ -197,7 +197,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
                         {zoneLabels[zone]}
                       </span>
                     </div>
-                    <p style={{ marginBottom: "6px" }}>{student.className || "Class is not set"}</p>
+                    <p style={{ marginBottom: "6px" }}>{student.className || "Класс не указан"}</p>
                     <small style={{ color: "#64748b" }}>
                       attemptId: {student.attemptId}
                     </small>
@@ -215,7 +215,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
         <div className="section-heading">
-          <p className="eyebrow">Monitoring</p>
+          <p className="eyebrow">Мониторинг</p>
           <h2>Риск-группы по тесту</h2>
         </div>
         <form className="stack" onSubmit={handleLoadRiskStudents}>
@@ -250,7 +250,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
         {hasSearched ? (
           <div style={{ marginTop: "18px" }}>
             <div className="section-heading compact-heading">
-              <p className="eyebrow">Summary</p>
+              <p className="eyebrow">Сводка</p>
               <h2>Сводка по зонам</h2>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "10px" }}>
@@ -281,17 +281,17 @@ export function TeacherRiskDashboardPage({ session }: Props) {
         ) : null}
 
         <div className="section-heading compact-heading">
-          <p className="eyebrow">Results</p>
+          <p className="eyebrow">Результаты</p>
           <h2>Ученики</h2>
         </div>
         <div className="student-list">
           {!hasSearched ? (
             loadingAllStudents ? (
-              <div className="empty-state">Loading your students...</div>
+              <div className="empty-state">Загрузка списка учеников...</div>
             ) : allStudents.length === 0 ? (
               <div className="empty-state">
-                <strong>No students</strong>
-                <p>You don't have any students registered under your account yet.</p>
+                <strong>Нет учеников</strong>
+                <p>Пока что за вашим аккаунтом не закреплено ни одного ученика.</p>
               </div>
             ) : (
               allStudents.map((student) => (
@@ -299,7 +299,7 @@ export function TeacherRiskDashboardPage({ session }: Props) {
                   <div className="student-card-top">
                     <strong>{student.fullName}</strong>
                   </div>
-                  <p>{student.className || "Class is not set"}</p>
+                  <p>{student.className || "Класс не указан"}</p>
                   <small>studentId: {student.id}</small>
                 </div>
               ))
@@ -312,33 +312,33 @@ export function TeacherRiskDashboardPage({ session }: Props) {
 
       <section className="card details-card">
         <div className="section-heading">
-          <p className="eyebrow">Details</p>
-          <h2>Attempt report</h2>
+          <p className="eyebrow">Детали</p>
+          <h2>Отчёт по попытке</h2>
         </div>
-        {detailsLoading ? <div className="empty-state">Loading attempt details...</div> : null}
+        {detailsLoading ? <div className="empty-state">Загрузка деталей попытки...</div> : null}
         {detailsError ? <div className="banner error">{detailsError}</div> : null}
         {!detailsLoading && !detailsError && !attemptDetails ? (
           <div className="empty-state">
-            <strong>No attempt selected</strong>
-            <p>Select a student on the left to inspect category results and answers.</p>
+            <strong>Попытка не выбрана</strong>
+            <p>Выберите ученика слева, чтобы посмотреть результаты по категориям и ответы.</p>
           </div>
         ) : null}
         {!detailsLoading && !detailsError && attemptDetails ? (
           <div className="details-layout">
             <div className="summary-grid">
-              <InfoBox label="Student" value={attemptDetails.studentName} />
-              <InfoBox label="Test" value={attemptDetails.testTitle} />
-              <InfoBox label="Class" value={attemptDetails.className || "Not set"} />
-              <InfoBox label="Max zone" value={attemptDetails.maxZone} tone={attemptDetails.maxZone} />
-              <InfoBox label="Started" value={formatDateTime(attemptDetails.startedAt)} />
+              <InfoBox label="Ученик" value={attemptDetails.studentName} />
+              <InfoBox label="Тест" value={attemptDetails.testTitle} />
+              <InfoBox label="Класс" value={attemptDetails.className || "Не указан"} />
+              <InfoBox label="Макс. зона" value={attemptDetails.maxZone} tone={attemptDetails.maxZone} />
+              <InfoBox label="Начало" value={formatDateTime(attemptDetails.startedAt)} />
               <InfoBox
-                label="Finished"
-                value={attemptDetails.finishedAt ? formatDateTime(attemptDetails.finishedAt) : "Not finished"}
+                label="Завершение"
+                value={attemptDetails.finishedAt ? formatDateTime(attemptDetails.finishedAt) : "Не завершено"}
               />
             </div>
             <div className="panel-block">
               <div className="panel-heading">
-                <h3>Category results</h3>
+                <h3>Результаты по категориям</h3>
               </div>
               <div className="category-grid">
                 {attemptDetails.categoryResults.map((result) => (
@@ -347,24 +347,24 @@ export function TeacherRiskDashboardPage({ session }: Props) {
                       <strong>{result.categoryName}</strong>
                       <span className={`zone-pill zone-${result.zone.toLowerCase()}`}>{result.zone}</span>
                     </div>
-                    <p>Total score: {result.totalScore}</p>
+                    <p>Сумма баллов: {result.totalScore}</p>
                   </article>
                 ))}
               </div>
             </div>
             <div className="panel-block">
               <div className="panel-heading">
-                <h3>Answers</h3>
+                <h3>Ответы</h3>
               </div>
               <div className="answers-table-wrapper">
                 <table className="answers-table">
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>Category</th>
-                      <th>Question</th>
-                      <th>Answer</th>
-                      <th>Score</th>
+                      <th>Категория</th>
+                      <th>Вопрос</th>
+                      <th>Ответ</th>
+                      <th>Баллы</th>
                     </tr>
                   </thead>
                   <tbody>

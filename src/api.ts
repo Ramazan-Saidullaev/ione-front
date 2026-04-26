@@ -104,9 +104,9 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 async function extractErrorMessage(response: Response): Promise<string> {
   try {
     const data = (await response.json()) as { message?: string; error?: string };
-    return data.message || data.error || `Request failed with status ${response.status}`;
+    return data.message || data.error || `Ошибка запроса (HTTP ${response.status})`;
   } catch {
-    return `Request failed with status ${response.status}`;
+    return `Ошибка запроса (HTTP ${response.status})`;
   }
 }
 

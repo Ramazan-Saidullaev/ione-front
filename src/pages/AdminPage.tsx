@@ -20,18 +20,18 @@ export function AdminPage() {
     return (
       <main style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", background: "#f9fafb", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ textAlign: "center" }}>
-          <h1 style={{ fontSize: "2rem", color: "#111827", margin: "0 0 16px 0" }}>Access Denied</h1>
-          <p style={{ color: "#6b7280" }}>You do not have permission to view the Admin Dashboard.</p>
+          <h1 style={{ fontSize: "2rem", color: "#111827", margin: "0 0 16px 0" }}>Доступ запрещён</h1>
+          <p style={{ color: "#6b7280" }}>У вас нет прав для просмотра панели администратора.</p>
         </div>
       </main>
     );
   }
 
   const navItems = [
-    { path: "/admin", label: "Dashboard", icon: "📊" },
-    { path: "/admin/schools", label: "Schools & Users", icon: "🏫" },
-    { path: "/admin/courses", label: "Courses", icon: "📚" },
-    { path: "/admin/tests", label: "Tests & Scales", icon: "🧠" },
+    { path: "/admin", label: "Панель", icon: "📊" },
+    { path: "/admin/schools", label: "Школы и пользователи", icon: "🏫" },
+    { path: "/admin/courses", label: "Курсы", icon: "📚" },
+    { path: "/admin/tests", label: "Тесты и шкалы", icon: "🧠" },
   ];
 
   return (
@@ -66,11 +66,11 @@ export function AdminPage() {
         <header style={{ height: "64px", backgroundColor: "#ffffff", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 32px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111827" }}>{session.fullName || "Admin User"}</div>
-              <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>System Administrator</div>
+              <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111827" }}>{session.fullName || "Администратор"}</div>
+              <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>Системный администратор</div>
             </div>
             <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>
-              Log out
+              Выйти
             </button>
           </div>
         </header>

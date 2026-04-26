@@ -71,12 +71,12 @@ export function TeacherRegisterPage() {
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleRegister}>
           <div className="section-heading">
-            <p className="eyebrow">Registration</p>
-            <h2>Sign up as a teacher</h2>
+            <p className="eyebrow">Регистрация</p>
+            <h2>Регистрация учителя</h2>
           </div>
 
           <label className="field">
-            <span>Full Name</span>
+            <span>ФИО</span>
             <input
               type="text"
               value={fullName}
@@ -96,32 +96,32 @@ export function TeacherRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Password</span>
+            <span>Пароль</span>
             <PasswordToggleField value={password} onChange={setPassword} required />
           </label>
 
           <label className="field">
-            <span>Homeroom class (e.g., 7A, 8B)</span>
+            <span>Класс (классный руководитель), напр. 7А, 8Б</span>
             <input
               type="text"
               value={homeroomClass}
               onChange={(e) => setHomeroomClass(e.target.value)}
-              placeholder="e.g., 7A"
+              placeholder="Напр: 7А"
               required
             />
           </label>
 
           <label className="field">
-            <span>School</span>
+            <span>Школа</span>
             {loading ? (
-              <p style={{ color: "#666", margin: 0 }}>Loading schools...</p>
+              <p style={{ color: "#666", margin: 0 }}>Загрузка школ...</p>
             ) : (
               <select
                 value={schoolId}
                 onChange={(e) => setSchoolId(e.target.value ? parseInt(e.target.value) : "")}
                 required
               >
-                <option value="">Select a school</option>
+                <option value="">Выберите школу</option>
                 {schools.map((school) => (
                   <option key={school.id} value={school.id}>
                     {school.name}
@@ -134,7 +134,7 @@ export function TeacherRegisterPage() {
           {error ? <div className="banner error">{error}</div> : null}
 
           <button className="primary-button" type="submit" disabled={registering || loading}>
-            {registering ? "Creating account..." : "Register"}
+            {registering ? "Создание аккаунта..." : "Зарегистрироваться"}
           </button>
         </form>
       </section>
