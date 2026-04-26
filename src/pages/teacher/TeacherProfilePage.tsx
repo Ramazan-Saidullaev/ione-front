@@ -56,8 +56,8 @@ export function TeacherProfilePage() {
         </div>
       </section>
 
-      <section style={{ padding: "0 0 24px" }}>
-        <div style={{ display: "grid", gap: "14px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+      <section style={{ padding: "0 0 24px" }} className="animate-fade-in">
+        <div className="list-animate" style={{ display: "grid", gap: "14px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
           <InfoBox label="Роль" value="Учитель" />
           <InfoBox label="Школа" value={session.schoolName || "—"} />
           <InfoBox label="Классный руководитель" value={session.homeroomClass || "—"} />
@@ -65,7 +65,7 @@ export function TeacherProfilePage() {
         </div>
       </section>
 
-      <section style={{ padding: "0 0 32px" }}>
+      <section className="animate-fade-in" style={{ padding: "0 0 32px", animationDelay: "0.1s" }}>
         <div className="card" style={{ padding: "18px 18px" }}>
           <div className="section-heading" style={{ marginBottom: "12px" }}>
             <p className="eyebrow">Список</p>
@@ -82,7 +82,7 @@ export function TeacherProfilePage() {
           ) : null}
 
           {!loading && students.length > 0 ? (
-            <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+            <div className="list-animate" style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
               {students.map((s) => (
                 <div key={s.id} className="hero-note">
                   <span>Ученик</span>

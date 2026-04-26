@@ -40,8 +40,8 @@ export function StudentProfilePage() {
         </div>
       </section>
 
-      <section style={{ padding: "0 0 32px" }}>
-        <div style={{ display: "grid", gap: "14px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+      <section style={{ padding: "0 0 32px" }} className="animate-fade-in">
+        <div className="list-animate" style={{ display: "grid", gap: "14px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
           <InfoBox label="Роль" value="Ученик" />
           <InfoBox label="Школа" value={session.schoolName || "—"} />
           <InfoBox label="Ваш класс" value={session.className || "—"} />

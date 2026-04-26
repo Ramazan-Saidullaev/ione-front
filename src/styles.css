@@ -1302,6 +1302,23 @@ select {
   color: #0f172a;
 }
 
+.icon-action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.icon-action-btn:active {
+  transform: scale(0.95);
+}
+
 .primary-button,
 .ghost-button,
 .student-card {
@@ -1332,6 +1349,12 @@ select {
 .ghost-button:hover,
 .student-card:hover {
   transform: translateY(-2px);
+}
+
+.primary-button:active,
+.ghost-button:active {
+  transform: scale(0.96) translateY(0);
+  transition: transform 0.1s ease;
 }
 
 .primary-button:disabled {
@@ -1525,6 +1548,12 @@ select {
 
 .info-box {
   min-height: 102px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 64, 89, 0.1);
 }
 
 .tone-green {
@@ -2263,6 +2292,19 @@ select {
   min-width: 160px;
   z-index: 100;
   margin-top: 8px;
+  animation: dropdownFadeIn 0.2s ease-out;
+  transform-origin: top right;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .auth-menu-item {
