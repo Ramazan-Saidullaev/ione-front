@@ -534,19 +534,8 @@ export function StudentPage() {
                 >
                   <div className="student-card-top">
                     <strong>{course.title}</strong>
-                    <span
-                      className="mini-pill"
-                      style={{
-                        display: courseProgress[course.id]?.completed ? undefined : "none",
-                        background: "#dcfce7",
-                        color: "#166534"
-                      }}
-                    >
-                      Курс пройден
-                    </span>
                     <span className="mini-pill">{course.ageGroup || "Для всех"}</span>
                   </div>
-                  <p>{course.description || "Описание отсутствует."}</p>
                   {courseProgress[course.id] ? (
                     <p style={{ marginTop: "8px", color: courseProgress[course.id].completed ? "#166534" : "#4b5563", fontWeight: 600 }}>
                       {courseProgress[course.id].completedLessons} из {courseProgress[course.id].totalLessons} уроков пройдено
@@ -577,19 +566,14 @@ export function StudentPage() {
                       className="mini-pill"
                       style={{
                         background: lessonProgress[lesson.id]?.status === "COMPLETED" ? "#dcfce7" : "#e5e7eb",
-                        color: lessonProgress[lesson.id]?.status === "COMPLETED" ? "#166534" : "#4b5563"
+                        color: lessonProgress[lesson.id]?.status === "COMPLETED" ? "#166534" : "#4b5563",
+                        flexShrink: 0,
+                        whiteSpace: "nowrap"
                       }}
                     >
                       {lessonProgress[lesson.id]?.status === "COMPLETED" ? "Пройден" : "Не пройден"}
                     </span>
                   </div>
-                  {lesson.textContent?.trim() ? (
-                    <p className="muted-text" style={{ marginTop: "6px", fontSize: "0.9rem" }}>
-                      {lesson.textContent.trim().length > 120
-                        ? `${lesson.textContent.trim().slice(0, 120)}…`
-                        : lesson.textContent.trim()}
-                    </p>
-                  ) : null}
                 </button>
               ))}
             </div>
