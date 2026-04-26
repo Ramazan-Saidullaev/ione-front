@@ -59,6 +59,12 @@ export function AdminTests() {
   const [editAText, setEditAText] = useState("");
   const [editAScore, setEditAScore] = useState("0");
 
+  // Bulk Answer Creation
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState<Set<number>>(new Set());
+  const [isBulkAnswerModalOpen, setIsBulkAnswerModalOpen] = useState(false);
+  const [bulkAnswers, setBulkAnswers] = useState<{ text: string; score: string }[]>([{ text: "", score: "" }]);
+  const [bulkBusy, setBulkBusy] = useState(false);
+
   if (isLoading) return <div style={{ color: "#6b7280" }}>Загрузка тестов...</div>;
   if (!data) return null;
 
@@ -166,6 +172,73 @@ export function AdminTests() {
     try { await api.deleteTestAnswer(session.accessToken, aId); } catch (err) { alert(getErrorMessage(err)); } finally { refetch(); }
   }
 
+  // --- BULK ANSWER HANDLERS ---
+  function toggleQuestionSelection(qId: number) {
+    setSelectedQuestionIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(qId)) {
+        newSet.delete(qId);
+      } else {
+        newSet.add(qId);
+      }
+      return newSet;
+    });
+  }
+  function selectAllQuestions() {
+    if (selectedCategory) {
+      setSelectedQuestionIds(new Set(selectedCategory.questions.map(q => q.id)));
+    }
+  }
+  function deselectAllQuestions() {
+    setSelectedQuestionIds(new Set());
+  }
+  function addBulkAnswerField() {
+    setBulkAnswers(prev => [...prev, { text: "", score: "" }]);
+  }
+  function removeBulkAnswerField(index: number) {
+    setBulkAnswers(prev => prev.filter((_, i) => i !== index));
+  }
+  function updateBulkAnswerField(index: number, field: "text" | "score", value: string) {
+    setBulkAnswers(prev => prev.map((a, i) => i === index ? { ...a, [field]: value } : a));
+  }
+  async function handleBulkAnswerSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!session || selectedQuestionIds.size === 0) return;
+    setBulkBusy(true);
+    try {
+      const validAnswers = bulkAnswers.filter(a => a.text.trim() && a.score !== "");
+      if (validAnswers.length === 0) {
+        alert("Добавьте хотя бы один вариант ответа");
+        return;
+      }
+      const questionIds = Array.from(selectedQuestionIds);
+      let createdCount = 0;
+      for (const qId of questionIds) {
+        for (const answer of validAnswers) {
+          await api.createTestAnswer(session.accessToken, { questionId: qId, text: answer.text.trim(), score: Number(answer.score) });
+          createdCount++;
+        }
+      }
+      alert(`Добавлено ${createdCount} ответов к ${questionIds.length} вопросам`);
+      setIsBulkAnswerModalOpen(false);
+      setBulkAnswers([{ text: "", score: "" }]);
+      setSelectedQuestionIds(new Set());
+      refetch();
+    } catch (err) {
+      alert(getErrorMessage(err));
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+  function openBulkAnswerModal() {
+    if (selectedQuestionIds.size === 0) {
+      alert("Выберите хотя бы один вопрос");
+      return;
+    }
+    setBulkAnswers([{ text: "", score: "" }]);
+    setIsBulkAnswerModalOpen(true);
+  }
+
   // УРОВЕНЬ 3: Категория (Зоны и Вопросы)
   if (selectedTest && selectedCategory) {
     return (
@@ -240,18 +313,35 @@ export function AdminTests() {
 
           {/* PANELS: QUESTIONS */}
           <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", alignItems: "center" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
               <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#111827" }}>Вопросы и ответы</h3>
-              <button onClick={() => { 
-                if (newQCatId === selectedCategory.id) {
-                  setNewQCatId(null);
-                } else {
-                  setNewQCatId(selectedCategory.id);
-                  const maxOrder = selectedCategory.questions.reduce((max, q) => Math.max(max, q.orderNumber || 0), 0);
-                  setNewQOrder(String(maxOrder + 1)); 
-                }
-              }} style={{ padding: "6px 12px", fontSize: "0.8rem", border: "1px solid #d1d5db", borderRadius: "6px", background: "#fff", cursor: "pointer", fontWeight: 500 }}>+ Добавить вопрос</button>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                {selectedQuestionIds.size > 0 && (
+                  <span style={{ fontSize: "0.85rem", color: "#6b7280", marginRight: "8px" }}>Выбрано: {selectedQuestionIds.size}</span>
+                )}
+                <button onClick={openBulkAnswerModal} disabled={selectedQuestionIds.size === 0} style={{ padding: "6px 12px", fontSize: "0.8rem", border: "1px solid #2563eb", borderRadius: "6px", background: selectedQuestionIds.size > 0 ? "#2563eb" : "#f3f4f6", color: selectedQuestionIds.size > 0 ? "#fff" : "#9ca3af", cursor: selectedQuestionIds.size > 0 ? "pointer" : "not-allowed", fontWeight: 500 }}>+ Добавить ответы к выбранным</button>
+                <button onClick={() => { 
+                  if (newQCatId === selectedCategory.id) {
+                    setNewQCatId(null);
+                  } else {
+                    setNewQCatId(selectedCategory.id);
+                    const maxOrder = selectedCategory.questions.reduce((max, q) => Math.max(max, q.orderNumber || 0), 0);
+                    setNewQOrder(String(maxOrder + 1)); 
+                  }
+                }} style={{ padding: "6px 12px", fontSize: "0.8rem", border: "1px solid #d1d5db", borderRadius: "6px", background: "#fff", cursor: "pointer", fontWeight: 500 }}>+ Добавить вопрос</button>
+              </div>
             </div>
+            {selectedCategory.questions.length > 0 && (
+              <div style={{ display: "flex", gap: "12px", marginBottom: "12px", padding: "8px 12px", background: "#f9fafb", borderRadius: "6px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", color: "#374151", cursor: "pointer" }}>
+                  <input type="checkbox" checked={selectedQuestionIds.size === selectedCategory.questions.length && selectedCategory.questions.length > 0} onChange={(e) => e.target.checked ? selectAllQuestions() : deselectAllQuestions()} />
+                  Выбрать все
+                </label>
+                {selectedQuestionIds.size > 0 && (
+                  <button onClick={deselectAllQuestions} style={{ fontSize: "0.8rem", color: "#dc2626", background: "none", border: "none", cursor: "pointer" }}>Снять выбор</button>
+                )}
+              </div>
+            )}
 
             {newQCatId === selectedCategory.id && (
               <form onSubmit={handleCreateQuestion} style={{ display: "flex", gap: "8px", marginBottom: "20px", padding: "16px", background: "#f9fafb", borderRadius: "8px", border: "1px dashed #d1d5db" }}>
@@ -275,7 +365,14 @@ export function AdminTests() {
                     </form>
                   ) : (
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "12px 16px", backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb", cursor: "pointer" }} onClick={() => setExpandedQuestionId(expandedQuestionId === q.id ? null : q.id)}>
-                      <div style={{ fontWeight: 500, color: "#111827", display: "flex", gap: "12px" }}>
+                      <div style={{ fontWeight: 500, color: "#111827", display: "flex", gap: "12px", alignItems: "flex-start" }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedQuestionIds.has(q.id)}
+                          onChange={(e) => { e.stopPropagation(); toggleQuestionSelection(q.id); }}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ marginTop: "3px", cursor: "pointer" }}
+                        />
                         <span style={{ color: "#6b7280", minWidth: "32px" }}>{expandedQuestionId === q.id ? "▼" : "▶"} {q.orderNumber}.</span>
                         <span>{q.text}</span>
                       </div>
@@ -340,6 +437,41 @@ export function AdminTests() {
             </div>
           </div>
         </div>
+
+        {/* BULK ANSWER MODAL */}
+        <Modal isOpen={isBulkAnswerModalOpen} onClose={() => setIsBulkAnswerModalOpen(false)} title={`Добавить ответы к ${selectedQuestionIds.size} вопросам`}>
+          <form onSubmit={handleBulkAnswerSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280" }}>Укажите варианты ответов и их баллы. Они будут добавлены ко всем выбранным вопросам.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {bulkAnswers.map((answer, index) => (
+                <div key={index} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  <input
+                    type="text"
+                    placeholder="Текст ответа"
+                    value={answer.text}
+                    onChange={(e) => updateBulkAnswerField(index, "text", e.target.value)}
+                    style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db" }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Баллы"
+                    value={answer.score}
+                    onChange={(e) => updateBulkAnswerField(index, "score", e.target.value)}
+                    style={{ width: "100px", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db" }}
+                  />
+                  {bulkAnswers.length > 1 && (
+                    <button type="button" onClick={() => removeBulkAnswerField(index)} style={{ padding: "8px 12px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "6px", cursor: "pointer", color: "#dc2626" }}>✕</button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={addBulkAnswerField} style={{ padding: "8px 16px", background: "#f3f4f6", border: "1px dashed #d1d5db", borderRadius: "6px", cursor: "pointer", fontSize: "0.85rem" }}>+ Добавить ещё один вариант ответа</button>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
+              <button type="button" onClick={() => setIsBulkAnswerModalOpen(false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontWeight: 500 }}>Отмена</button>
+              <button type="submit" disabled={bulkBusy} style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 16px", borderRadius: "6px", border: "none", fontWeight: 500, cursor: "pointer", opacity: bulkBusy ? 0.7 : 1 }}>{bulkBusy ? "Сохранение..." : "Сохранить ответы"}</button>
+            </div>
+          </form>
+        </Modal>
       </div>
     );
   }
