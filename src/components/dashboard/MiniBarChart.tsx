@@ -20,8 +20,8 @@ export function MiniBarChart({ title, eyebrow = "Сводка", items }: Props) 
         <h2 style={{ fontSize: "1.15rem" }}>{title}</h2>
       </div>
       <div className="mini-bars">
-        {items.map((x) => (
-          <div key={x.label} className="mini-bar-row">
+        {items.map((x, i) => (
+          <div key={i} className="mini-bar-row">
             <div className="mini-bar-meta">
               <span>{x.label}</span>
               <strong>{x.value}</strong>

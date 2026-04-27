@@ -22,18 +22,18 @@ export function QuickActionsCard({ title, eyebrow = "Быстрые действ
         <h2 style={{ fontSize: "1.15rem" }}>{title}</h2>
       </div>
       <div className="quick-actions">
-        {actions.map((a) => {
+        {actions.map((a, i) => {
           const className = a.tone === "primary" ? "primary-link-button" : "ghost-link-button";
           if (a.href) {
             return (
-              <a key={a.label} className={className} href={a.href}>
+              <a key={`${i}-${a.tone}`} className={className} href={a.href}>
                 {a.icon ? <span className="qa-icon">{a.icon}</span> : null}
                 {a.label}
               </a>
             );
           }
           return (
-            <button key={a.label} type="button" className={a.tone === "primary" ? "primary-button" : "ghost-button"} onClick={a.onClick}>
+            <button key={`${i}-${a.tone}`} type="button" className={a.tone === "primary" ? "primary-button" : "ghost-button"} onClick={a.onClick}>
               {a.icon ? <span className="qa-icon">{a.icon}</span> : null}
               {a.label}
             </button>
