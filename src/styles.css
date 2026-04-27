@@ -46,6 +46,12 @@ select {
   padding: 32px 0 48px;
 }
 
+.dashboard-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .landing-shell {
   width: min(1220px, calc(100% - 32px));
   margin: 0 auto;
