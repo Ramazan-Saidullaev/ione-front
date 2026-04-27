@@ -55,8 +55,8 @@ function App() {
           <Route path="admin/*" element={<AdminPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
-        <Route path="/yrys/auth" element={<YrysAuthPage />} />
-        <Route path="/yrys/register" element={<YrysRegisterPage />} />
+        {/* <Route path="/yrys/auth" element={<YrysAuthPage />} /> */}
+{/* <Route path="/yrys/register" element={<YrysRegisterPage />} /> */}
         <Route path="/" element={<Navigate to="/ru" replace />} />
         <Route path="*" element={<Navigate to="/ru" replace />} />
       </Routes>
