@@ -11,6 +11,8 @@ import { StudentPage } from "./pages/student/StudentPage";
 import { SituationTestPage } from "./pages/SituationTestPage";
 import { AdminPage } from "./pages/admin/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { YrysAuthPage } from "./pages/YrysAuthPage";
+import { YrysRegisterPage } from "./pages/YrysRegisterPage";
 import { StudentProfilePage } from "./pages/student/StudentProfilePage";
 import { TeacherProfilePage } from "./pages/teacher/TeacherProfilePage";
 import { PublicCoursesPage } from "./pages/PublicCoursesPage";
@@ -53,6 +55,8 @@ function App() {
           <Route path="admin/*" element={<AdminPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
+        <Route path="/yrys/auth" element={<YrysAuthPage />} />
+        <Route path="/yrys/register" element={<YrysRegisterPage />} />
         <Route path="/" element={<Navigate to="/ru" replace />} />
         <Route path="*" element={<Navigate to="/ru" replace />} />
       </Routes>
