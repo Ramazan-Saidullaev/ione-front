@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import type { AuthResponse, TeacherStudentLatestAttempt } from "../../types";
 import { formatDateTime, getErrorMessage } from "../../utils/helpers";
+import { useLang } from "../../hooks/useLang";
 import { KpiGrid } from "../../components/dashboard/KpiGrid";
 import { MiniBarChart } from "../../components/dashboard/MiniBarChart";
 import { QuickActionsCard } from "../../components/dashboard/QuickActionsCard";
@@ -12,6 +14,8 @@ type Props = {
 };
 
 export function TeacherAutoTestResultsPage({ session }: Props) {
+  const { t } = useTranslation();
+  const lang = useLang();
   const [items, setItems] = useState<TeacherStudentLatestAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,31 +45,31 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
         <div className="section-heading">
-          <p className="eyebrow">Авто‑результаты</p>
-          <h2>Ученики</h2>
+          <p className="eyebrow">{t("teacherAutoTests.autoResultsEyebrow")}</p>
+          <h2>{t("teacherAutoTests.studentsTitle")}</h2>
         </div>
 
-        {loading ? <div className="empty-state">Загрузка последних результатов...</div> : null}
+        {loading ? <div className="empty-state">{t("teacherAutoTests.loadingResults")}</div> : null}
         {error ? <div className="banner error">{error}</div> : null}
         {!loading && !error && completed.length === 0 ? (
           <div className="empty-state">
-            <strong>Пока нет завершённых тестов</strong>
-            <p>Ваши ученики ещё не завершили психологические тесты.</p>
+            <strong>{t("teacherAutoTests.noCompletedTests")}</strong>
+            <p>{t("teacherAutoTests.noCompletedTestsHint")}</p>
           </div>
         ) : null}
 
         <div className="student-list list-animate">
           {completed.map((row) => (
-            <Link key={row.studentId} className="student-card" to={`/teachers/tests/${row.studentId}/results`}>
+            <Link key={row.studentId} className="student-card" to={`/${lang}/teachers/tests/${row.studentId}/results`}>
               <div className="student-card-top">
                 <strong>{row.studentName}</strong>
                 <span className={`zone-pill zone-${row.latestAttempt!.maxZone.toLowerCase()}`}>
                   {row.latestAttempt!.maxZone}
                 </span>
               </div>
-              <p>{row.className || "Класс не указан"}</p>
+              <p>{row.className || t("teacherAutoTests.classNotSpecified")}</p>
               <small>
-                Последний тест: {row.latestAttempt!.testTitle}
+                {t("teacherAutoTests.lastTest")}: {row.latestAttempt!.testTitle}
                 {row.latestAttempt!.finishedAt ? ` · ${formatDateTime(row.latestAttempt!.finishedAt)}` : ""}
               </small>
             </Link>
@@ -75,33 +79,33 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
 
       <section className="card details-card">
         <div className="section-heading">
-          <p className="eyebrow">Обзор</p>
-          <h2>Панель по психологическим тестам</h2>
+          <p className="eyebrow">{t("teacherAutoTests.overviewEyebrow")}</p>
+          <h2>{t("teacherAutoTests.panelTitle")}</h2>
         </div>
 
         <KpiGrid
           items={[
             {
-              label: "Ученики",
+              label: t("teacherAutoTests.studentsTitle"),
               value: items.length,
-              hint: "в списке"
+              hint: t("teacherAutoTests.studentsInList")
             },
             {
-              label: "Есть результат",
+              label: t("teacherAutoTests.hasResult"),
               value: completed.length,
-              hint: "завершили хотя бы один тест",
+              hint: t("teacherAutoTests.completedAtLeastOne"),
               tone: completed.length > 0 ? "success" : "warning"
             },
             {
-              label: "Зона риска",
+              label: t("teacherAutoTests.riskZone"),
               value: zoneCounts.BLACK + zoneCounts.RED,
               hint: "BLACK + RED",
               tone: zoneCounts.BLACK + zoneCounts.RED > 0 ? "danger" : "success"
             },
             {
-              label: "Ожидают",
+              label: t("teacherAutoTests.waiting"),
               value: Math.max(0, items.length - completed.length),
-              hint: "без результатов",
+              hint: t("teacherAutoTests.noResults"),
               tone: items.length - completed.length > 0 ? "warning" : "default"
             }
           ]}
@@ -109,7 +113,7 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
 
         <div className="details-layout">
           <MiniBarChart
-            title="Распределение по зонам"
+            title={t("teacherAutoTests.zoneDistribution")}
             items={[
               { label: "GREEN", value: zoneCounts.GREEN, color: "#22c55e" },
               { label: "YELLOW", value: zoneCounts.YELLOW, color: "#eab308" },
@@ -119,10 +123,10 @@ export function TeacherAutoTestResultsPage({ session }: Props) {
           />
 
           <QuickActionsCard
-            title="Быстрые действия"
+            title={t("teacherAutoTests.quickActions")}
             actions={[
-              { label: "Открыть панель рисков", href: "/teachers", tone: "ghost" },
-              { label: "Прогресс по курсам", href: "/teachers/progress", tone: "ghost" }
+              { label: t("teacherAutoTests.openRiskPanel"), href: `/${lang}/teachers`, tone: "ghost" },
+              { label: t("teacherAutoTests.courseProgress"), href: `/${lang}/teachers/progress`, tone: "ghost" }
             ]}
           />
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { saveSession } from "../../storage";
 import { GlobalHeader } from "../../components/GlobalHeader";
@@ -7,6 +8,7 @@ import { getErrorMessage, redirectToRole } from "../../utils/helpers";
 import type { PublicClassDto, PublicSchoolDto } from "../../types";
 
 export function StudentRegisterPage() {
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,12 +63,12 @@ export function StudentRegisterPage() {
     event.preventDefault();
 
     if (schoolId === "") {
-      setError("Пожалуйста, выберите школу");
+      setError(t("studentRegister.selectSchoolError"));
       return;
     }
 
     if (!className.trim()) {
-      setError("Пожалуйста, выберите класс");
+      setError(t("studentRegister.selectClassError"));
       return;
     }
 
@@ -99,20 +101,20 @@ export function StudentRegisterPage() {
       <section className="card" style={{ alignSelf: "stretch" }}>
         <div className="section-heading">
           <p className="eyebrow">SanaU</p>
-          <h2 style={{ marginTop: 0 }}>Учись коротко, применяй сразу.</h2>
+          <h2 style={{ marginTop: 0 }}>{t("studentRegister.panelTitle")}</h2>
         </div>
         <p className="lead" style={{ marginTop: 0 }}>
-          Регистрация ученика открывает доступ к урокам, тестам и фиксации прогресса.
+          {t("studentRegister.description")}
         </p>
         <ul className="clean-list" style={{ margin: 0 }}>
-          <li>Курсы по 2–3 минуты</li>
-          <li>Психологические тесты и зоны риска</li>
-          <li>Ситуационные задания с последствиями</li>
+          <li>{t("studentRegister.feature1")}</li>
+          <li>{t("studentRegister.feature2")}</li>
+          <li>{t("studentRegister.feature3")}</li>
         </ul>
         <div className="highlight-box" style={{ marginTop: "18px" }}>
-          <strong>Важно</strong>
+          <strong>{t("studentRegister.important")}</strong>
           <p style={{ marginBottom: 0 }}>
-            Выберите школу и класс — так учитель увидит ваш прогресс.
+            {t("studentRegister.importantDesc")}
           </p>
         </div>
       </section>
@@ -120,12 +122,12 @@ export function StudentRegisterPage() {
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleRegister}>
           <div className="section-heading">
-            <p className="eyebrow">Регистрация</p>
-            <h2>Регистрация ученика</h2>
+            <p className="eyebrow">{t("common.register")}</p>
+            <h2>{t("studentRegister.registerTitle")}</h2>
           </div>
 
           <label className="field">
-            <span>ФИО</span>
+            <span>{t("common.fullName")}</span>
             <input
               type="text"
               value={fullName}
@@ -135,7 +137,7 @@ export function StudentRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Email</span>
+            <span>{t("common.email")}</span>
             <input
               type="email"
               value={email}
@@ -145,21 +147,21 @@ export function StudentRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Пароль</span>
+            <span>{t("common.password")}</span>
             <PasswordToggleField value={password} onChange={setPassword} required />
           </label>
 
           <label className="field">
-            <span>Школа</span>
+            <span>{t("common.school")}</span>
             {loading ? (
-              <p style={{ color: "#666", margin: 0 }}>Загрузка школ...</p>
+              <p style={{ color: "#666", margin: 0 }}>{t("studentRegister.loadingSchools")}</p>
             ) : (
               <select
                 value={schoolId}
                 onChange={(e) => handleSchoolChange(e.target.value ? parseInt(e.target.value) : "")}
                 required
               >
-                <option value="">Выберите школу</option>
+                <option value="">{t("studentRegister.selectSchool")}</option>
                 {schools.map((school) => (
                   <option key={school.id} value={school.id}>
                     {school.name}
@@ -170,20 +172,20 @@ export function StudentRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Класс</span>
+            <span>{t("common.class")}</span>
             {schoolId === "" ? (
-              <p style={{ color: "#999", margin: 0 }}>Сначала выберите школу</p>
+              <p style={{ color: "#999", margin: 0 }}>{t("studentRegister.firstSelectSchool")}</p>
             ) : loadingClasses ? (
-              <p style={{ color: "#666", margin: 0 }}>Загрузка классов...</p>
+              <p style={{ color: "#666", margin: 0 }}>{t("studentRegister.loadingClasses")}</p>
             ) : classes.length === 0 ? (
-              <p style={{ color: "#999", margin: 0 }}>Для этой школы классы не найдены</p>
+              <p style={{ color: "#999", margin: 0 }}>{t("studentRegister.noClassesForSchool")}</p>
             ) : (
               <select
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
                 required
               >
-                <option value="">Выберите класс</option>
+                <option value="">{t("studentRegister.selectClass")}</option>
                 {classes.map((c) => (
                   <option key={c.className} value={c.className}>
                     {c.className}
@@ -196,7 +198,7 @@ export function StudentRegisterPage() {
           {error ? <div className="banner error">{error}</div> : null}
 
           <button className="primary-button" type="submit" disabled={registering || loading}>
-            {registering ? "Создание аккаунта..." : "Зарегистрироваться"}
+            {registering ? t("studentRegister.creatingAccount") : t("studentRegister.registerButton")}
           </button>
         </form>
       </section>

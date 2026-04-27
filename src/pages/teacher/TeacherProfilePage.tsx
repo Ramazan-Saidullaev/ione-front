@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { GlobalHeader } from "../../components/GlobalHeader";
 import { InfoBox } from "../../components/InfoBox";
 import { loadSession } from "../../storage";
+import { useLang } from "../../hooks/useLang";
 import type { AuthResponse, TeacherStudent } from "../../types";
 import { getErrorMessage } from "../../utils/helpers";
 
 export function TeacherProfilePage() {
+  const { t } = useTranslation();
+  const lang = useLang();
   const [session] = useState<AuthResponse | null>(() => loadSession("teacher"));
   const [students, setStudents] = useState<TeacherStudent[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,12 +33,12 @@ export function TeacherProfilePage() {
       <main className="shell route-shell">
         <GlobalHeader />
         <section className="hero-panel">
-          <p className="eyebrow">Профиль</p>
-          <h1>Вам необходимо войти</h1>
-          <p className="lead">После входа вы сможете увидеть профиль учителя.</p>
-          <a className="route-card compact-route-card" href="/auth">
-            <h2>Войти в аккаунт</h2>
-            <p>Открыть страницу авторизации.</p>
+          <p className="eyebrow">{t("common.profile")}</p>
+          <h1>{t("teacherProfile.needLogin")}</h1>
+          <p className="lead">{t("teacherProfile.needLoginDesc")}</p>
+          <a className="route-card compact-route-card" href={`/${lang}/auth`}>
+            <h2>{t("common.loginToAccount")}</h2>
+            <p>{t("common.openAuthPage")}</p>
           </a>
         </section>
       </main>
@@ -46,38 +50,38 @@ export function TeacherProfilePage() {
       <GlobalHeader />
       <section className="topbar">
         <div>
-          <p className="eyebrow">Профиль учителя</p>
-          <h1>{session.fullName || "Учитель"}</h1>
+          <p className="eyebrow">{t("teacherProfile.eyebrow")}</p>
+          <h1>{session.fullName || t("teacher.teacherLabel")}</h1>
         </div>
         <div className="topbar-actions">
-          <Link className="ghost-button" to="/teachers">
-            ← Назад
+          <Link className="ghost-button" to={`/${lang}/teachers`}>
+            {t("common.back")}
           </Link>
         </div>
       </section>
 
       <section style={{ padding: "0 0 24px" }} className="animate-fade-in">
         <div className="list-animate" style={{ display: "grid", gap: "14px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
-          <InfoBox label="Роль" value="Учитель" />
-          <InfoBox label="Школа" value={session.schoolName || "—"} />
-          <InfoBox label="Классный руководитель" value={session.homeroomClass || "—"} />
-          <InfoBox label="Учеников" value={loading ? "…" : String(students.length)} />
+          <InfoBox label={t("teacherProfile.role")} value={t("teacher.teacherLabel")} />
+          <InfoBox label={t("teacherProfile.school")} value={session.schoolName || "—"} />
+          <InfoBox label={t("teacherProfile.homeroom")} value={session.homeroomClass || "—"} />
+          <InfoBox label={t("teacherProfile.studentsCount")} value={loading ? "…" : String(students.length)} />
         </div>
       </section>
 
       <section className="animate-fade-in" style={{ padding: "0 0 32px", animationDelay: "0.1s" }}>
         <div className="card" style={{ padding: "18px 18px" }}>
           <div className="section-heading" style={{ marginBottom: "12px" }}>
-            <p className="eyebrow">Список</p>
-            <h2>Ваши ученики</h2>
+            <p className="eyebrow">{t("teacherProfile.listEyebrow")}</p>
+            <h2>{t("teacherProfile.yourStudents")}</h2>
           </div>
 
           {error ? <div className="banner error">{error}</div> : null}
-          {loading ? <div className="empty-state">Загрузка учеников...</div> : null}
+          {loading ? <div className="empty-state">{t("teacherProfile.loadingStudents")}</div> : null}
           {!loading && students.length === 0 ? (
             <div className="empty-state">
-              <strong>Пока нет учеников</strong>
-              <p>Ученики появятся здесь после регистрации в ваш класс.</p>
+              <strong>{t("teacherProfile.noStudents")}</strong>
+              <p>{t("teacherProfile.noStudentsHint")}</p>
             </div>
           ) : null}
 
@@ -85,9 +89,9 @@ export function TeacherProfilePage() {
             <div className="list-animate" style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
               {students.map((s) => (
                 <div key={s.id} className="hero-note">
-                  <span>Ученик</span>
+                  <span>{t("teacherProfile.studentLabel")}</span>
                   <strong>{s.fullName}</strong>
-                  <span style={{ marginTop: "6px" }}>Класс: {s.className || "—"}</span>
+                  <span style={{ marginTop: "6px" }}>{t("teacherProfile.classLabel")}: {s.className || "—"}</span>
                 </div>
               ))}
             </div>

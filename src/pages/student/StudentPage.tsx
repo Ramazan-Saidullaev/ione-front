@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { loadSession, clearSession } from "../../storage";
 import { GlobalHeader } from "../../components/GlobalHeader";
@@ -7,6 +8,7 @@ import { LessonCompletedModal } from "../../components/LessonCompletedModal";
 import { VideoLessonPlayer } from "../../components/VideoLessonPlayer";
 import { KpiGrid } from "../../components/dashboard/KpiGrid";
 import { QuickActionsCard } from "../../components/dashboard/QuickActionsCard";
+import { useLang } from "../../hooks/useLang";
 import type {
   AuthResponse,
   CategoryResult,
@@ -24,6 +26,8 @@ import { useRoleSession, handleRoleLogin } from "../../hooks/authHooks";
 import { parseMediaUrl } from "../../utils/mediaUrl";
 
 export function StudentPage() {
+  const { t } = useTranslation();
+  const lang = useLang();
   const navigate = useNavigate();
   const [session, setSession] = useState<AuthResponse | null>(() => loadSession("student"));
   const [authLoading, setAuthLoading] = useState<boolean>(Boolean(loadSession("student")));
@@ -214,36 +218,36 @@ export function StudentPage() {
 
   const completionModalConfig = hasNextLesson
     ? {
-        completionMessage: "Вы успешно завершили этот урок.",
-        helperText: "Готовы перейти к следующему уроку?",
-        primaryActionLabel: "Перейти на следующий урок",
+        completionMessage: t("student.lessonCompletedSuccess"),
+        helperText: t("student.readyForNextLesson"),
+        primaryActionLabel: t("student.goToNextLesson"),
         onPrimaryAction: handleNextLesson
       }
     : isCurrentCourseCompleted && hasNextCourse
       ? {
-          completionMessage: "Поздравляем, вы завершили все уроки этого курса.",
-          helperText: "Можно сразу перейти к следующему курсу и продолжить обучение.",
-          primaryActionLabel: "Перейти на следующий курс",
+          completionMessage: t("student.courseCompletedCongrats"),
+          helperText: t("student.goToNextCourseHint"),
+          primaryActionLabel: t("student.goToNextCourse"),
           onPrimaryAction: handleNextCourse
         }
       : programFullyCompleted
         ? {
-            completionMessage: "Поздравляем! Вы прошли всю образовательную программу.",
-            helperText: "Вы успешно завершили все курсы. Спасибо за обучение!",
-            primaryActionLabel: "Закрыть",
+            completionMessage: t("student.programCompletedCongrats"),
+            helperText: t("student.programCompletedThankYou"),
+            primaryActionLabel: t("common.close"),
             onPrimaryAction: () => setShowCompletionModal(false)
           }
         : isCurrentCourseCompleted
           ? {
-              completionMessage: "Вы завершили этот курс.",
-              helperText: "Чтобы завершить всю программу, пройдите остальные курсы в списке слева.",
-              primaryActionLabel: "Продолжить",
+              completionMessage: t("student.courseCompleted"),
+              helperText: t("student.completeOtherCourses"),
+              primaryActionLabel: t("student.continue"),
               onPrimaryAction: () => setShowCompletionModal(false)
             }
           : {
-              completionMessage: "Вы успешно завершили этот урок.",
-              helperText: "Чтобы завершить курс, пройдите оставшиеся уроки из списка.",
-              primaryActionLabel: "Продолжить обучение",
+              completionMessage: t("student.lessonCompletedSuccess"),
+              helperText: t("student.completeRemainingLessons"),
+              primaryActionLabel: t("student.continueLearning"),
               onPrimaryAction: () => setShowCompletionModal(false)
             };
 
@@ -297,7 +301,7 @@ export function StudentPage() {
       }
       setLessonCompletedLocally(true);
       setShowCompletionModal(true);
-      setLessonActionMessage(`Урок успешно пройден! (${formatDateTime(result.completedAt)})`);
+      setLessonActionMessage(`${t("student.lessonPassed")} (${formatDateTime(result.completedAt)})`);
     } catch (error: unknown) {
       setLessonActionMessage(getErrorMessage(error));
     } finally {
@@ -359,12 +363,12 @@ export function StudentPage() {
     const missed = questions.filter((q) => !answersByQuestion[q.id]).map((q) => q.id);
     if (missed.length > 0) {
       setUnansweredQuestions(missed);
-      alert("Вы ответили не на все вопросы! Пожалуйста, выберите ответы для вопросов, выделенных красным.");
+      alert(t("student.answerAllQuestions"));
       const firstMissedElement = document.getElementById(`question-${missed[0]}`);
       firstMissedElement?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    if (window.confirm("Вы уверены, что хотите завершить тест? После этого ответы нельзя будет изменить.")) {
+    if (window.confirm(t("student.confirmFinishTest"))) {
       handleFinishAttempt();
     }
   }
@@ -397,19 +401,19 @@ export function StudentPage() {
     setUnansweredQuestions([]);
   }
 
-  if (authLoading) return <div className="shell loading-shell">Загрузка данных ученика...</div>;
+  if (authLoading) return <div className="shell loading-shell">{t("student.loadingStudentData")}</div>;
 
   if (!session) {
     return (
       <main className="shell route-shell">
         <GlobalHeader />
         <section className="hero-panel">
-          <p className="eyebrow">Кабинет ученика</p>
-          <h1>Вам необходимо войти в систему</h1>
-          <p className="lead">Используйте общую страницу авторизации, после чего вы будете перенаправлены сюда.</p>
-          <a className="route-card compact-route-card" href="/auth">
-            <h2>Войти в аккаунт</h2>
-            <p>Открыть страницу авторизации.</p>
+          <p className="eyebrow">{t("student.cabinetEyebrow")}</p>
+          <h1>{t("student.needLogin")}</h1>
+          <p className="lead">{t("student.needLoginDesc")}</p>
+          <a className="route-card compact-route-card" href={`/${lang}/auth`}>
+            <h2>{t("common.loginToAccount")}</h2>
+            <p>{t("common.openAuthPage")}</p>
           </a>
         </section>
       </main>
@@ -421,12 +425,12 @@ export function StudentPage() {
       <GlobalHeader />
       <section className="topbar">
         <div>
-          <p className="eyebrow">Кабинет ученика</p>
-          <h1>Добро пожаловать, {session.fullName || "Ученик"}</h1>
+          <p className="eyebrow">{t("student.cabinetEyebrow")}</p>
+          <h1>{t("student.welcomeStudent", { name: session.fullName || t("student.studentDefault") })}</h1>
         </div>
         <div className="topbar-actions">
           <button className="ghost-button" onClick={handleLogout} type="button">
-            Выйти
+            {t("common.logout")}
           </button>
         </div>
       </section>
@@ -434,8 +438,8 @@ export function StudentPage() {
       {/* Вкладки навигации */}
       <div className="student-tabs">
         {[
-          { id: "courses", label: "📚 Учебные курсы" },
-          { id: "tests", label: "🧠 Тесты" }
+          { id: "courses", label: t("student.tabCourses") },
+          { id: "tests", label: t("student.tabTests") }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -451,39 +455,39 @@ export function StudentPage() {
       <KpiGrid
         items={[
           {
-            label: "Курсы",
+            label: t("student.kpiCourses"),
             value: `${completedCoursesCount} / ${courses.length}`,
-            hint: "завершено",
+            hint: t("student.kpiCompleted"),
             tone: completedCoursesCount > 0 ? "success" : "default"
           },
           {
-            label: "Уроки",
+            label: t("student.kpiLessons"),
             value: `${completedLessonsCount} / ${totalLessonsCount}`,
-            hint: "пройдено",
+            hint: t("student.kpiPassed"),
             tone: completedLessonsCount > 0 ? "success" : "default"
           },
           {
-            label: "Текущий курс",
+            label: t("student.kpiCurrentCourse"),
             value: selectedCourseId ? `${selectedCoursePercent}%` : "—",
-            hint: selectedCourseId ? "прогресс" : "выберите курс",
+            hint: selectedCourseId ? t("student.kpiProgress") : t("student.kpiSelectCourse"),
             tone: selectedCoursePercent >= 70 ? "success" : selectedCoursePercent >= 35 ? "warning" : "default"
           },
           {
-            label: "Тесты",
+            label: t("student.kpiTests"),
             value: tests.length,
-            hint: "доступно",
+            hint: t("student.kpiAvailable"),
             tone: tests.length > 0 ? "default" : "warning"
           }
         ]}
       />
 
       <QuickActionsCard
-        title={activeTab === "courses" ? "Продолжить обучение" : "Быстрые действия"}
+        title={activeTab === "courses" ? t("student.continueLearning") : t("student.quickActions")}
         actions={
           activeTab === "courses"
             ? [
                 {
-                  label: selectedCourseId && selectedLessonId ? "Открыть текущий урок" : "Выбрать курс",
+                  label: selectedCourseId && selectedLessonId ? t("student.openCurrentLesson") : t("student.selectCourse"),
                   onClick: () => {
                     const el = document.querySelector(".details-card");
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -491,14 +495,14 @@ export function StudentPage() {
                   tone: "primary"
                 },
                 {
-                  label: "Перейти к тестам",
+                  label: t("student.goToTests"),
                   onClick: () => setActiveTab("tests"),
                   tone: "ghost"
                 }
               ]
             : [
                 {
-                  label: "Начать выбранный тест",
+                  label: t("student.startSelectedTest"),
                   onClick: () => {
                     const el = document.querySelector(".details-card");
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -506,7 +510,7 @@ export function StudentPage() {
                   tone: "primary"
                 },
                 {
-                  label: "Вернуться к курсам",
+                  label: t("student.backToCourses"),
                   onClick: () => setActiveTab("courses"),
                   tone: "ghost"
                 }
@@ -518,13 +522,13 @@ export function StudentPage() {
         <section className="student-dashboard-grid">
           <aside className="card sidebar-card">
             <div className="section-heading">
-              <p className="eyebrow">Доступные программы</p>
-              <h2>Курсы</h2>
+              <p className="eyebrow">{t("student.availablePrograms")}</p>
+              <h2>{t("student.kpiCourses")}</h2>
             </div>
-            {coursesLoading ? <div className="empty-state">Загрузка курсов...</div> : null}
+            {coursesLoading ? <div className="empty-state">{t("student.loadingCourses")}</div> : null}
             {coursesError ? <div className="banner error">{coursesError}</div> : null}
             <div className="stack list-animate">
-              {courses.length === 0 && !coursesLoading && <p className="muted-text">Нет доступных курсов</p>}
+              {courses.length === 0 && !coursesLoading && <p className="muted-text">{t("student.noCourses")}</p>}
               {courses.map((course) => (
                 <button
                   key={course.id}
@@ -534,11 +538,11 @@ export function StudentPage() {
                 >
                   <div className="student-card-top">
                     <strong>{course.title}</strong>
-                    <span className="mini-pill">{course.ageGroup || "Для всех"}</span>
+                    <span className="mini-pill">{course.ageGroup || t("student.forAll")}</span>
                   </div>
                   {courseProgress[course.id] ? (
                     <p style={{ marginTop: "8px", color: courseProgress[course.id].completed ? "#166534" : "#4b5563", fontWeight: 600 }}>
-                      {courseProgress[course.id].completedLessons} из {courseProgress[course.id].totalLessons} уроков пройдено
+                      {t("student.lessonsCompleted", { completed: courseProgress[course.id].completedLessons, total: courseProgress[course.id].totalLessons })}
                     </p>
                   ) : null}
                 </button>
@@ -546,13 +550,13 @@ export function StudentPage() {
             </div>
 
             <div className="section-heading compact-heading" style={{ marginTop: '24px' }}>
-              <p className="eyebrow">Материалы курса</p>
-              <h2>Уроки</h2>
+              <p className="eyebrow">{t("student.courseMaterials")}</p>
+              <h2>{t("student.kpiLessons")}</h2>
             </div>
-            {lessonsLoading ? <div className="empty-state">Загрузка уроков...</div> : null}
+            {lessonsLoading ? <div className="empty-state">{t("student.loadingLessons")}</div> : null}
             {lessonsError ? <div className="banner error">{lessonsError}</div> : null}
             <div className="stack list-animate">
-              {lessons.length === 0 && selectedCourseId && !lessonsLoading && <p className="muted-text">В этом курсе пока нет уроков.</p>}
+              {lessons.length === 0 && selectedCourseId && !lessonsLoading && <p className="muted-text">{t("student.noLessons")}</p>}
               {lessons.map((lesson) => (
                 <button
                   key={lesson.id}
@@ -571,7 +575,7 @@ export function StudentPage() {
                         whiteSpace: "nowrap"
                       }}
                     >
-                      {lessonProgress[lesson.id]?.status === "COMPLETED" ? "Пройден" : "Не пройден"}
+                      {lessonProgress[lesson.id]?.status === "COMPLETED" ? t("student.lessonDone") : t("student.lessonNotDone")}
                     </span>
                   </div>
                 </button>
@@ -593,15 +597,15 @@ export function StudentPage() {
                 }}
               >
                 {selectedCourseProgress.completed
-                  ? `Курс завершён: ${selectedCourseProgress.completedLessons} из ${selectedCourseProgress.totalLessons} уроков`
-                  : `Пройдено ${selectedCourseProgress.completedLessons} из ${selectedCourseProgress.totalLessons} уроков`}
+                  ? t("student.courseFinished", { completed: selectedCourseProgress.completedLessons, total: selectedCourseProgress.totalLessons })
+                  : t("student.lessonsCompleted", { completed: selectedCourseProgress.completedLessons, total: selectedCourseProgress.totalLessons })}
               </div>
             ) : null}
             <div className="section-heading">
-              <p className="eyebrow">Содержимое</p>
-              <h2>Просмотр урока</h2>
+              <p className="eyebrow">{t("student.contentEyebrow")}</p>
+              <h2>{t("student.lessonView")}</h2>
             </div>
-            {lessonDetailsLoading ? <div className="empty-state">Загрузка урока...</div> : null}
+            {lessonDetailsLoading ? <div className="empty-state">{t("student.loadingLesson")}</div> : null}
             {!lessonDetailsLoading && lessonDetails ? (
               <div className="details-layout animate-fade-in" key={`lesson-${selectedLessonId}`}>
                 {programFullyCompleted ? (
@@ -618,7 +622,7 @@ export function StudentPage() {
                       lineHeight: 1.5
                     }}
                   >
-                    Поздравляем! Вы прошли всю образовательную программу — все доступные курсы успешно завершены.
+                    {t("student.programFullyCompletedBanner")}
                   </div>
                 ) : null}
                 <div className="panel-block">
@@ -642,19 +646,19 @@ export function StudentPage() {
                           }}
                           style={{ display: "inline-block", border: "none", cursor: "pointer" }}
                         >
-                          {isLessonVideoOpen ? "Скрыть видеоурок" : "▶ Открыть видеоурок"}
+                          {isLessonVideoOpen ? t("student.hideVideo") : t("student.openVideo")}
                         </button>
 
                         {isLessonVideoOpen ? (
                           <VideoLessonPlayer
-                            title={lessonDetails?.title ? `Видеоурок: ${lessonDetails.title}` : "Видеоурок"}
+                            title={lessonDetails?.title ? `${t("student.videoLesson")}: ${lessonDetails.title}` : t("student.videoLesson")}
                             videoUrl={resolvedLessonVideoUrl}
                           />
                         ) : null}
                       </div>
                     ) : (
                       <p className="muted-text" style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}>
-                        Видео к этому уроку не прикреплено.
+                        {t("student.noVideoAttached")}
                       </p>
                     )}
                   </div>
@@ -663,11 +667,11 @@ export function StudentPage() {
                   <div className="panel-block" style={{ marginTop: "8px" }}>
                     {hasNextLesson ? (
                       <button type="button" className="ghost-button" onClick={handleNextLesson} style={{ width: "100%", padding: "14px", fontWeight: 600 }}>
-                        Следующий урок
+                        {t("student.nextLesson")}
                       </button>
                     ) : hasNextCourse ? (
                       <button type="button" className="ghost-button" onClick={handleNextCourse} style={{ width: "100%", padding: "14px", fontWeight: 600 }}>
-                        Следующий курс
+                        {t("student.nextCourse")}
                       </button>
                     ) : null}
                   </div>
@@ -676,22 +680,22 @@ export function StudentPage() {
                 {!lessonCompletedLocally ? (
                   <div className="panel-block" style={{ marginTop: '24px' }}>
                     <button className="primary-button" onClick={handleCompleteLesson} disabled={lessonActionBusy} style={{ width: '100%', padding: '16px', fontSize: '1.1rem' }}>
-                      {lessonActionBusy ? "Сохранение..." : "Я изучил(а) этот материал"}
+                      {lessonActionBusy ? t("student.saving") : t("student.iStudiedThis")}
                     </button>
                   </div>
                 ) : (
                   <>
                   <div style={{ marginTop: '24px', padding: '24px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', display: 'none' }}>
-                    <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>✅ Урок успешно пройден</h3>
-                    <p style={{ color: '#15803d', marginBottom: '16px' }}>Вам стал доступен ситуационный сценарий для закрепления материала.</p>
-                    <button style={{ backgroundColor: '#166534', color: '#fff', padding: '12px 24px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer', width: '100%', fontSize: '1rem' }} onClick={() => alert('Раздел загрузки ситуационных сценариев в разработке. Здесь откроется диалог для выбора вариантов ответа.')}>
-                      🎭 Начать ситуационный тест (Сценарий)
+                    <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>{t("student.lessonPassedTitle")}</h3>
+                    <p style={{ color: '#15803d', marginBottom: '16px' }}>{t("student.scenarioAvailable")}</p>
+                    <button style={{ backgroundColor: '#166534', color: '#fff', padding: '12px 24px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer', width: '100%', fontSize: '1rem' }} onClick={() => alert(t("student.scenarioInDev"))}>
+                      {t("student.startSituationTest")}
                     </button>
                   </div>
                   <div style={{ marginTop: '24px', padding: '24px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px' }}>
-                    <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>Урок успешно пройден</h3>
+                    <h3 style={{ color: '#166534', margin: '0 0 8px 0' }}>{t("student.lessonPassedTitle")}</h3>
                     {lessonScenarioLoading ? (
-                      <p style={{ color: '#15803d', marginBottom: '16px' }}>Проверяем доступность ситуационного теста...</p>
+                      <p style={{ color: '#15803d', marginBottom: '16px' }}>{t("student.checkingScenario")}</p>
                     ) : lessonScenarios?.hasScenarios ? (
                       <div style={{ color: '#15803d' }}>
                         {(() => {
@@ -705,14 +709,13 @@ export function StudentPage() {
                             return (
                               <>
                                 <p style={{ margin: '0 0 12px 0' }}>
-                                  Вам доступно <strong>{list.filter((s) => s.available).length}</strong> ситуационных тест(а/ов) для этого урока.
-                                  Каждый можно пройти <strong>один раз</strong>.
+                                  {t("student.scenariosAvailableCount", { count: list.filter((s) => s.available).length })}
                                 </p>
                                 {selectedCourseId ? (
                                   <button
                                     type="button"
                                     onClick={() =>
-                                      navigate(`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`)
+                                      navigate(`/${lang}/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`)
                                     }
                                     style={{
                                       backgroundColor: '#166534',
@@ -726,7 +729,7 @@ export function StudentPage() {
                                       fontSize: '1rem'
                                     }}
                                   >
-                                    🎭 Начать ситуационный тест
+                                    {t("student.startSituationTest")}
                                   </button>
                                 ) : null}
                               </>
@@ -737,15 +740,15 @@ export function StudentPage() {
                             return (
                               <>
                                 <p style={{ margin: '0 0 12px 0' }}>
-                                  Все ситуационные тесты по этому уроку уже пройдены. Можно открыть страницу и посмотреть результаты.
+                                  {t("student.allScenariosCompleted")}
                                 </p>
                                 {selectedCourseId ? (
                                   <Link
                                     className="primary-link-button"
-                                    to={`/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`}
+                                    to={`/${lang}/students/course/${selectedCourseId}/lesson/${selectedLessonId}/situation-test`}
                                     style={{ display: 'inline-block' }}
                                   >
-                                    Посмотреть результаты
+                                    {t("student.viewResults")}
                                   </Link>
                                 ) : null}
                               </>
@@ -768,8 +771,8 @@ export function StudentPage() {
             ) : null}
             {!lessonDetailsLoading && !lessonDetails ? (
               <div className="empty-state">
-                <strong>Урок не выбран</strong>
-                <p>Выберите курс и урок слева, чтобы начать обучение.</p>
+                <strong>{t("student.noLessonSelected")}</strong>
+                <p>{t("student.selectLessonHint")}</p>
               </div>
             ) : null}
           </section>
@@ -780,12 +783,12 @@ export function StudentPage() {
         <section className="student-dashboard-grid">
           <aside className="card sidebar-card">
             <div className="section-heading">
-              <p className="eyebrow">Диагностика</p>
-              <h2>Тесты</h2>
+              <p className="eyebrow">{t("student.diagnosticsEyebrow")}</p>
+              <h2>{t("student.kpiTests")}</h2>
             </div>
             {testsError ? <div className="banner error">{testsError}</div> : null}
             <div className="stack list-animate">
-              {tests.length === 0 && <p className="muted-text">Доступных тестов пока нет.</p>}
+              {tests.length === 0 && <p className="muted-text">{t("student.noTestsAvailable")}</p>}
               {tests.map((test) => (
                 <button
                   key={test.id}
@@ -796,14 +799,14 @@ export function StudentPage() {
                   <div className="student-card-top">
                     <strong>{test.title}</strong>
                   </div>
-                  <p>{test.description || "Психологическое тестирование"}</p>
+                  <p>{test.description || t("student.psychTest")}</p>
                 </button>
               ))}
             </div>
           </aside>
 
           <section className="card details-card panel-animate">
-            {questionsLoading ? <div className="empty-state">Загрузка вопросов...</div> : null}
+            {questionsLoading ? <div className="empty-state">{t("student.loadingQuestions")}</div> : null}
             {questionsError ? <div className="banner error">{questionsError}</div> : null}
 
             {!questionsLoading && selectedTestId && questions.length > 0 ? (
@@ -811,10 +814,10 @@ export function StudentPage() {
                 {!attemptId && !finishResult ? (
                   <div className="empty-state animate-fade-in" key="test-intro" style={{ padding: '60px 20px' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📝</div>
-                    <h3 style={{ fontSize: '1.4rem', color: '#111827', marginBottom: '12px' }}>Готовы начать тест?</h3>
-                    <p style={{ color: '#4b5563', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>Вам будет предложено несколько вопросов. Пожалуйста, отвечайте на них честно. После завершения теста результаты будут отправлены вашему учителю.</p>
+                    <h3 style={{ fontSize: '1.4rem', color: '#111827', marginBottom: '12px' }}>{t("student.readyToStart")}</h3>
+                    <p style={{ color: '#4b5563', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>{t("student.testIntroDescription")}</p>
                     <button className="primary-button" onClick={handleStartAttempt} disabled={testActionBusy} style={{ padding: '12px 32px', fontSize: '1.1rem' }}>
-                      {testActionBusy ? "Подготовка..." : "Начать тестирование"}
+                      {testActionBusy ? t("student.preparing") : t("student.startTesting")}
                     </button>
                   </div>
                 ) : null}
@@ -822,8 +825,8 @@ export function StudentPage() {
                 {attemptId && !finishResult ? (
                   <div className="animate-fade-in" key={`test-attempt-${attemptId}`}>
                     <div className="student-test-head">
-                      <h2 style={{ margin: 0, color: '#111827' }}>Прохождение теста</h2>
-                      <span style={{ background: '#e0e7ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '99px', fontWeight: 600, fontSize: '0.9rem' }}>В процессе</span>
+                      <h2 style={{ margin: 0, color: '#111827' }}>{t("student.testInProgress")}</h2>
+                      <span style={{ background: '#e0e7ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '99px', fontWeight: 600, fontSize: '0.9rem' }}>{t("student.inProgress")}</span>
                     </div>
                     
                     <div className="question-list list-animate" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -838,7 +841,7 @@ export function StudentPage() {
                             </div>
                             {isUnanswered && (
                               <div style={{ color: '#dc2626', fontSize: '0.9rem', marginBottom: '12px', fontWeight: 600 }}>
-                                ⚠️ Вы забыли выбрать ответ на этот вопрос
+                                {t("student.forgotAnswer")}
               </div>
                             )}
                             <div className="option-list" style={{ display: 'grid', gap: '8px' }}>
@@ -868,7 +871,7 @@ export function StudentPage() {
                     
                     <div style={{ marginTop: '32px', borderTop: '1px solid #e5e7eb', paddingTop: '24px', display: 'flex', justifyContent: 'center' }}>
                       <button className="primary-button" onClick={handleTryFinish} disabled={testActionBusy} style={{ padding: '16px 48px', fontSize: '1.1rem', backgroundColor: '#111827' }}>
-                        {testActionBusy ? "Отправка..." : "Завершить тест и отправить ответы"}
+                        {testActionBusy ? t("student.submitting") : t("student.finishTestAndSubmit")}
                       </button>
                     </div>
                   </div>
@@ -877,10 +880,10 @@ export function StudentPage() {
                 {finishResult ? (
                   <div className="panel-block result-success-animate" key="test-result" style={{ textAlign: 'center', padding: '40px 20px' }}>
                     <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🎉</div>
-                    <h2 style={{ color: '#111827', marginBottom: '12px' }}>Тест успешно завершен!</h2>
-                    <p style={{ color: '#4b5563', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 24px' }}>Ваши ответы сохранены и отправлены вашему учителю для ознакомления. Спасибо за прохождение.</p>
+                    <h2 style={{ color: '#111827', marginBottom: '12px' }}>{t("student.testCompletedTitle")}</h2>
+                    <p style={{ color: '#4b5563', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 24px' }}>{t("student.testCompletedDesc")}</p>
                     <button className="ghost-button" onClick={() => { setAttemptId(null); setFinishResult(null); setAnswersByQuestion({}); }} style={{ padding: '10px 24px', fontSize: '1rem' }}>
-                      Пройти тест заново
+                      {t("student.retakeTest")}
                     </button>
                   </div>
                 ) : null}
@@ -889,8 +892,8 @@ export function StudentPage() {
 
             {!questionsLoading && selectedTestId && questions.length === 0 ? (
               <div className="empty-state">
-                <strong>Вопросы не найдены</strong>
-                <p>В этом тесте пока нет вопросов.</p>
+                <strong>{t("student.questionsNotFound")}</strong>
+                <p>{t("student.noQuestionsInTest")}</p>
               </div>
             ) : null}
           </section>

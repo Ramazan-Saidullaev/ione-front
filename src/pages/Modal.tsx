@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -25,7 +27,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <button
               type="button"
               onClick={onClose}
-              aria-label="Закрыть"
+              aria-label={t("common.close")}
               style={{
                 background: "none",
                 border: "none",

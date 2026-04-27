@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { GlobalHeader } from "../components/GlobalHeader";
 import { VideoLessonPlayer } from "../components/VideoLessonPlayer";
+import { useLang } from "../hooks/useLang";
 import type { Course, Lesson } from "../types";
 
 function getMediaUrl(path: string | undefined | null) {
@@ -18,6 +20,8 @@ function getMediaUrl(path: string | undefined | null) {
 }
 
 export function PublicCoursesPage() {
+  const { t } = useTranslation();
+  const lang = useLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [coursesError, setCoursesError] = useState<string | null>(null);
@@ -41,7 +45,7 @@ export function PublicCoursesPage() {
     setCoursesLoading(true);
     fetch(`${API_BASE}/api/public/courses`)
       .then((res) => {
-        if (!res.ok) throw new Error("Не удалось загрузить курсы");
+        if (!res.ok) throw new Error(t("publicCourses.failedLoadCourses"));
         return res.json();
       })
       .then((data) => {
@@ -61,7 +65,7 @@ export function PublicCoursesPage() {
     setLessonsLoading(true);
     fetch(`${API_BASE}/api/public/courses/${selectedCourseId}/lessons`)
       .then((res) => {
-        if (!res.ok) throw new Error("Не удалось загрузить уроки");
+        if (!res.ok) throw new Error(t("publicCourses.failedLoadLessons"));
         return res.json();
       })
       .then((data) => {
@@ -83,7 +87,7 @@ export function PublicCoursesPage() {
     setLessonDetailsLoading(true);
     fetch(`${API_BASE}/api/public/lessons/${selectedLessonId}`)
       .then((res) => {
-        if (!res.ok) throw new Error("Не удалось загрузить содержимое урока");
+        if (!res.ok) throw new Error(t("publicCourses.failedLoadLessonContent"));
         return res.json();
       })
       .then((data) => setLessonDetails(data))
@@ -96,12 +100,12 @@ export function PublicCoursesPage() {
       <GlobalHeader />
       <section className="topbar">
         <div>
-          <p className="eyebrow">Открытый доступ</p>
-          <h1>Каталог курсов</h1>
+          <p className="eyebrow">{t("publicCourses.openAccessEyebrow")}</p>
+          <h1>{t("publicCourses.catalogTitle")}</h1>
         </div>
         <div className="topbar-actions">
-          <a className="primary-button" href="/auth" style={{ textDecoration: "none" }}>
-            Войти в аккаунт
+          <a className="primary-button" href={`/${lang}/auth`} style={{ textDecoration: "none" }}>
+            {t("common.loginToAccount")}
           </a>
         </div>
       </section>
@@ -110,13 +114,13 @@ export function PublicCoursesPage() {
         {/* Боковая панель с курсами и уроками */}
         <aside className="card sidebar-card">
           <div className="section-heading">
-            <p className="eyebrow">Программы</p>
-            <h2>Доступные курсы</h2>
+            <p className="eyebrow">{t("publicCourses.programsEyebrow")}</p>
+            <h2>{t("publicCourses.availableCourses")}</h2>
           </div>
-          {coursesLoading && <div className="empty-state">Загрузка курсов...</div>}
+          {coursesLoading && <div className="empty-state">{t("publicCourses.loadingCourses")}</div>}
           {coursesError && <div className="banner error">{coursesError}</div>}
           <div className="stack list-animate">
-            {courses.length === 0 && !coursesLoading && <p className="muted-text">Курсы пока не добавлены.</p>}
+            {courses.length === 0 && !coursesLoading && <p className="muted-text">{t("publicCourses.noCoursesYet")}</p>}
             {courses.map((course) => (
               <button
                 key={course.id}
@@ -126,22 +130,22 @@ export function PublicCoursesPage() {
               >
                 <div className="student-card-top">
                   <strong>{course.title}</strong>
-                  <span className="mini-pill">{course.ageGroup || "Для всех"}</span>
+                  <span className="mini-pill">{course.ageGroup || t("common.forAll")}</span>
                 </div>
-                <p>{course.description || "Описание отсутствует."}</p>
+                <p>{course.description || t("publicCourses.noDescription")}</p>
               </button>
             ))}
           </div>
 
           <div className="section-heading compact-heading" style={{ marginTop: "24px" }}>
-            <p className="eyebrow">Материалы курса</p>
-            <h2>Уроки</h2>
+            <p className="eyebrow">{t("publicCourses.courseMaterialsEyebrow")}</p>
+            <h2>{t("publicCourses.lessonsTitle")}</h2>
           </div>
-          {lessonsLoading && <div className="empty-state">Загрузка уроков...</div>}
+          {lessonsLoading && <div className="empty-state">{t("publicCourses.loadingLessons")}</div>}
           {lessonsError && <div className="banner error">{lessonsError}</div>}
           <div className="stack list-animate">
             {lessons.length === 0 && selectedCourseId && !lessonsLoading && (
-              <p className="muted-text">В этом курсе пока нет уроков.</p>
+              <p className="muted-text">{t("publicCourses.noLessonsInCourse")}</p>
             )}
             {lessons.map((lesson) => (
               <button
@@ -163,10 +167,10 @@ export function PublicCoursesPage() {
         {/* Основная зона с контентом урока */}
         <section className="card details-card panel-animate">
           <div className="section-heading">
-            <p className="eyebrow">Содержимое</p>
-            <h2>Просмотр урока</h2>
+            <p className="eyebrow">{t("publicCourses.contentEyebrow")}</p>
+            <h2>{t("publicCourses.lessonView")}</h2>
           </div>
-          {lessonDetailsLoading && <div className="empty-state">Загрузка урока...</div>}
+          {lessonDetailsLoading && <div className="empty-state">{t("publicCourses.loadingLesson")}</div>}
           {!lessonDetailsLoading && lessonDetails && (
             <div className="details-layout animate-fade-in" key={`lesson-${selectedLessonId}`}>
               <div className="panel-block">
@@ -189,12 +193,12 @@ export function PublicCoursesPage() {
                         }}
                         style={{ display: "inline-block", border: "none", cursor: "pointer" }}
                       >
-                        {isLessonVideoOpen ? "Скрыть видеоурок" : "▶ Открыть видеоурок"}
+                        {isLessonVideoOpen ? t("publicCourses.hideVideo") : t("publicCourses.openVideo")}
                       </button>
 
                       {isLessonVideoOpen ? (
                         <VideoLessonPlayer
-                          title={lessonDetails?.title ? `Видеоурок: ${lessonDetails.title}` : "Видеоурок"}
+                          title={lessonDetails?.title ? `${t("publicCourses.lessonView")}: ${lessonDetails.title}` : t("publicCourses.lessonView")}
                           videoUrl={resolvedLessonVideoUrl}
                         />
                       ) : null}
@@ -204,7 +208,7 @@ export function PublicCoursesPage() {
                       className="muted-text"
                       style={{ marginTop: lessonDetails.textContent?.trim() ? "24px" : "12px" }}
                     >
-                      Видео к этому уроку не прикреплено.
+                      {t("publicCourses.noVideo")}
                     </p>
                   )}
                 </div>
@@ -223,18 +227,18 @@ export function PublicCoursesPage() {
                 }}
               >
                 <p style={{ margin: "0 0 16px 0", color: "#334155", fontWeight: 500 }}>
-                  Для сохранения прогресса и прохождения тестирования необходимо войти в аккаунт ученика.
+                  {t("publicCourses.needLoginForProgress")}
                 </p>
-                <a className="primary-button" href="/auth" style={{ display: "inline-block", textDecoration: "none" }}>
-                  Войти или зарегистрироваться
+                <a className="primary-button" href={`/${lang}/auth`} style={{ display: "inline-block", textDecoration: "none" }}>
+                  {t("publicCourses.loginOrRegister")}
                 </a>
               </div>
             </div>
           )}
           {!lessonDetailsLoading && !lessonDetails && (
             <div className="empty-state">
-              <strong>Урок не выбран</strong>
-              <p>Выберите курс и урок слева, чтобы посмотреть материалы.</p>
+              <strong>{t("publicCourses.noLessonSelected")}</strong>
+              <p>{t("publicCourses.selectLessonHint")}</p>
             </div>
           )}
         </section>

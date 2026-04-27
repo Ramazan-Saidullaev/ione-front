@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { loadSession } from "../storage";
+import { useLang } from "../hooks/useLang";
 import type { AuthResponse } from "../types";
 
 function ChevronDown() {
@@ -21,10 +23,23 @@ function UserIcon() {
 }
 
 export function GlobalHeader() {
+  const { t, i18n } = useTranslation();
+  const lang = useLang();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showAuthMenu, setShowAuthMenu] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
   const [student, setStudent] = useState<AuthResponse | null>(() => loadSession("student"));
   const [teacher, setTeacher] = useState<AuthResponse | null>(() => loadSession("teacher"));
+
+  function switchLang(newLang: string) {
+    i18n.changeLanguage(newLang);
+    const newPath = location.pathname.replace(`/${lang}`, `/${newLang}`);
+    navigate(newPath + location.search + location.hash, { replace: true });
+    setShowLangMenu(false);
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,6 +55,18 @@ export function GlobalHeader() {
   }, [showAuthMenu]);
 
   useEffect(() => {
+    function handleClickOutsideLang(event: MouseEvent) {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setShowLangMenu(false);
+      }
+    }
+    if (showLangMenu) {
+      document.addEventListener("mousedown", handleClickOutsideLang);
+      return () => document.removeEventListener("mousedown", handleClickOutsideLang);
+    }
+  }, [showLangMenu]);
+
+  useEffect(() => {
     function handleStorage() {
       setStudent(loadSession("student"));
       setTeacher(loadSession("teacher"));
@@ -48,28 +75,28 @@ export function GlobalHeader() {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  const profileLink = student ? "/students/profile" : teacher ? "/teachers/profile" : null;
+  const profileLink = student ? `/${lang}/students/profile` : teacher ? `/${lang}/teachers/profile` : null;
 
   return (
     <header className="global-header">
       <div className="global-header-left">
-        <Link to="/" className="global-brand">
+        <Link to={`/${lang}`} className="global-brand">
           <div className="brand-logo-card">
             <img className="brand-logo-img" src="/sanau-logo.png" alt="SanaU" />
           </div>
         </Link>
         <nav className="global-nav">
-          <a href="/#product" className="nav-dropdown-btn">О платформе</a>
-          <a href="/#features" className="nav-dropdown-btn">Функции</a>
-          <a href="/#audience" className="nav-dropdown-btn">Для кого</a>
-          <a href="/#privacy" className="nav-dropdown-btn">Контакты</a>
+          <a href={`/${lang}#product`} className="nav-dropdown-btn">{t("header.aboutPlatform")}</a>
+          <a href={`/${lang}#features`} className="nav-dropdown-btn">{t("header.features")}</a>
+          <a href={`/${lang}#audience`} className="nav-dropdown-btn">{t("header.forWhom")}</a>
+          <a href={`/${lang}#privacy`} className="nav-dropdown-btn">{t("header.contacts")}</a>
         </nav>
       </div>
       <div className="global-header-right">
         <div className="auth-menu-container" ref={menuRef}>
           <button
             className="icon-action-btn"
-            title="Меню"
+            title={t("header.menu")}
             onClick={() => setShowAuthMenu(!showAuthMenu)}
           >
             <UserIcon />
@@ -79,15 +106,15 @@ export function GlobalHeader() {
             <div className="auth-dropdown-menu">
               {profileLink ? (
                 <Link to={profileLink} className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
-                  Профиль
+                  {t("common.profile")}
                 </Link>
               ) : (
                 <>
-                  <Link to="/auth" className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
-                    Войти
+                  <Link to={`/${lang}/auth`} className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
+                    {t("common.login")}
                   </Link>
-                  <Link to="/auth/register" className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
-                    Регистрация
+                  <Link to={`/${lang}/auth/register`} className="auth-menu-item" onClick={() => setShowAuthMenu(false)}>
+                    {t("common.register")}
                   </Link>
                 </>
               )}
@@ -95,10 +122,19 @@ export function GlobalHeader() {
           )}
         </div>
 
-        <button className="lang-selector-btn">
-          <div className="ru-flag"></div>
-          <ChevronDown />
-        </button>
+        <div className="auth-menu-container" ref={langMenuRef}>
+          <button className="lang-selector-btn" onClick={() => setShowLangMenu(!showLangMenu)}>
+            <span style={{ fontWeight: 600, textTransform: "uppercase" }}>{lang}</span>
+            <ChevronDown />
+          </button>
+          {showLangMenu && (
+            <div className="auth-dropdown-menu">
+              <button className="auth-menu-item" onClick={() => switchLang("ru")} type="button">RU</button>
+              <button className="auth-menu-item" onClick={() => switchLang("kz")} type="button">KZ</button>
+              <button className="auth-menu-item" onClick={() => switchLang("en")} type="button">EN</button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

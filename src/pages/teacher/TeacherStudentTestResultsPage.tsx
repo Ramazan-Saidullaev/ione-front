@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import type {
   AuthResponse,
@@ -9,12 +10,15 @@ import type {
   TeacherStudentTestAttemptSummary
 } from "../../types";
 import { formatDateTime, getErrorMessage } from "../../utils/helpers";
+import { useLang } from "../../hooks/useLang";
 
 type Props = {
   session: AuthResponse;
 };
 
 export function TeacherStudentTestResultsPage({ session }: Props) {
+  const { t } = useTranslation();
+  const lang = useLang();
   const params = useParams();
   const studentId = Number(params.studentId);
 
@@ -36,7 +40,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
   useEffect(() => {
     if (!Number.isFinite(studentId) || studentId <= 0) {
-      setError("Некорректный studentId.");
+      setError(t("teacherStudentTests.invalidStudentId"));
       setLoading(false);
       return;
     }
@@ -86,7 +90,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
   const title = useMemo(() => {
     if (student?.fullName) return student.fullName;
-    return `Ученик ${studentId}`;
+    return `${t("teacherStudentTests.studentPrefix")} ${studentId}`;
   }, [student?.fullName, studentId]);
 
   const selectedTestSummary = useMemo(() => {
@@ -98,20 +102,20 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
     <section className="dashboard-grid">
       <aside className="card sidebar-card">
         <div className="section-heading">
-          <p className="eyebrow">Психологические тесты</p>
+          <p className="eyebrow">{t("teacherStudentTests.psychTestsEyebrow")}</p>
           <h2>{title}</h2>
         </div>
 
         <div className="page-nav">
-          <Link to="/teachers/tests">← Назад к ученикам</Link>
+          <Link to={`/${lang}/teachers/tests`}>{t("teacherStudentTests.backToStudents")}</Link>
         </div>
 
-        {loading ? <div className="empty-state">Загрузка результатов...</div> : null}
+        {loading ? <div className="empty-state">{t("teacherStudentTests.loadingResults")}</div> : null}
         {error ? <div className="banner error">{error}</div> : null}
         {!loading && !error && summaries.length === 0 ? (
           <div className="empty-state">
-            <strong>Нет результатов</strong>
-            <p>Этот ученик ещё не завершил психологические тесты.</p>
+            <strong>{t("teacherStudentTests.noResults")}</strong>
+            <p>{t("teacherStudentTests.noResultsHint")}</p>
           </div>
         ) : null}
 
@@ -128,7 +132,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                   <strong>{test.testTitle}</strong>
                   <span className={`zone-pill zone-${test.maxZone.toLowerCase()}`}>{test.maxZone}</span>
                 </div>
-                <p>Последнее завершение: {test.finishedAt ? formatDateTime(test.finishedAt) : "—"}</p>
+                <p>{t("teacherStudentTests.lastCompletion")}: {test.finishedAt ? formatDateTime(test.finishedAt) : "—"}</p>
                 <small>testId: {test.testId}</small>
               </button>
             ))
@@ -144,21 +148,21 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                   setAttemptsError(null);
                 }}
               >
-                ← Назад к тестам
+                {t("teacherStudentTests.backToTests")}
               </button>
 
               <div className="empty-state" style={{ marginTop: 8 }}>
-                <strong>{selectedTestSummary?.testTitle ?? `Тест ${selectedTestId}`}</strong>
-                <p>Попытки (сначала последние)</p>
+                <strong>{selectedTestSummary?.testTitle ?? `${t("teacherStudentTests.testLabel")} ${selectedTestId}`}</strong>
+                <p>{t("teacherStudentTests.attemptsLatestFirst")}</p>
               </div>
 
               {attemptsError ? <div className="banner error">{attemptsError}</div> : null}
-              {attemptsLoading ? <div className="empty-state">Загрузка попыток...</div> : null}
+              {attemptsLoading ? <div className="empty-state">{t("teacherStudentTests.loadingAttempts")}</div> : null}
 
               {!attemptsLoading && !attemptsError && attempts.length === 0 ? (
                 <div className="empty-state">
-                  <strong>Нет попыток</strong>
-                  <p>Для этого теста не найдено завершённых попыток.</p>
+                  <strong>{t("teacherStudentTests.noAttempts")}</strong>
+                  <p>{t("teacherStudentTests.noAttemptsHint")}</p>
                 </div>
               ) : null}
 
@@ -176,12 +180,12 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                    */}
                   <div className="student-card-top">
                     <strong>
-                      Попытка #{attempts.length - idx} из {attempts.length}
+                      {t("teacherStudentTests.attemptOf", { current: attempts.length - idx, total: attempts.length })}
                     </strong>
                     <span className={`zone-pill zone-${a.maxZone.toLowerCase()}`}>{a.maxZone}</span>
                   </div>
-                  <p>Начало: {formatDateTime(a.startedAt)}</p>
-                  <p>Завершение: {a.finishedAt ? formatDateTime(a.finishedAt) : "—"}</p>
+                  <p>{t("teacherStudentTests.startedAt")}: {formatDateTime(a.startedAt)}</p>
+                  <p>{t("teacherStudentTests.finishedAt")}: {a.finishedAt ? formatDateTime(a.finishedAt) : "—"}</p>
                   <small>attemptId: {a.attemptId}</small>
                 </button>
               ))}
@@ -193,17 +197,17 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
 
       <section className="card details-card panel-animate" key={`attempt-${expandedAttemptId ?? 'none'}`}>
         <div className="section-heading">
-          <p className="eyebrow">Панель</p>
-          <h2>Категории и зоны риска</h2>
+          <p className="eyebrow">{t("teacherStudentTests.panelEyebrow")}</p>
+          <h2>{t("teacherStudentTests.categoriesAndZones")}</h2>
         </div>
 
         {!expandedAttemptId ? (
           <div className="empty-state">
-            <strong>{selectedTestId ? "Выберите попытку" : "Выберите тест"}</strong>
+            <strong>{selectedTestId ? t("teacherStudentTests.selectAttempt") : t("teacherStudentTests.selectTest")}</strong>
             <p>
               {selectedTestId
-                ? "Выберите попытку слева, чтобы посмотреть зоны по категориям."
-                : "Выберите тест слева, чтобы увидеть все попытки, затем откройте одну попытку для деталей."}
+                ? t("teacherStudentTests.selectAttemptHint")
+                : t("teacherStudentTests.selectTestHint")}
             </p>
           </div>
         ) : null}
@@ -212,7 +216,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
           <>
             {detailsError ? <div className="banner error">{detailsError}</div> : null}
             {detailsLoading && !detailsByAttemptId[expandedAttemptId] ? (
-              <div className="empty-state">Загрузка деталей попытки...</div>
+              <div className="empty-state">{t("teacherStudentTests.loadingAttemptDetails")}</div>
             ) : null}
 
             {(() => {
@@ -236,22 +240,22 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                 <div className="details-layout results-animate">
                   <div className="summary-grid">
                     <div className="info-box">
-                      <span>Тест</span>
+                      <span>{t("teacherStudentTests.testLabel")}</span>
                       <strong>{summary.testTitle}</strong>
                     </div>
                     <div className="info-box">
-                      <span>Завершение</span>
+                      <span>{t("teacherStudentTests.completion")}</span>
                       <strong>{summary.finishedAt ? formatDateTime(summary.finishedAt) : "—"}</strong>
                     </div>
                     <div className={`info-box tone-${summary.maxZone.toLowerCase()}`}>
-                      <span>Макс. зона</span>
+                      <span>{t("teacherStudentTests.maxZone")}</span>
                       <strong>{summary.maxZone}</strong>
                     </div>
                   </div>
 
                   <div className="panel-block">
                     <div className="panel-heading">
-                      <h3>Результаты по категориям</h3>
+                      <h3>{t("teacherStudentTests.categoryResults")}</h3>
                     </div>
                     <div className="category-grid">
                       {summary.categoryResults.map((result) => (
@@ -260,7 +264,7 @@ export function TeacherStudentTestResultsPage({ session }: Props) {
                             <strong>{result.categoryName}</strong>
                             <span className={`zone-pill zone-${result.zone.toLowerCase()}`}>{result.zone}</span>
                           </div>
-                          <p>Сумма баллов: {result.totalScore}</p>
+                          <p>{t("teacherStudentTests.totalScore")}: {result.totalScore}</p>
                         </article>
                       ))}
                     </div>

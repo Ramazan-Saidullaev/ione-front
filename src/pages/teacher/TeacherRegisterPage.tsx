@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api";
 import { saveSession } from "../../storage";
 import { GlobalHeader } from "../../components/GlobalHeader";
@@ -7,6 +8,7 @@ import { getErrorMessage, redirectToRole } from "../../utils/helpers";
 import type { PublicSchoolDto } from "../../types";
 
 export function TeacherRegisterPage() {
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,11 +39,11 @@ export function TeacherRegisterPage() {
   async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (schoolId === "") {
-      setError("Пожалуйста, выберите школу");
+      setError(t("teacherRegister.selectSchoolError"));
       return;
     }
     if (!homeroomClass.trim()) {
-      setError("Пожалуйста, укажите класс (классный руководитель), например 7A");
+      setError(t("teacherRegister.specifyClassError"));
       return;
     }
 
@@ -74,20 +76,20 @@ export function TeacherRegisterPage() {
       <section className="card" style={{ alignSelf: "stretch" }}>
         <div className="section-heading">
           <p className="eyebrow">SanaU</p>
-          <h2 style={{ marginTop: 0 }}>Панель учителя и аналитика.</h2>
+          <h2 style={{ marginTop: 0 }}>{t("teacherRegister.panelTitle")}</h2>
         </div>
         <p className="lead" style={{ marginTop: 0 }}>
-          Регистрация учителя даёт доступ к мониторингу прогресса, результатам тестов и зонам риска по ученикам.
+          {t("teacherRegister.description")}
         </p>
         <ul className="clean-list" style={{ margin: 0 }}>
-          <li>Список учеников и результаты</li>
-          <li>Зоны риска по тестам</li>
-          <li>Прогресс по курсам и урокам</li>
+          <li>{t("teacherRegister.feature1")}</li>
+          <li>{t("teacherRegister.feature2")}</li>
+          <li>{t("teacherRegister.feature3")}</li>
         </ul>
         <div className="highlight-box" style={{ marginTop: "18px" }}>
-          <strong>Подсказка</strong>
+          <strong>{t("teacherRegister.hint")}</strong>
           <p style={{ marginBottom: 0 }}>
-            Укажите «классный руководитель» (например 7А), чтобы ученики могли зарегистрироваться в ваш класс.
+            {t("teacherRegister.hintText")}
           </p>
         </div>
       </section>
@@ -95,12 +97,12 @@ export function TeacherRegisterPage() {
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleRegister}>
           <div className="section-heading">
-            <p className="eyebrow">Регистрация</p>
-            <h2>Регистрация учителя</h2>
+            <p className="eyebrow">{t("teacherRegister.registerEyebrow")}</p>
+            <h2>{t("teacherRegister.registerTitle")}</h2>
           </div>
 
           <label className="field">
-            <span>ФИО</span>
+            <span>{t("common.fullName")}</span>
             <input
               type="text"
               value={fullName}
@@ -110,7 +112,7 @@ export function TeacherRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Email</span>
+            <span>{t("common.email")}</span>
             <input
               type="email"
               value={email}
@@ -120,32 +122,32 @@ export function TeacherRegisterPage() {
           </label>
 
           <label className="field">
-            <span>Пароль</span>
+            <span>{t("common.password")}</span>
             <PasswordToggleField value={password} onChange={setPassword} required />
           </label>
 
           <label className="field">
-            <span>Класс (классный руководитель), напр. 7А, 8Б</span>
+            <span>{t("teacherRegister.homeroomClass")}</span>
             <input
               type="text"
               value={homeroomClass}
               onChange={(e) => setHomeroomClass(e.target.value)}
-              placeholder="Напр: 7А"
+              placeholder={t("teacherRegister.homeroomPlaceholder")}
               required
             />
           </label>
 
           <label className="field">
-            <span>Школа</span>
+            <span>{t("common.school")}</span>
             {loading ? (
-              <p style={{ color: "#666", margin: 0 }}>Загрузка школ...</p>
+              <p style={{ color: "#666", margin: 0 }}>{t("teacherRegister.loadingSchools")}</p>
             ) : (
               <select
                 value={schoolId}
                 onChange={(e) => setSchoolId(e.target.value ? parseInt(e.target.value) : "")}
                 required
               >
-                <option value="">Выберите школу</option>
+                <option value="">{t("teacherRegister.selectSchool")}</option>
                 {schools.map((school) => (
                   <option key={school.id} value={school.id}>
                     {school.name}
@@ -158,7 +160,7 @@ export function TeacherRegisterPage() {
           {error ? <div className="banner error">{error}</div> : null}
 
           <button className="primary-button" type="submit" disabled={registering || loading}>
-            {registering ? "Создание аккаунта..." : "Зарегистрироваться"}
+            {registering ? t("teacherRegister.creatingAccount") : t("teacherRegister.registerButton")}
           </button>
         </form>
       </section>

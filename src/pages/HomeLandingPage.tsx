@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../api";
 import { GlobalHeader } from "../components/GlobalHeader";
+import { useLang } from "../hooks/useLang";
 import type { Course } from "../types";
 
 export function HomeLandingPage() {
+  const { t } = useTranslation();
+  const lang = useLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(true);
   const [coursesError, setCoursesError] = useState<string | null>(null);
@@ -16,7 +20,7 @@ export function HomeLandingPage() {
       .then(setCourses)
       .catch((e: unknown) => {
         setCourses([]);
-        setCoursesError(e instanceof Error ? e.message : "Не удалось загрузить курсы");
+        setCoursesError(e instanceof Error ? e.message : t("landing.loadCoursesError"));
       })
       .finally(() => setCoursesLoading(false));
   }, []);
@@ -40,34 +44,33 @@ export function HomeLandingPage() {
         <div className="byjus-hero-inner">
           <div className="byjus-hero-copy">
             <div className="byjus-badges">
-              <span className="byjus-badge">6–16 лет</span>
-              <span className="byjus-badge">микро‑уроки</span>
-              <span className="byjus-badge">практика</span>
+              <span className="byjus-badge">{t("landing.badges.age")}</span>
+              <span className="byjus-badge">{t("landing.badges.microLessons")}</span>
+              <span className="byjus-badge">{t("landing.badges.practice")}</span>
             </div>
 
-            <h1 className="byjus-h1">Жизненные навыки, которые действительно закрепляются.</h1>
+            <h1 className="byjus-h1">{t("landing.hero.title")}</h1>
             <p className="byjus-lead">
-              Короткие уроки по 2–3 минуты + квиз + сценарий. Формируем финансовую грамотность, кибербезопасность,
-              основы права и коммуникацию — в удобном мобильном формате.
+              {t("landing.hero.description")}
             </p>
 
             <div className="byjus-cta">
-              <a className="byjus-btn byjus-btn-primary" href="/auth">Начать бесплатно</a>
-              <a className="byjus-btn byjus-btn-ghost" href="/public-courses">Смотреть курсы</a>
+              <a className="byjus-btn byjus-btn-primary" href={`/${lang}/auth`}>{t("landing.hero.startFree")}</a>
+              <a className="byjus-btn byjus-btn-ghost" href={`/${lang}/public-courses`}>{t("landing.hero.viewCourses")}</a>
             </div>
 
             <div className="byjus-trust">
               <div className="byjus-trust-item">
                 <strong>{coursesLoading ? "…" : courses.length}</strong>
-                <span>курсов в каталоге</span>
+                <span>{t("landing.trust.coursesInCatalog")}</span>
               </div>
               <div className="byjus-trust-item">
                 <strong>{coursesLoading ? "…" : ageGroups.length || "—"}</strong>
-                <span>возрастных групп</span>
+                <span>{t("landing.trust.ageGroups")}</span>
               </div>
               <div className="byjus-trust-item">
-                <strong>2–3 минуты</strong>
-                <span>на урок</span>
+                <strong>{t("landing.trust.lessonDuration")}</strong>
+                <span>{t("landing.trust.perLesson")}</span>
               </div>
             </div>
 
@@ -79,12 +82,12 @@ export function HomeLandingPage() {
               <img className="byjus-hero-img" src="/landing-hero.svg" alt="" />
             </div>
             <div className="byjus-float byjus-float-1">
-              <strong>Прогресс</strong>
-              <span>видно учителю</span>
+              <strong>{t("landing.progress.title")}</strong>
+              <span>{t("landing.progress.visibleToTeacher")}</span>
             </div>
             <div className="byjus-float byjus-float-2">
-              <strong>Обратная связь</strong>
-              <span>без перегруза</span>
+              <strong>{t("landing.feedback.title")}</strong>
+              <span>{t("landing.feedback.noOverload")}</span>
             </div>
           </div>
         </div>
@@ -92,9 +95,9 @@ export function HomeLandingPage() {
 
       <section className="byjus-section" id="catalog">
         <div className="byjus-section-head">
-          <p className="byjus-kicker">Каталог</p>
-          <h2 className="byjus-h2">Популярные курсы</h2>
-          <p className="byjus-text">Показываем реальные курсы:</p>
+          <p className="byjus-kicker">{t("landing.catalog.kicker")}</p>
+          <h2 className="byjus-h2">{t("landing.catalog.title")}</h2>
+          <p className="byjus-text">{t("landing.catalog.subtitle")}</p>
         </div>
 
         {coursesLoading ? (
@@ -105,20 +108,20 @@ export function HomeLandingPage() {
           </div>
         ) : featuredCourses.length === 0 ? (
           <div className="byjus-empty">
-            <strong>Пока нет курсов</strong>
-            <span>Добавь курсы в админке — и они появятся на лендинге автоматически.</span>
+            <strong>{t("landing.catalog.noCourses")}</strong>
+            <span>{t("landing.catalog.noCoursesHint")}</span>
           </div>
         ) : (
           <div className="byjus-course-grid">
             {featuredCourses.map((course) => (
-              <a key={course.id} className="byjus-course-card" href="/public-courses">
+              <a key={course.id} className="byjus-course-card" href={`/${lang}/public-courses`}>
                 <div className="byjus-course-top">
                   <strong>{course.title}</strong>
-                  <span className="byjus-pill">{course.ageGroup || "Для всех"}</span>
+                  <span className="byjus-pill">{course.ageGroup || t("common.forAll")}</span>
                 </div>
-                <p>{course.description || "Короткие уроки + квиз + сценарии для закрепления навыков."}</p>
+                <p>{course.description || t("landing.catalog.defaultDescription")}</p>
                 <div className="byjus-course-cta">
-                  <span>Открыть</span>
+                  <span>{t("common.open")}</span>
                   <span className="byjus-arrow">→</span>
                 </div>
               </a>
@@ -129,11 +132,10 @@ export function HomeLandingPage() {
 
       <section className="byjus-section" id="features">
         <div className="byjus-section-head">
-          <p className="byjus-kicker">Как работает</p>
-          <h2 className="byjus-h2">Смотрим. Проверяем. Применяем.</h2>
+          <p className="byjus-kicker">{t("landing.howItWorks.kicker")}</p>
+          <h2 className="byjus-h2">{t("landing.howItWorks.title")}</h2>
           <p className="byjus-text">
-            Мы сделали простой цикл обучения: микро‑урок → квиз → сценарий. Он помогает превратить знания в
-            действие и удерживать регулярность.
+            {t("landing.howItWorks.description")}
           </p>
         </div>
 
@@ -142,26 +144,26 @@ export function HomeLandingPage() {
             <div className="byjus-step">
               <div className="byjus-step-dot">1</div>
               <div>
-                <strong>Микро‑урок 2–3 минуты</strong>
-                <span>Коротко и по делу — без перегруза.</span>
+                <strong>{t("landing.howItWorks.step1Title")}</strong>
+                <span>{t("landing.howItWorks.step1Desc")}</span>
               </div>
             </div>
             <div className="byjus-step">
               <div className="byjus-step-dot">2</div>
               <div>
-                <strong>Квиз с обратной связью</strong>
-                <span>Закрепляем понимание сразу после просмотра.</span>
+                <strong>{t("landing.howItWorks.step2Title")}</strong>
+                <span>{t("landing.howItWorks.step2Desc")}</span>
               </div>
             </div>
             <div className="byjus-step">
               <div className="byjus-step-dot">3</div>
               <div>
-                <strong>Сценарий «как в жизни»</strong>
-                <span>Выбираем вариант и видим последствия.</span>
+                <strong>{t("landing.howItWorks.step3Title")}</strong>
+                <span>{t("landing.howItWorks.step3Desc")}</span>
               </div>
             </div>
             <div className="byjus-note">
-              Психологический модуль — ранний «сигнал» для внимания, не медицинский диагноз.
+              {t("landing.howItWorks.psychNote")}
             </div>
           </div>
 
@@ -172,50 +174,50 @@ export function HomeLandingPage() {
 
         <div className="byjus-grid">
           <div className="byjus-card">
-            <strong>Финансовая грамотность</strong>
-            <span>Бюджет, ценность денег, ежедневные решения.</span>
+            <strong>{t("landing.features.finance")}</strong>
+            <span>{t("landing.features.financeDesc")}</span>
           </div>
           <div className="byjus-card">
-            <strong>Кибербезопасность</strong>
-            <span>Пароли, фишинг, защита данных.</span>
+            <strong>{t("landing.features.cyber")}</strong>
+            <span>{t("landing.features.cyberDesc")}</span>
           </div>
           <div className="byjus-card">
-            <strong>Право и ответственность</strong>
-            <span>Понятные основы для онлайн и офлайн.</span>
+            <strong>{t("landing.features.law")}</strong>
+            <span>{t("landing.features.lawDesc")}</span>
           </div>
           <div className="byjus-card">
-            <strong>Коммуникация</strong>
-            <span>Этикет и здоровое общение.</span>
+            <strong>{t("landing.features.communication")}</strong>
+            <span>{t("landing.features.communicationDesc")}</span>
           </div>
           <div className="byjus-card">
-            <strong>Учительская панель</strong>
-            <span>Прогресс, результаты, зоны риска.</span>
+            <strong>{t("landing.features.teacherPanel")}</strong>
+            <span>{t("landing.features.teacherPanelDesc")}</span>
           </div>
           <div className="byjus-card">
-            <strong>Рекомендации</strong>
-            <span>Подсказки по следующему шагу обучения.</span>
+            <strong>{t("landing.features.recommendations")}</strong>
+            <span>{t("landing.features.recommendationsDesc")}</span>
           </div>
         </div>
       </section>
 
       <section className="byjus-section" id="audience">
         <div className="byjus-section-head">
-          <p className="byjus-kicker">Для кого</p>
-          <h2 className="byjus-h2">Одна платформа — разные роли</h2>
+          <p className="byjus-kicker">{t("landing.audience.kicker")}</p>
+          <h2 className="byjus-h2">{t("landing.audience.title")}</h2>
         </div>
 
         <div className="byjus-audience">
           <div className="byjus-audience-card">
-            <strong>Школьникам</strong>
-            <span>Короткие уроки + практика, чтобы реально запомнить.</span>
+            <strong>{t("landing.audience.students")}</strong>
+            <span>{t("landing.audience.studentsDesc")}</span>
           </div>
           <div className="byjus-audience-card">
-            <strong>Учителям</strong>
-            <span>Обзор прогресса и результатов без ручных таблиц.</span>
+            <strong>{t("landing.audience.teachers")}</strong>
+            <span>{t("landing.audience.teachersDesc")}</span>
           </div>
           <div className="byjus-audience-card">
-            <strong>Родителям</strong>
-            <span>Понимание, что ребенок учится полезным навыкам.</span>
+            <strong>{t("landing.audience.parents")}</strong>
+            <span>{t("landing.audience.parentsDesc")}</span>
           </div>
         </div>
 
@@ -224,13 +226,13 @@ export function HomeLandingPage() {
             <img className="byjus-figure" src="/landing-teacher.svg" alt="" />
           </div>
           <div className="byjus-split-copy">
-            <h3 className="byjus-h3">Учителю — понятная аналитика</h3>
+            <h3 className="byjus-h3">{t("landing.teacherAnalytics.title")}</h3>
             <p className="byjus-text">
-              Кто учится регулярно, кто пропускает, какие темы вызывают трудности — всё в одном месте.
+              {t("landing.teacherAnalytics.description")}
             </p>
             <div className="byjus-mini">
-              <strong>Сигналы риска</strong>
-              <span>Помогают заметить проблему раньше, чем она станет большой.</span>
+              <strong>{t("landing.teacherAnalytics.riskSignals")}</strong>
+              <span>{t("landing.teacherAnalytics.riskSignalsDesc")}</span>
             </div>
           </div>
         </div>
@@ -239,15 +241,15 @@ export function HomeLandingPage() {
       <section className="byjus-cta">
         <div className="byjus-cta-inner">
           <div>
-            <p className="byjus-kicker">Готовы начать?</p>
-            <h2 className="byjus-h2">Попробуйте бесплатно и покажите результат.</h2>
+            <p className="byjus-kicker">{t("landing.cta.kicker")}</p>
+            <h2 className="byjus-h2">{t("landing.cta.title")}</h2>
             <p className="byjus-text" style={{ margin: 0 }}>
-              Для демонстрации диплома важно первое впечатление — этот экран делает его сильным.
+              {t("landing.cta.description")}
             </p>
           </div>
           <div className="byjus-cta-actions">
-            <a className="byjus-btn byjus-btn-primary" href="/auth">Регистрация</a>
-            <a className="byjus-btn byjus-btn-ghost" href="/public-courses">Открыть курсы</a>
+            <a className="byjus-btn byjus-btn-primary" href={`/${lang}/auth`}>{t("landing.cta.register")}</a>
+            <a className="byjus-btn byjus-btn-ghost" href={`/${lang}/public-courses`}>{t("landing.cta.openCourses")}</a>
           </div>
         </div>
       </section>
@@ -255,7 +257,7 @@ export function HomeLandingPage() {
       <footer className="site-footer" id="privacy">
         <div className="footer-brand">
           <strong>SanaU</strong>
-          <p>Практическое микро‑обучение жизненным навыкам — с панелью учителя.</p>
+          <p>{t("landing.footer.description")}</p>
         </div>
         <div className="footer-links">
           <a href="mailto:support@sanau.local">support@sanau.local</a>
@@ -265,8 +267,8 @@ export function HomeLandingPage() {
           <a href="https://instagram.com/" target="_blank" rel="noreferrer">
             Instagram
           </a>
-          <a href="/auth">Войти</a>
-          <a href="#privacy">Политика конфиденциальности</a>
+          <a href={`/${lang}/auth`}>{t("common.login")}</a>
+          <a href="#privacy">{t("landing.footer.privacyPolicy")}</a>
         </div>
       </footer>
     </main>

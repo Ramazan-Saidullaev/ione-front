@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../api";
 import { loadSession, saveSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
@@ -6,6 +7,7 @@ import { PasswordToggleField } from "../components/PasswordToggleField";
 import { getErrorMessage, redirectToRole } from "../utils/helpers";
 
 export function AuthPage() {
+  const { t } = useTranslation();
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
@@ -38,39 +40,39 @@ export function AuthPage() {
 
       <section className="card" style={{ alignSelf: "stretch" }}>
         <div className="section-heading">
-          <p className="eyebrow">Добро пожаловать в SanaU</p>
-          <h2 style={{ marginTop: 0 }}>Практическое обучение для реальной жизни.</h2>
+          <p className="eyebrow">{t("auth.welcomeEyebrow")}</p>
+          <h2 style={{ marginTop: 0 }}>{t("auth.welcomeTitle")}</h2>
         </div>
         <p className="lead" style={{ marginTop: 0 }}>
-          Уроки по 2–3 минуты, квизы и ситуационные задания для учеников (6–16) — с отслеживанием прогресса для учителей.
+          {t("auth.welcomeDescription")}
         </p>
         <ul className="clean-list" style={{ margin: 0 }}>
-          <li>Микрообучение, удобное на телефоне</li>
-          <li>Финансовая грамотность и практическое мышление</li>
-          <li>Панель учителя и аналитика</li>
+          <li>{t("auth.feature1")}</li>
+          <li>{t("auth.feature2")}</li>
+          <li>{t("auth.feature3")}</li>
         </ul>
         <div className="highlight-box" style={{ marginTop: "18px" }}>
-          <strong>Начните за пару минут</strong>
-          <p style={{ marginBottom: 0 }}>Войдите, чтобы открыть личный кабинет и продолжить обучение.</p>
+          <strong>{t("auth.startQuickly")}</strong>
+          <p style={{ marginBottom: 0 }}>{t("auth.startQuicklyDesc")}</p>
         </div>
       </section>
 
       <section className="card auth-card auth-home-card">
         <form className="stack" onSubmit={handleLogin}>
           <div className="section-heading">
-            <p className="eyebrow">Вход</p>
-            <h2>Откройте личный кабинет</h2>
+            <p className="eyebrow">{t("auth.loginEyebrow")}</p>
+            <h2>{t("auth.loginTitle")}</h2>
           </div>
           <label className="field">
-            <span>Email</span>
+            <span>{t("common.email")}</span>
             <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
           </label>
           <label className="field">
-            <span>Пароль</span>
+            <span>{t("common.password")}</span>
             <PasswordToggleField value={loginPassword} onChange={setLoginPassword} required />
           </label>
           {authError ? <div className="banner error">{authError}</div> : null}
-          <button className="primary-button" type="submit" disabled={authBusy}>{authBusy ? "Выполняется вход..." : "Войти"}</button>
+          <button className="primary-button" type="submit" disabled={authBusy}>{authBusy ? t("auth.loggingIn") : t("auth.loginButton")}</button>
         </form>
       </section>
 

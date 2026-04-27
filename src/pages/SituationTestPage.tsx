@@ -1,8 +1,10 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { loadSession } from "../storage";
 import { GlobalHeader } from "../components/GlobalHeader";
+import { useLang } from "../hooks/useLang";
 import type { AuthResponse, StudentLessonScenario, StudentLessonScenarios } from "../types";
 import { getErrorMessage } from "../utils/helpers";
 import { resolveStudentMediaSrc } from "../utils/mediaUrl";
@@ -55,6 +57,8 @@ function optionsGridStyle(total: number): CSSProperties {
 }
 
 export function SituationTestPage() {
+  const { t } = useTranslation();
+  const lang = useLang();
   const { courseId: courseIdParam, lessonId: lessonIdParam } = useParams();
   const courseId = Number(courseIdParam);
   const lessonId = Number(lessonIdParam);
@@ -74,11 +78,11 @@ export function SituationTestPage() {
 
   const paramsInvalid = !Number.isFinite(courseId) || !Number.isFinite(lessonId) || courseId <= 0 || lessonId <= 0;
 
-  const backHref = "/students";
+  const backHref = `/${lang}/students`;
 
   useEffect(() => {
     if (paramsInvalid) {
-      setLoadError("Некорректная ссылка на тест.");
+      setLoadError(t("situationTest.invalidLink"));
       setLoading(false);
       return;
     }
@@ -130,7 +134,7 @@ export function SituationTestPage() {
     setSubmitError(null);
     if (
       !window.confirm(
-        "Вы уверены, что хотите подтвердить выбранный ответ? После отправки изменить выбор будет нельзя."
+        t("situationTest.confirmSubmit")
       )
     ) {
       return;
@@ -186,8 +190,8 @@ export function SituationTestPage() {
       <main className="dashboard-shell">
         <GlobalHeader />
         <section className="card" style={{ padding: "24px" }}>
-          <p>{loadError || "Некорректная ссылка."}</p>
-          <Link to={backHref}>Вернуться в кабинет</Link>
+          <p>{loadError || t("situationTest.invalidLinkShort")}</p>
+          <Link to={backHref}>{t("situationTest.backToCabinet")}</Link>
         </section>
       </main>
     );
@@ -198,10 +202,10 @@ export function SituationTestPage() {
       <main className="dashboard-shell">
         <GlobalHeader />
         <section className="card" style={{ padding: "24px", maxWidth: "520px" }}>
-          <h1 style={{ marginTop: 0 }}>Ситуационный тест</h1>
-          <p>Чтобы пройти тест, войдите как ученик. Прямая ссылка для других пользователей не даёт доступа к вашему прогрессу.</p>
-          <Link className="primary-link-button" to="/auth" style={{ display: "inline-block", marginTop: "12px" }}>
-            Войти
+          <h1 style={{ marginTop: 0 }}>{t("situationTest.eyebrow")}</h1>
+          <p>{t("situationTest.loginRequired")}</p>
+          <Link className="primary-link-button" to={`/${lang}/auth`} style={{ display: "inline-block", marginTop: "12px" }}>
+            {t("common.login")}
           </Link>
         </section>
       </main>
@@ -212,7 +216,7 @@ export function SituationTestPage() {
     return (
       <main className="shell loading-shell">
         <GlobalHeader />
-        <p style={{ padding: "24px" }}>Загрузка ситуационного теста…</p>
+        <p style={{ padding: "24px" }}>{t("situationTest.loadingTest")}</p>
       </main>
     );
   }
@@ -223,9 +227,9 @@ export function SituationTestPage() {
         <GlobalHeader />
         <section className="card" style={{ padding: "24px" }}>
           <p className="banner error" style={{ marginBottom: "16px" }}>
-            {loadError || "Не удалось загрузить тест."}
+            {loadError || t("situationTest.failedLoad")}
           </p>
-          <Link to={backHref}>Вернуться в кабинет</Link>
+          <Link to={backHref}>{t("situationTest.backToCabinet")}</Link>
         </section>
       </main>
     );
@@ -236,9 +240,9 @@ export function SituationTestPage() {
       <main className="dashboard-shell">
         <GlobalHeader />
         <section className="card" style={{ padding: "24px" }}>
-          <h1 style={{ marginTop: 0 }}>Ситуационный тест</h1>
-          <p>Для этого урока ситуационный тест не настроен.</p>
-          <Link to={backHref}>Вернуться в кабинет</Link>
+          <h1 style={{ marginTop: 0 }}>{t("situationTest.eyebrow")}</h1>
+          <p>{t("situationTest.noScenariosConfigured")}</p>
+          <Link to={backHref}>{t("situationTest.backToCabinet")}</Link>
         </section>
       </main>
     );
@@ -276,21 +280,21 @@ export function SituationTestPage() {
     <main className="dashboard-shell">
       <GlobalHeader />
       <section style={{ padding: "24px 32px", maxWidth: "720px" }}>
-        <p className="eyebrow">Ситуационный тест</p>
-        <h1 style={{ marginTop: "4px", color: "#1e3a8a" }}>{scenario?.title || "Сценарии урока"}</h1>
+        <p className="eyebrow">{t("situationTest.eyebrow")}</p>
+        <h1 style={{ marginTop: "4px", color: "#1e3a8a" }}>{scenario?.title || t("situationTest.scenariosOfLesson")}</h1>
         <p style={{ color: "#64748b", marginBottom: "24px" }}>
-          Урок: <strong>{lessonTitle}</strong>
+          {t("situationTest.lesson")}: <strong>{lessonTitle}</strong>
         </p>
 
         {step === "list" ? (
           <div className="content-card animate-fade-in" key="step-list" style={{ padding: "20px", marginBottom: "20px" }}>
             <p style={{ marginTop: 0, color: "#334155", lineHeight: 1.6 }}>
-              Выберите один из ситуационных тестов для этого урока. Каждый тест можно пройти <strong>один раз</strong>.
+              <span dangerouslySetInnerHTML={{ __html: t("situationTest.selectOneTest") }} />
             </p>
             <div className="list-animate" style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
               {list.map((s) => {
                 const isActive = (s.scenarioId ?? null) === activeScenarioId;
-                const statusLabel = s.completed ? "Пройден" : s.available ? "Доступен" : "Недоступен";
+                const statusLabel = s.completed ? t("situationTest.passed") : s.available ? t("situationTest.available") : t("situationTest.unavailable");
                 const statusBg = s.completed ? "#dcfce7" : s.available ? "#e0e7ff" : "#f3f4f6";
                 const statusColor = s.completed ? "#166534" : s.available ? "#1d4ed8" : "#374151";
                 return (
@@ -305,7 +309,7 @@ export function SituationTestPage() {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 800, color: "#0f172a" }}>{s.title || "Сценарий"}</div>
+                        <div style={{ fontWeight: 800, color: "#0f172a" }}>{s.title || t("situationTest.scenario")}</div>
                         {s.description ? (
                           <div style={{ color: "#475569", marginTop: "6px", whiteSpace: "pre-wrap" }}>
                             {s.description.length > 180 ? `${s.description.slice(0, 180)}…` : s.description}
@@ -346,7 +350,7 @@ export function SituationTestPage() {
                         style={{ padding: "10px 16px" }}
                         disabled={!s.scenarioId}
                       >
-                        {s.completed ? "Открыть результат" : s.available ? "Начать" : "Открыть"}
+                        {s.completed ? t("situationTest.openResult") : s.available ? t("situationTest.start") : t("common.open")}
                       </button>
                     </div>
                   </div>
@@ -359,7 +363,7 @@ export function SituationTestPage() {
         {showUnavailable ? (
           <div className="content-card animate-fade-in" key="step-unavailable" style={{ padding: "20px", marginBottom: "20px" }}>
             <p style={{ margin: 0, color: "#334155", lineHeight: 1.6 }}>
-              {scenario?.message || "Ситуационный тест сейчас недоступен."}
+              {scenario?.message || t("situationTest.testUnavailable")}
             </p>
           </div>
         ) : null}
@@ -367,14 +371,13 @@ export function SituationTestPage() {
         {step === "intro" && scenario?.available && !scenario.completed ? (
           <div className="content-card animate-fade-in" key="step-intro" style={{ padding: "24px", marginBottom: "20px", lineHeight: 1.65 }}>
             <p style={{ marginTop: 0, color: "#334155" }}>
-              Вы завершили урок «{lessonTitle}». Вам доступен ситуационный тест: короткая ситуация и выбор действия. Его можно
-              пройти <strong>один раз</strong>; после отправки ответа повторно пройти тот же тест будет нельзя.
+              <span dangerouslySetInnerHTML={{ __html: t("situationTest.introText", { lesson: lessonTitle }) }} />
             </p>
             <button type="button" className="primary-button" onClick={() => setStep("test")} style={{ marginTop: "16px" }}>
-              Перейти к ситуации
+              {t("situationTest.goToSituation")}
             </button>
             <button type="button" className="ghost-button" onClick={() => setStep("list")} style={{ marginTop: "12px" }}>
-              ← К списку ситуационных тестов
+              {t("situationTest.backToList")}
             </button>
           </div>
         ) : null}
@@ -384,14 +387,14 @@ export function SituationTestPage() {
             {scenario.baseImageUrl ? (
               <img
                 src={resolveStudentMediaSrc(api.baseUrl, scenario.baseImageUrl)}
-                alt="Иллюстрация к ситуации"
+                alt={t("situationTest.illustrationAlt")}
                 style={scenarioImageStyle}
               />
             ) : null}
             {scenario.description ? (
               <p style={{ whiteSpace: "pre-wrap", color: "#374151", marginBottom: "20px" }}>{scenario.description}</p>
             ) : null}
-            <p style={{ fontWeight: 600, color: "#111827", marginBottom: "12px" }}>Выберите действие:</p>
+            <p style={{ fontWeight: 600, color: "#111827", marginBottom: "12px" }}>{t("situationTest.chooseAction")}</p>
             <div style={optionsGridStyle(scenario.options.length)}>
               {scenario.options.map((option, idx) => (
                 <button
@@ -419,10 +422,10 @@ export function SituationTestPage() {
               onClick={handleConfirmSubmit}
               style={{ marginTop: "20px", width: "100%", maxWidth: "320px" }}
             >
-              {submitBusy ? "Отправка…" : "Подтвердить выбор и посмотреть ответ"}
+              {submitBusy ? t("situationTest.submitting") : t("situationTest.confirmChoice")}
             </button>
             <button type="button" className="ghost-button" onClick={() => setStep("list")} style={{ marginTop: "12px" }}>
-              ← К списку ситуационных тестов
+              {t("situationTest.backToList")}
             </button>
           </div>
         ) : null}
@@ -438,7 +441,7 @@ export function SituationTestPage() {
               borderRadius: "12px"
             }}
           >
-            <h2 style={{ marginTop: 0, fontSize: "1.25rem", color: "#0f172a" }}>Итог</h2>
+            <h2 style={{ marginTop: 0, fontSize: "1.25rem", color: "#0f172a" }}>{t("situationTest.resultTitle")}</h2>
             {scenario?.baseImageUrl ? (
               <img
                 src={resolveStudentMediaSrc(api.baseUrl, scenario.baseImageUrl)}
@@ -448,19 +451,19 @@ export function SituationTestPage() {
             ) : null}
             {scenario?.description ? (
               <p style={{ color: "#475569", marginBottom: "12px" }}>
-                <strong>Ситуация:</strong> {scenario.description}
+                <strong>{t("situationTest.situationLabel")}</strong> {scenario.description}
               </p>
             ) : null}
             <p style={{ color: "#475569", marginBottom: "12px" }}>
-              <strong>Ваш выбор:</strong> {displayOutcome.selectedOptionText || "—"}
+              <strong>{t("situationTest.yourChoice")}</strong> {displayOutcome.selectedOptionText || "—"}
             </p>
             <p style={{ color: "#1e293b", whiteSpace: "pre-wrap", marginBottom: "12px" }}>
-              <strong>Комментарий к ответу:</strong> {displayOutcome.resultText || "Ответ сохранён."}
+              <strong>{t("situationTest.answerComment")}</strong> {displayOutcome.resultText || t("situationTest.answerSaved")}
             </p>
             {displayOutcome.resultImageUrl ? (
               <img
                 src={resolveStudentMediaSrc(api.baseUrl, displayOutcome.resultImageUrl)}
-                alt="Иллюстрация к результату"
+                alt={t("situationTest.resultImageAlt")}
                 style={scenarioImageStyle}
               />
             ) : null}
@@ -471,18 +474,18 @@ export function SituationTestPage() {
                 onClick={() => goToScenario(nextScenario)}
                 style={{ marginTop: "16px", width: "100%", maxWidth: "420px" }}
               >
-                Перейти к следующему ситуационному тесту →
+                {t("situationTest.goToNextTest")}
               </button>
             ) : null}
             <button type="button" className="ghost-button" onClick={() => setStep("list")} style={{ marginTop: "16px" }}>
-              ← К списку ситуационных тестов
+              {t("situationTest.backToList")}
             </button>
           </div>
         ) : null}
 
         <div style={{ marginTop: "28px" }}>
           <Link to={backHref} className="ghost-button" style={{ display: "inline-block", padding: "10px 20px" }}>
-            ← Вернуться к урокам
+            {t("situationTest.backToLessons")}
           </Link>
         </div>
       </section>

@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { useLang } from "../../hooks/useLang";
 import { loadSession, clearSession } from "../../storage";
 import { AdminOverview } from "./AdminOverview";
 import { AdminCourses } from "./AdminCourses";
@@ -8,30 +10,32 @@ import { AdminTests } from "./AdminTests";
 import type { AuthResponse } from "../../types";
 
 export function AdminPage() {
+  const { t } = useTranslation();
+  const lang = useLang();
   const [session] = useState<AuthResponse | null>(() => loadSession("admin"));
   const location = useLocation();
 
   function handleLogout() {
     clearSession("admin");
-    window.location.href = "/";
+    window.location.href = `/${lang}`;
   }
 
   if (!session) {
     return (
       <main style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", background: "#f9fafb", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ textAlign: "center" }}>
-          <h1 style={{ fontSize: "2rem", color: "#111827", margin: "0 0 16px 0" }}>Доступ запрещён</h1>
-          <p style={{ color: "#6b7280" }}>У вас нет прав для просмотра панели администратора.</p>
+          <h1 style={{ fontSize: "2rem", color: "#111827", margin: "0 0 16px 0" }}>{t("admin.accessDenied")}</h1>
+          <p style={{ color: "#6b7280" }}>{t("admin.noPermission")}</p>
         </div>
       </main>
     );
   }
 
   const navItems = [
-    { path: "/admin", label: "Панель", icon: "📊" },
-    { path: "/admin/schools", label: "Школы и пользователи", icon: "🏫" },
-    { path: "/admin/courses", label: "Курсы", icon: "📚" },
-    { path: "/admin/tests", label: "Тесты и шкалы", icon: "🧠" },
+    { path: `/${lang}/admin`, label: t("admin.panel"), icon: "📊" },
+    { path: `/${lang}/admin/schools`, label: t("admin.schoolsAndUsers"), icon: "🏫" },
+    { path: `/${lang}/admin/courses`, label: t("admin.courses"), icon: "📚" },
+    { path: `/${lang}/admin/tests`, label: t("admin.testsAndScales"), icon: "🧠" },
   ];
 
   return (
@@ -44,7 +48,7 @@ export function AdminPage() {
         </div>
         <nav style={{ flex: 1, padding: "20px 12px", display: "flex", flexDirection: "column", gap: "4px" }}>
           {navItems.map(item => {
-            const isActive = location.pathname === item.path || (item.path !== "/admin" && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path || (item.path !== `/${lang}/admin` && location.pathname.startsWith(item.path));
             return (
               <Link key={item.path} to={item.path} style={{
                 padding: "10px 12px", borderRadius: "8px", textDecoration: "none", fontSize: "0.95rem",
@@ -66,11 +70,11 @@ export function AdminPage() {
         <header style={{ height: "64px", backgroundColor: "#ffffff", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 32px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111827" }}>{session.fullName || "Администратор"}</div>
-              <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>Системный администратор</div>
+              <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111827" }}>{session.fullName || t("admin.administrator")}</div>
+              <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{t("admin.sysAdmin")}</div>
             </div>
             <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500, color: "#374151" }}>
-              Выйти
+              {t("common.logout")}
             </button>
           </div>
         </header>

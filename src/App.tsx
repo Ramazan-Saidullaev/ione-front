@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { HomeLandingPage } from "./pages/HomeLandingPage";
 import { AuthPage } from "./pages/AuthPage";
 import { RegisterTypePage } from "./pages/RegisterTypePage";
@@ -13,23 +15,46 @@ import { StudentProfilePage } from "./pages/student/StudentProfilePage";
 import { TeacherProfilePage } from "./pages/teacher/TeacherProfilePage";
 import { PublicCoursesPage } from "./pages/PublicCoursesPage";
 
+const SUPPORTED_LANGS = ["ru", "kz", "en"];
+
+function LangWrapper() {
+  const { lang } = useParams<{ lang: string }>();
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    if (lang && SUPPORTED_LANGS.includes(lang) && i18n.language !== lang) {
+      i18n.changeLanguage(lang);
+    }
+  }, [lang, i18n]);
+
+  if (!lang || !SUPPORTED_LANGS.includes(lang)) {
+    return <Navigate to={`/ru`} replace />;
+  }
+
+  return <Outlet />;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomeLandingPage />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/public-courses" element={<PublicCoursesPage />} />
-        <Route path="/auth/register" element={<RegisterTypePage />} />
-        <Route path="/auth/register/teacher" element={<TeacherRegisterPage />} />
-        <Route path="/auth/register/student" element={<StudentRegisterPage />} />
-        <Route path="/teachers/profile" element={<TeacherProfilePage />} />
-        <Route path="/teachers/*" element={<TeacherPage />} />
-        <Route path="/students/course/:courseId/lesson/:lessonId/situation-test" element={<SituationTestPage />} />
-        <Route path="/students/profile" element={<StudentProfilePage />} />
-        <Route path="/students/*" element={<StudentPage />} />
-        <Route path="/admin/*" element={<AdminPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/:lang" element={<LangWrapper />}>
+          <Route index element={<HomeLandingPage />} />
+          <Route path="auth" element={<AuthPage />} />
+          <Route path="public-courses" element={<PublicCoursesPage />} />
+          <Route path="auth/register" element={<RegisterTypePage />} />
+          <Route path="auth/register/teacher" element={<TeacherRegisterPage />} />
+          <Route path="auth/register/student" element={<StudentRegisterPage />} />
+          <Route path="teachers/profile" element={<TeacherProfilePage />} />
+          <Route path="teachers/*" element={<TeacherPage />} />
+          <Route path="students/course/:courseId/lesson/:lessonId/situation-test" element={<SituationTestPage />} />
+          <Route path="students/profile" element={<StudentProfilePage />} />
+          <Route path="students/*" element={<StudentPage />} />
+          <Route path="admin/*" element={<AdminPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+        <Route path="/" element={<Navigate to="/ru" replace />} />
+        <Route path="*" element={<Navigate to="/ru" replace />} />
       </Routes>
     </BrowserRouter>
   );
