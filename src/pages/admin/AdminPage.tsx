@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import { useLang } from "../../hooks/useLang";
 import { loadSession, clearSession } from "../../storage";
 import { AdminOverview } from "./AdminOverview";
@@ -10,10 +10,32 @@ import { AdminTests } from "./AdminTests";
 import type { AuthResponse } from "../../types";
 
 export function AdminPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = useLang();
+  const navigate = useNavigate();
   const [session] = useState<AuthResponse | null>(() => loadSession("admin"));
   const location = useLocation();
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setShowLangMenu(false);
+      }
+    }
+    if (showLangMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showLangMenu]);
+
+  function switchLang(newLang: string) {
+    i18n.changeLanguage(newLang);
+    const newPath = location.pathname.replace(`/${lang}`, `/${newLang}`);
+    navigate(newPath + location.search + location.hash, { replace: true });
+    setShowLangMenu(false);
+  }
 
   function handleLogout() {
     clearSession("admin");
@@ -69,6 +91,30 @@ export function AdminPage() {
         {/* TOPBAR */}
         <header style={{ height: "64px", backgroundColor: "#ffffff", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 32px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            {/* Language Switcher */}
+            <div ref={langMenuRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 10px", borderRadius: "6px", border: "none", background: "transparent", cursor: "pointer", fontSize: "0.9rem", color: "#374151" }}
+              >
+                <span style={{ fontSize: "1.25rem" }}>{{ ru: "\u{1F1F7}\u{1F1FA}", kz: "\u{1F1F0}\u{1F1FF}", en: "\u{1F1FA}\u{1F1F8}" }[lang]}</span>
+                <span style={{ fontSize: "0.7rem", transition: "transform 0.2s", transform: showLangMenu ? "rotate(180deg)" : "rotate(0)" }}>&#9662;</span>
+              </button>
+              {showLangMenu && (
+                <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "6px", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "10px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden", zIndex: 100, minWidth: "160px" }}>
+                  {([["kz", "\u{1F1F0}\u{1F1FF}", "\u049A\u0430\u0437\u0430\u049B\u0448\u0430"], ["ru", "\u{1F1F7}\u{1F1FA}", "\u0420\u0443\u0441\u0441\u043A\u0438\u0439"], ["en", "\u{1F1FA}\u{1F1F8}", "English"]] as [string, string, string][]).map(([code, flag, label]) => (
+                    <button
+                      key={code}
+                      onClick={() => switchLang(code)}
+                      style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "10px 16px", border: "none", background: code === lang ? "#f0f4ff" : "#fff", cursor: "pointer", fontSize: "0.9rem", fontWeight: code === lang ? 600 : 400, color: "#111827", textAlign: "left" }}
+                    >
+                      <span style={{ fontSize: "1.2rem" }}>{flag}</span>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111827" }}>{session.fullName || t("admin.administrator")}</div>
               <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{t("admin.sysAdmin")}</div>

@@ -124,14 +124,23 @@ export function GlobalHeader() {
 
         <div className="auth-menu-container" ref={langMenuRef}>
           <button className="lang-selector-btn" onClick={() => setShowLangMenu(!showLangMenu)}>
-            <span style={{ fontWeight: 600, textTransform: "uppercase" }}>{lang}</span>
+            <span style={{ fontSize: "1.25rem" }}>{{ ru: "\u{1F1F7}\u{1F1FA}", kz: "\u{1F1F0}\u{1F1FF}", en: "\u{1F1FA}\u{1F1F8}" }[lang]}</span>
             <ChevronDown />
           </button>
           {showLangMenu && (
             <div className="auth-dropdown-menu">
-              <button className="auth-menu-item" onClick={() => switchLang("ru")} type="button">RU</button>
-              <button className="auth-menu-item" onClick={() => switchLang("kz")} type="button">KZ</button>
-              <button className="auth-menu-item" onClick={() => switchLang("en")} type="button">EN</button>
+              {([["kz", "\u{1F1F0}\u{1F1FF}", "\u049A\u0430\u0437\u0430\u049B\u0448\u0430"], ["ru", "\u{1F1F7}\u{1F1FA}", "\u0420\u0443\u0441\u0441\u043A\u0438\u0439"], ["en", "\u{1F1FA}\u{1F1F8}", "English"]] as [string, string, string][]).map(([code, flag, label]) => (
+                <button
+                  key={code}
+                  className={`auth-menu-item${code === lang ? " active" : ""}`}
+                  onClick={() => switchLang(code)}
+                  type="button"
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  <span style={{ fontSize: "1.1rem" }}>{flag}</span>
+                  {label}
+                </button>
+              ))}
             </div>
           )}
         </div>
